@@ -34,7 +34,7 @@ A 3d coverflow like launcher for PS Vita.
 <p>For PSX2PSP, game folder name must match with the GameID. For example "ux0:pspemu/PSP/GAME/<strong>SLES01234</strong>".</p>
 <p><strong>Subfolders and psp categories plugin are not supported</strong>.</p>
 <h1>Downloads</h1>
-<p>Grab the latest version from the Releases page <a href="https://github.com/VitaHEX-Games/HexFlow-Launcher/releases">HERE</a></p>
+<p>Grab the latest version from the Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases
 <p>&nbsp;</p>
 <h3>Credits</h3>
 <p>Programming/UI: <strong>Sakis RG</strong></p>
