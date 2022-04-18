@@ -1,4 +1,5 @@
 # HexFlow-Launcher-Unofficial-Custom
+Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases
 
 A 3d coverflow like launcher for PS Vita.
 <p><img src="/Media/screen_03.png" width="800" title="screen-03"></p>
