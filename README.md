@@ -3,7 +3,8 @@ Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Cu
 
 A 3d coverflow like launcher for PS Vita.
 <p><img src="/Media/screen_03_800x557.png" width="800" title="screen-03"></p>
-Higher definition version of the above image <p><a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/blob/main/Media/screen_03.png" target="_blank" rel="noopener">can be found here (github link)</a></p> Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases
+Higher definition version of the above image <a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/blob/main/Media/screen_03.png" target="_blank" rel="noopener">can be found here (github link)</a>
+Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases
 <p>Display and launch your games and homebrews in style.<br /><strong>HexFlow Launcher</strong> features a 3d user interface to display your games with their box art and supports many customization options like custom covers and backgrounds.</p>
 <p>Launching a game/app from <strong>HexFlow Launcher</strong> will close the launcher automaticaly without asking.</p>
 <h2>Custom Covers</h2>
