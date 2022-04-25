@@ -105,6 +105,7 @@
 <p>⚫Setting to change between soundsets and background music (currently a hidden feature in VitaHEX's HexFlow Launcher v0.5 and all versions of HexLauncher Custom). May involve taking some code from Retroflow, which has more polished music code though still a hidden in that app too.</p>
 <p>⚫Setting to change the category text color (on the top left of the screen) for when you're using a bright background (low priority)</p>
 <p>⚫Setting to show system apps such as PSN store, Browser, Camera, Gallery, and Settings from within the launcher (or maybe at the app background screen, for that including Vitashell?)</p>
+<p>⚫Setting to use up and down arrows to change category to next/previous.</p>
 <p>⚫Setting to let you use the touchscreen to touch the "X Launch" on the bottom right of the screen to launch a game starting 1 second after you start HexLauncher Custom. (low priority). Any other touch features probably won't be added because when the screen gets wet it touches random places for you and also because I'm a lazy.</p>
 <p>⚫Setting (or not as a setting just adding it normally?) of "recently played", "most played", and/or "search". Setting to rename "Custom" to "Favorites".</p>
 <p>⚫The ability to quickly add an app to "Custom" (through triangle menu?). High priority if "rolling refresh" is added.</p>
