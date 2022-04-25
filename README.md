@@ -67,7 +67,8 @@
 <p>or send to his <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=RM8ECMVYMTXGJ&amp;source=url">PayPal link.</a></p>
 <p><a href="https://twitter.com/VitaHex">Official VitaHEX Twitter</a></p>
 <p><a href="https://vitahex.weebly.com/">Official VitaHEX Website</a></p>
-<p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases<p>
+<p><a href="https://github.com/VitaHEX-Games/HexFlow-Launcher">Official VitaHEX HexFlow Launcher Github (abandoned?)</a></p>
+<p><a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases">"HexLauncher Unofficial Custom" download page</a></p>
 <h2>HexLauncher Custom: User Feature Requests</h2>
 <p>Feature requests and "issues" posted on Retroflow & HexFlow Launcher are considered for being added to this list. Mostly no feature is impossible because there are experienced coders involved in the HexLauncher Custom project, but this entire project is just for me (only posted publicly out of the "generousity of my heart") so only features that I like will get added.</p>
 <p>If you'd like to try coding up a feature (which may be faster than having me do it), then take your editted sourcecode and name it to "index.lua" and put it in like this: ux0:/app/HXLC00001/index.lua</p>
