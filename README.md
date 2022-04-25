@@ -13,7 +13,7 @@
 <p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. A big thanks to <b>astuermer</b> for his contribution.</p>
 <p><a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">https://github.com/andiweli/hexflow-covers</a></p>
 <h3>Custom Background</h3>
-<p>Place your <strong>Background.png</strong> or <strong>Background.jpg</strong> image in "<em>ux0:/data/HexFlow/</em>" (recomended resolution 1280x720px or less). Some custom backgrounds are available <a href="https://github.com/andiweli/hexflow-covers/tree/main/Backgrounds">HERE</a></p>. From v0.9, these sample custom backgrounds are included by default.
+<p>Place your <strong>Background.png</strong> or <strong>Background.jpg</strong> image in "<em>ux0:/data/HexFlow/</em>" (recomended resolution 1280x720px or less). Some custom backgrounds are available <a href="https://github.com/andiweli/hexflow-covers/tree/main/Backgrounds">HERE</a>. In v0.9 and above, these sample custom backgrounds are included by default.</p>
 <h3>Custom Category</h3>
 <p>In v0.6 and above, take the <strong>applist.dat</strong> file in "<em>ux0:data/HexFlow/</em>" and rename it to <strong>customsort.dat</strong>. This will generate a 5th category - "Custom" - and you can put what games you want or reorder it within Vitashell, or on your PC in a unix-compatible text editor such as gVim Easy. Windows notepad won't work.</p>
 <h3>Custom Music</h3>
