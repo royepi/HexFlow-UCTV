@@ -1,6 +1,6 @@
 # HexFlow-Launcher-Unofficial-Custom
 <p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases</p>
-<p>Revamp mod for VitaHEX's 3D coverflow style launcher for PS Vita with (among other improvements) the ability to have a user-defined category.</p>
+<p>Revamp mod for VitaHEX's 3D coverflow style launcher for PS Vita.</p>
 <p><img src="/Media/screen_03_800x557.png" width="800" title="screen-03"></p>
 <p>HD version of above image is here: <a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/blob/main/Media/screen_03.png" target="_blank" rel="noopener">https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/blob/main/Media/screen_03.png</a></p>
 <p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases</p>
