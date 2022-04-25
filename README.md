@@ -6,7 +6,7 @@
 <p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases</p>
 <p>Display and launch your games and homebrews in style.<br /><strong>HexFlow Launcher</strong> features a 3d user interface to display your games with their box art and supports many customization options like custom covers, backgrounds, and - in v0.6 and above - one custom category.</p>
 <p>Launching a game/app from <strong>HexFlow Launcher</strong> will close the launcher automaticaly without asking.</p>
-<h3>Custom Covers</h3>
+<h2>Custom Covers</h2>
 <p>Place your custom covers in "<em>ux0:/data/HexFlow/COVERS/PSVITA/</em>"</p>
 <p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). In v0.9 and above, games in the PS1 category can have cover png's named to match the <strong>App ID</strong>, or the <strong>App Name</strong>, or the <strong>PSX Serial</strong> as found in the triangle menu. <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
 <h3>Download Covers and Backgrounds</h3>
