@@ -77,13 +77,15 @@
 <p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off"</p>
 <p>⚫Default override doesn't really do anything lol.</p>
 <p>⚫PS Vita games that are overridden to Homebrew keep their covers and vise versa. (Note: some homebrews actually have covers to download if you override them to Vita first)</p>
+<p>⚫Vita and Homebrews share a cover data folder but no other app types do. This is removed in Retroflow, but I'm not completely sure if it's a bug or a feature.</p>
+<p>⚫The HEXFlow cover archive isn't very complete, it would be good to perform a secondary check to the Retroflow cover archive.</p>
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
 <p></p>
 <h3>Planned Features for Upcoming Updates</h3>
-<p>⚫Instant inline cache update when downloading covers/overriding category. (like Retroflow 3.x)✔️Done for cover download, an attempt of instant inline cache update for overrides is in v0.9</p>
+<p>⚫Instant inline cache update when downloading covers/overriding category. (like Retroflow 3.x)✔️Done for cover download, an attempt of instant inline cache update for overrides is in v0.9, commented out because some people said it caused a crash, I don't know how/why yet.</p>
 <p>⚫Emu-launch, as seen in Retroflow. Either using Retroflow's rom identification, Adrenaline Bubble Manager's rom identification, and/or "MD5/CDC32 scraping" rom identification. Hopefully not slowing down loading times for people uninterested in Emu-launch.✔️Done but too buggy for release right now</p>
 <p>⚫An option in the settings menu to pretend everything is homebrew for better performance and a "cleaner" look, and/or make there be only 2 categories: Custom and All.✔️Done, unreleased for some reason.</p>
-<p>⚫Ability to use Adrenaline Bubble Manager, Adrenaline Launcher, and Retroarch for PSP/PS1 where possible, all at once if you so feel like it. ✔️ framework for this - "pspemu_translation_table" is included in v0.9 but Adrenaline Launcher capabilities are not added.</p>
+<p>⚫Ability to use Adrenaline Bubble Manager, Adrenaline Launcher, and Retroarch for PSP/PS1 where possible, all at once if you so feel like it. ✔️ framework for this - "pspemu_translation_table" is included in v0.9 but Adrenaline Launcher capabilities are not added yet, only this framework.</p>
 <p>⚫"Rolling Refresh" using a verification file that says 1: Current HexLauncher version, 2: # of entries in ux0:app folder and/or rom folders, 3: whether the last cache refresh was finished successfully. If any are untrue (ex: if you uninstall/install a new app), it will attempt a quick cache update - a "rolling refresh". ✔️Done but too buggy for release right now</p>
 <p>⚫New Emu-launch categories, on top of Retroflow's: Nintendo DS Category (✔️Done, coming when Retroflow integration is added to public HexLauncher Custom release), Dreamcast Category (low priority), ScummVM Category (low priority), Playstation Mobile Category (low priority), Pico8 (low priority but easy to program).</p>
 <p>⚫ PSVShell and the "L..." overclocking program integration. AKA the ability to launch an app at 500 overclock through triangle menu.✔️Done, coming when Retroflow integration is added to public HexLauncher Custom release</p>
