@@ -60,7 +60,7 @@
 <p>Japanese - @iGlitch (Retroflow)</p>
 <p>Chinese - @acd13141 (Retroflow)</p>
 <p>Polish - @SK00RUPA (Retroflow)</p>
-<p>Google Translate was used for HexLauncher Custom translations that weren't found on HexFlow Launcher and Retroflow. Retroflow's oddly formatted translation files have been standardized.</p>
+<p>Google Translate was used for HexFlow Launcher Unofficial Custom translations that weren't found on HexFlow Launcher and Retroflow. Retroflow's oddly formatted translation files have been standardized.</p>
 <p>&nbsp;</p>
 <h2>Support</h2>
 <p>If you want to support the original creator of HexFlow Launcher (not this revamp mod), you can join <a href="https://www.patreon.com/vitahex">his Patreon</a>.</p>
@@ -68,15 +68,15 @@
 <p><a href="https://twitter.com/VitaHex">Official VitaHEX Twitter</a></p>
 <p><a href="https://vitahex.weebly.com/">Official VitaHEX Website</a></p>
 <p><a href="https://github.com/VitaHEX-Games/HexFlow-Launcher">Official VitaHEX HexFlow Launcher Github (abandoned?)</a></p>
-<p><a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases">"HexLauncher Unofficial Custom" download page</a></p>
-<h2>HexLauncher Custom: User Feature Requests</h2>
+<p><a href="https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases">HexFlow Launcher Unofficial Custom download page</a></p>
+<h2>User Feature Requests</h2>
 <p>Feature requests and "issues" posted on Retroflow & HexFlow Launcher are considered for being added to this list. Mostly no feature is impossible because there are experienced coders involved in the HexLauncher Custom project, but this entire project is just for me (only posted publicly out of the "generousity of my heart") so only features that I like will get added.</p>
 <p>If you'd like to try coding up a feature (which may be faster than having me do it), then take your editted sourcecode and name it to "index.lua" and put it in like this: ux0:/app/HXLC00001/index.lua</p>
 <p>...Or put it directly into the vpk (openable with Winrar) to replace the index.lua there.</p>
 <p>The great feature of lua files is they can open in a simple text editor such as Notepad, and you don't need VitaSDK.</p>
-<p>If your version works out, send it here as a github "pull request" and I'll see about adding your feature to this project so it can stay as the app updates.<p>
+<p>If your version works out, send it here as a github "pull request" and I'll see about adding your feature to this project so it can stay as the app updates. Otherwise you'll basicly have to wait for next release and hope I added a feature you want.<p>
 <h3>Known bugs</h3>
-<p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off"</p>
+<p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off".</p>
 <p>⚫Default override doesn't really do anything lol.</p>
 <p>⚫PS Vita games that are overridden to Homebrew keep their covers and vise versa. (Note: some homebrews actually have covers to download if you override them to Vita first)</p>
 <p>⚫Vita and Homebrews share a cover data folder but no other app types do. This is removed in Retroflow, but I'm not completely sure if it's a bug or a feature.</p>
