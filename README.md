@@ -95,7 +95,7 @@
 <p>⚫The option for playing gameboy original games in color. More than likely just a switch that messes with retroarch settings. This would be great for games that were retroactively given color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
 <p>⚫Extra smooth cover size adjusting, like the XBox "Aurora" coverflow app, you can see it at about 9 minute, 15 seconds into this video: https://www.youtube.com/watch?v=Kqvruf8q3J0</p>
 <p>⚫Rename a game via the triangle menu. Great for japanese-translated-to-English games where the translators were too lazy to translate the app title in the param.sfo (low priority).</p>
-<p>⚫More view modes such as one similar to Launchbox, and/or a "List View" where it's mostly text with either just the current selected cover, or maybe no covers at all, just the text?</p>
+<p>⚫Launchbox view, Nintendo Switch view, TN-X view, Wii view, and "List View" with a list of text of game names and maybe 1 cover?</p>
 <p>⚫Genres categories and an easy way to get there (from settings menu?) similar to the one in "Dig - Emulator Front-End" for android. ex: you could have a "Puzzles" folder and a "Mario" folder and can put "Mario Picross" in both (through triangle menu?)</p>
 <p>⚫Settings menu gui more like minecraft's menu, so more settings can be added. Especially for the On/Off settings. "Advanced options" button at the bottom for even more? (easy)</p>
 <p>⚫Setting for "livearea replacement mode: enables a loading screen image similar to the Enso "Molecule" image. This planned setting may also autoboot you into HexLauncher Custom. This will only be added if "advanced options" button is added. (easy)</p>
