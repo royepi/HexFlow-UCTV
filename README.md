@@ -78,11 +78,11 @@
 <h3>Known bugs</h3>
 <p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off". ✔️This is caused by the sound files taking up too much RAM. A low-RAM sound file has been developed that 100% makes the app never crash (though freezes still do rarely occur), but it doesn't sound quite the same and a more same version is being worked on. In tests, Retroflow's click2.ogg only reduced crashing by around 10%.</p>
 <p>⚫PS Vita games that are overridden to Homebrew keep their covers and vise versa. (Note: some homebrews actually have covers to download if you override them to Vita first) This is because, due to a bug (or feature??), Vita and Homebrews share a cover data folder but no other app types do. This is removed in Retroflow, but I'm not completely sure if it's a bug or a feature so I haven't removed it yet.</p>
-<p>⚫The HEXFlow cover archive isn't very complete, it would be good to perform a secondary check to the Retroflow cover archive.</p>
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
 <p></p>
 <h3>Planned Features for Upcoming Updates</h3>
 <p>⚫Instant inline cache update when downloading covers/overriding category, instant recategorization and perhaps a cool cover changing animation ✔️Done, coming in next release.</p>
+<p>⚫The HEXFlow cover archive isn't very complete, it would be good to perform a secondary check to the Retroflow cover archive. ✔️Done, coming in next release</p>
 <p>⚫Emu-launch, as seen in Retroflow. Either using Retroflow's rom identification, Adrenaline Bubble Manager's rom identification, and/or "MD5/CDC32 scraping" rom identification. Hopefully not slowing down loading times for people uninterested in Emu-launch.✔️Done but too buggy for release right now</p>
 <p>⚫An option in the settings menu to pretend everything is homebrew for better performance and a "cleaner" look, and/or make there be only 2 categories: Custom and All.✔️Done, unreleased for some reason.</p>
 <p>⚫Ability to use Adrenaline Bubble Manager, Adrenaline Launcher, and Retroarch for PSP/PS1 where possible, all at once if you so feel like it. ✔️ framework for this - "pspemu_translation_table" is included in v0.9 but Adrenaline Launcher capabilities are not added yet, only this framework.</p>
