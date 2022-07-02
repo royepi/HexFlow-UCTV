@@ -81,7 +81,7 @@
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
 <p></p>
 <h3>Planned Features for Upcoming Updates</h3>
-<p>⚫Instant inline cache update when downloading covers/overriding category, instant recategorization and perhaps a cool cover changing animation ✔️Done, coming in next release.</p>
+<p>⚫Instant inline cache update when downloading covers/overriding category, instant recategorization, override-change animation ✔️Done, coming in next release.</p>
 <p>⚫The HEXFlow cover archive isn't very complete, it would be good to perform a secondary check to the Retroflow cover archive. ✔️Done, coming in next release</p>
 <p>⚫Emu-launch, as seen in Retroflow. Either using Retroflow's rom identification, Adrenaline Bubble Manager's rom identification, and/or "MD5/CDC32 scraping" rom identification. Hopefully not slowing down loading times for people uninterested in Emu-launch.✔️Done but too buggy for release right now</p>
 <p>⚫An option in the settings menu to pretend everything is homebrew for better performance and a "cleaner" look, and/or make there be only 2 categories: Custom and All.✔️Done, unreleased for some reason.</p>
@@ -105,7 +105,7 @@
 <p>⚫Setting to show system apps such as PSN store, Browser, Camera, Gallery, and Settings from within the launcher (or maybe at the app background screen, for that including Vitashell?)</p>
 <p>⚫Setting to use up and down arrows to change category to next/previous.</p>
 <p>⚫Setting to let you use the touchscreen to touch the "X Launch" on the bottom right of the screen to launch a game starting 1 second after you start HexLauncher Custom. (low priority). Any other touch features probably won't be added because when the screen gets wet it touches random places for you and also because I'm a lazy.</p>
-<p>⚫Setting (or not as a setting just adding it normally?) to add categories/features: "recently played", "most played", and/or "search". Setting to rename "Custom" to "Favorites".</p>
+<p>⚫Setting (or not as a setting just adding it normally?) to add categories/features: "recently played", "most played", "search", "all: sort by popularity", "all: sort by release date", and/or "favorites"</p>
 <p>⚫Setting "Homebrew Style: <Default>/<Vita Cover-Style>/<Utility Split+50% Vita Coverstyle>/<Utility Split+100% Vita Coverstyle>". If you select any option, it will refresh cache. Vita style would put Vita game boxes on every homebrew, Utility Split 50% would put ports like "Bad Company 2" in Vita category (as if by overrides) and leave stuff like VitaShell in homebrews with homebrew cover styles, and Utility Split 100% would do the same as Utility Split 50% as well as it will put Vita game boxes on every homebrew. This would so the app would be able to make better use of the vita-style homebrew cover archive by reddit user "CoolFiverIsABabe".</p>
 <p>⚫The ability to quickly add an app to "Custom" (through triangle menu?). High priority if "rolling refresh" is added.</p>
 <p>⚫Setting to combine all PCEngine categories (or just have it combined by default, like psp and psp minis?). Setting to combine all gameboy categories.</p>
