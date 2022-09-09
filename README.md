@@ -78,6 +78,7 @@
 <p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off". ✔️This is caused by the sound files taking up too much RAM. A low-RAM sound file has been developed that 100% makes the app never crash (though freezes still do rarely occur), but it doesn't sound quite the same and a more same version is being worked on. In tests, Retroflow's click2.ogg only reduced crashing by around 10%.</p>
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
 <p>⚫Suspending sometimes causes a crash if you're using music.</p>
+<p>⚫Due to how the coding of the massive performance boost of v1.0.0+ is, some apps sometimes add garbage to the app title. A double scan on non-alphanumeric app titles might be able to fix this.</p>
 <p></p>
 <h3>Planned Features for Upcoming Updates</h3>
 <p>⚫Easier way to rename games</p>
