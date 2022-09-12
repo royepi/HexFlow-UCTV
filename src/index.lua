@@ -1,9 +1,11 @@
--- HexFlow Launcher  version 0.5 by VitaHEX
+﻿-- HexFlow Launcher  version 0.5 by VitaHEX
 -- https://www.patreon.com/vitahex
+--@@ search for "--@@" to see all major changes. These include removal of the coverflow system, and the part where I flattened the view.
+--@@ How to make your own version of HexFlow Launcher: In Microsoft Windows settings, disable "hide extensions for known file types". Rename the .vpk to .zip, then open it with winrar. Put your index.lua in and make it a vpk again.
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "0.6"
+local appversion = "0.7"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir
@@ -181,7 +183,9 @@ else
     System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. setLanguage .. showView .. showHomebrews, 8)
     System.closeFile(file_config)
 end
-showCat = startCategory
+showView = 1		--@@ always view icons flatly.
+showCat = 0		--@@ always start in "CUSTOM", which used to be "All"
+--@@showCat = startCategory
 
 -- Custom Background
 local imgCustomBack = imgBack
@@ -376,7 +380,8 @@ function listDirectory(dir)
 	System.closeFile(file_over)
 
     for i, file in pairs(dir) do
-	local custom_path, custom_path_id, app_type = nil, nil, nil
+	local custom_path, custom_path_id, app_type = nil, nil, 0	--@@ Put all apps in "All" previously known as "Homebrew"
+--@@	local custom_path, custom_path_id, app_type = nil, nil, nil
         if file.directory then
             -- get app name to match with custom cover file name
             if System.doesFileExist(working_dir .. "/" .. file.name .. "/sce_sys/param.sfo") then
@@ -384,160 +389,161 @@ function listDirectory(dir)
                 app_title = info.title
             end
 
-            if string.match(file.name, "PCS") and not string.match(file.name, "PCSI") then
-                -- Scan PSVita Games
+--@@          if string.match(file.name, "PCS") and not string.match(file.name, "PCSI") then
+--@@                -- Scan PSVita Games
+--@@                table.insert(folders_table, file)
+--@@                --table.insert(games_table, file)
+--@@                custom_path = covers_psv .. app_title .. ".png"
+--@@                custom_path_id = covers_psv .. file.name .. ".png"
+--@@				file.app_type=1
+--@@				
+--@@				--CHECK FOR OVERRIDDEN CATEGORY of PSP game
+--@@				if System.doesFileExist(cur_dir .. "/overrides.dat") then
+--@@					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
+--@@					if string.match(str, file.name .. "=1") then
+--@@						table.insert(games_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=1
+--@@					elseif string.match(str, file.name .. "=2") then
+--@@						table.insert(psp_table, file)
+--@@						custom_path = covers_psp .. app_title .. ".png"
+--@@						custom_path_id = covers_psp .. file.name .. ".png"
+--@@						file.app_type=2
+--@@					elseif string.match(str, file.name .. "=3") then
+--@@						table.insert(psx_table, file)
+--@@						custom_path = covers_psx .. app_title .. ".png"
+--@@						custom_path_id = covers_psx .. file.name .. ".png"
+--@@						file.app_type=3
+--@@					elseif string.match(str, file.name .. "=4") then
+--@@						table.insert(homebrews_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=0
+--@@					else
+--@@						table.insert(games_table, file)--default
+--@@					end
+--@@				else
+--@@					table.insert(games_table, file)
+--@@				end
+--@@				--END OVERRIDDEN CATEGORY of Vita game
+--@@            elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and not System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
+--@@                -- Scan PSP Games
+--@@                table.insert(folders_table, file)
+--@@                --table.insert(psp_table, file)
+--@@                custom_path = covers_psp .. app_title .. ".png"
+--@@                custom_path_id = covers_psp .. file.name .. ".png"
+--@@				file.app_type=2
+--@@				
+--@@			--CHECK FOR OVERRIDDEN CATEGORY of PSP game
+--@@				if System.doesFileExist(cur_dir .. "/overrides.dat") then
+--@@					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
+--@@					if string.match(str, file.name .. "=1") then
+--@@						table.insert(games_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=1
+--@@					elseif string.match(str, file.name .. "=2") then
+--@@						table.insert(psp_table, file)
+--@@						custom_path = covers_psp .. app_title .. ".png"
+--@@						custom_path_id = covers_psp .. file.name .. ".png"
+--@@						file.app_type=2
+--@@					elseif string.match(str, file.name .. "=3") then
+--@@						table.insert(psx_table, file)
+--@@						custom_path = covers_psx .. app_title .. ".png"
+--@@						custom_path_id = covers_psx .. file.name .. ".png"
+--@@						file.app_type=3
+--@@					elseif string.match(str, file.name .. "=4") then
+--@@						table.insert(homebrews_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=0
+--@@					else
+--@@						table.insert(psp_table, file)--default
+--@@					end
+--@@				else
+--@@					table.insert(psp_table, file)
+--@@				end
+--@@				--END OVERRIDDEN CATEGORY of Vita game
+--@@            elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
+--@@                -- Scan PSX Games
+--@@                table.insert(folders_table, file)
+--@@                --table.insert(psx_table, file)
+--@@                custom_path = covers_psx .. app_title .. ".png"
+--@@                custom_path_id = covers_psx .. file.name .. ".png"
+--@@				file.app_type=3
+--@@				
+--@@			--CHECK FOR OVERRIDDEN CATEGORY of PSX game
+--@@				if System.doesFileExist(cur_dir .. "/overrides.dat") then
+--@@					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
+--@@					if string.match(str, file.name .. "=1") then
+--@@						table.insert(games_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=1
+--@@					elseif string.match(str, file.name .. "=2") then
+--@@						table.insert(psp_table, file)
+--@@						custom_path = covers_psp .. app_title .. ".png"
+--@@						custom_path_id = covers_psp .. file.name .. ".png"
+--@@						file.app_type=2
+--@@					elseif string.match(str, file.name .. "=3") then
+--@@						table.insert(psx_table, file)
+--@@						custom_path = covers_psx .. app_title .. ".png"
+--@@						custom_path_id = covers_psx .. file.name .. ".png"
+--@@						file.app_type=3
+--@@					elseif string.match(str, file.name .. "=4") then
+--@@						table.insert(homebrews_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=0
+--@@					else
+--@@						table.insert(psx_table, file)--default
+--@@					end
+--@@				else
+--@@					table.insert(psx_table, file)
+--@@				end
+--@@				--END OVERRIDDEN CATEGORY of PSX game
+--@@            else
+--@@                -- Scan Homebrews
                 table.insert(folders_table, file)
-                --table.insert(games_table, file)
-                custom_path = covers_psv .. app_title .. ".png"
-                custom_path_id = covers_psv .. file.name .. ".png"
-				file.app_type=1
-				
-				--CHECK FOR OVERRIDDEN CATEGORY of PSP game
-				if System.doesFileExist(cur_dir .. "/overrides.dat") then
-					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
-					if string.match(str, file.name .. "=1") then
-						table.insert(games_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=1
-					elseif string.match(str, file.name .. "=2") then
-						table.insert(psp_table, file)
-						custom_path = covers_psp .. app_title .. ".png"
-						custom_path_id = covers_psp .. file.name .. ".png"
-						file.app_type=2
-					elseif string.match(str, file.name .. "=3") then
-						table.insert(psx_table, file)
-						custom_path = covers_psx .. app_title .. ".png"
-						custom_path_id = covers_psx .. file.name .. ".png"
-						file.app_type=3
-					elseif string.match(str, file.name .. "=4") then
+--@@                --table.insert(homebrews_table, file)
+--@@                custom_path = covers_psv .. app_title .. ".png"
+--@@                custom_path_id = covers_psv .. file.name .. ".png"
+--@@				file.app_type=0
+--@@				
+--@@			--CHECK FOR OVERRIDDEN CATEGORY of homebrew
+--@@				if System.doesFileExist(cur_dir .. "/overrides.dat") then
+--@@					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
+--@@					if string.match(str, file.name .. "=1") then
+--@@						table.insert(games_table, file)
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=1
+--@@					elseif string.match(str, file.name .. "=2") then
+--@@						table.insert(psp_table, file)
+--@@						custom_path = covers_psp .. app_title .. ".png"
+--@@						custom_path_id = covers_psp .. file.name .. ".png"
+--@@						file.app_type=2
+--@@					elseif string.match(str, file.name .. "=3") then
+--@@						table.insert(psx_table, file)
+--@@						custom_path = covers_psx .. app_title .. ".png"
+--@@						custom_path_id = covers_psx .. file.name .. ".png"
+--@@						file.app_type=3
+--@@					elseif string.match(str, file.name .. "=4") then
 						table.insert(homebrews_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=0
-					else
-						table.insert(games_table, file)--default
-					end
-				else
-					table.insert(games_table, file)
-				end
-				--END OVERRIDDEN CATEGORY of Vita game
-            elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and not System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
-                -- Scan PSP Games
-                table.insert(folders_table, file)
-                --table.insert(psp_table, file)
-                custom_path = covers_psp .. app_title .. ".png"
-                custom_path_id = covers_psp .. file.name .. ".png"
-				file.app_type=2
-				
-			--CHECK FOR OVERRIDDEN CATEGORY of PSP game
-				if System.doesFileExist(cur_dir .. "/overrides.dat") then
-					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
-					if string.match(str, file.name .. "=1") then
-						table.insert(games_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=1
-					elseif string.match(str, file.name .. "=2") then
-						table.insert(psp_table, file)
-						custom_path = covers_psp .. app_title .. ".png"
-						custom_path_id = covers_psp .. file.name .. ".png"
-						file.app_type=2
-					elseif string.match(str, file.name .. "=3") then
-						table.insert(psx_table, file)
-						custom_path = covers_psx .. app_title .. ".png"
-						custom_path_id = covers_psx .. file.name .. ".png"
-						file.app_type=3
-					elseif string.match(str, file.name .. "=4") then
-						table.insert(homebrews_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=0
-					else
-						table.insert(psp_table, file)--default
-					end
-				else
-					table.insert(psp_table, file)
-				end
-				--END OVERRIDDEN CATEGORY of Vita game
-            elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
-                -- Scan PSX Games
-                table.insert(folders_table, file)
-                --table.insert(psx_table, file)
-                custom_path = covers_psx .. app_title .. ".png"
-                custom_path_id = covers_psx .. file.name .. ".png"
-				file.app_type=3
-				
-			--CHECK FOR OVERRIDDEN CATEGORY of PSX game
-				if System.doesFileExist(cur_dir .. "/overrides.dat") then
-					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
-					if string.match(str, file.name .. "=1") then
-						table.insert(games_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=1
-					elseif string.match(str, file.name .. "=2") then
-						table.insert(psp_table, file)
-						custom_path = covers_psp .. app_title .. ".png"
-						custom_path_id = covers_psp .. file.name .. ".png"
-						file.app_type=2
-					elseif string.match(str, file.name .. "=3") then
-						table.insert(psx_table, file)
-						custom_path = covers_psx .. app_title .. ".png"
-						custom_path_id = covers_psx .. file.name .. ".png"
-						file.app_type=3
-					elseif string.match(str, file.name .. "=4") then
-						table.insert(homebrews_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=0
-					else
-						table.insert(psx_table, file)--default
-					end
-				else
-					table.insert(psx_table, file)
-				end
-				--END OVERRIDDEN CATEGORY of PSX game
-            else
-                -- Scan Homebrews
-                table.insert(folders_table, file)
-                --table.insert(homebrews_table, file)
-                custom_path = covers_psv .. app_title .. ".png"
-                custom_path_id = covers_psv .. file.name .. ".png"
-				file.app_type=0
-				
-			--CHECK FOR OVERRIDDEN CATEGORY of homebrew
-				if System.doesFileExist(cur_dir .. "/overrides.dat") then
-					--0 deafault, 1 vita, 2 psp, 3 psx, 4 homebrew
-					if string.match(str, file.name .. "=1") then
-						table.insert(games_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=1
-					elseif string.match(str, file.name .. "=2") then
-						table.insert(psp_table, file)
-						custom_path = covers_psp .. app_title .. ".png"
-						custom_path_id = covers_psp .. file.name .. ".png"
-						file.app_type=2
-					elseif string.match(str, file.name .. "=3") then
-						table.insert(psx_table, file)
-						custom_path = covers_psx .. app_title .. ".png"
-						custom_path_id = covers_psx .. file.name .. ".png"
-						file.app_type=3
-					elseif string.match(str, file.name .. "=4") then
-						table.insert(homebrews_table, file)
-						custom_path = covers_psv .. app_title .. ".png"
-						custom_path_id = covers_psv .. file.name .. ".png"
-						file.app_type=0
-					else
-						table.insert(homebrews_table, file)--default
-					end
-				else
-					table.insert(homebrews_table, file)
-				end
-				--END OVERRIDDEN CATEGORY of homebrew
-            end
+--@@						custom_path = covers_psv .. app_title .. ".png"
+--@@						custom_path_id = covers_psv .. file.name .. ".png"
+--@@						file.app_type=0
+--@@					else
+--@@						table.insert(homebrews_table, file)--default
+--@@					end
+--@@				else
+--@@					table.insert(homebrews_table, file)
+--@@				end
+--@@				--END OVERRIDDEN CATEGORY of homebrew
+--@@            end
 
+	--@@The above code could've run faster with switch statements but I just snipped it because I don't care for coverflow. Startup is now ~15% faster.
         end
         
 		if custom_path and System.doesFileExist(custom_path) then
@@ -1260,13 +1266,13 @@ while true do
         if showCat == 1 then
             Font.print(fnt22, 32, 34, lang_lines[1], white)--GAMES
         elseif showCat == 2 then
-            Font.print(fnt22, 32, 34, lang_lines[2], white)--HOMEBREWS
+            Font.print(fnt22, 32, 34, lang_lines[5], white)--@@ALL, Previously HOMEBREWS
         elseif showCat == 3 then
             Font.print(fnt22, 32, 34, lang_lines[3], white)--PSP
         elseif showCat == 4 then
             Font.print(fnt22, 32, 34, lang_lines[4], white)--PSX
         else
-            Font.print(fnt22, 32, 34, lang_lines[5], white)--ALL
+            Font.print(fnt22, 32, 34, lang_lines[33], white)--@@CUSTOM previously ALL. Requires new Hexlauncher Custom 0.7 "translations" language pack which is installed with the vpk.
         end
         if Network.isWifiEnabled() then
             Graphics.drawImage(800, 38, imgWifi)-- wifi icon
@@ -1713,11 +1719,13 @@ while true do
         
         Font.print(fnt22, 84, 112, lang_lines[14] .. ": ", white)--Startup Category
         if startCategory == 0 then
-            Font.print(fnt22, 84 + 260, 112, lang_lines[5], white)--ALL
+--@@            Font.print(fnt22, 84 + 260, 112, lang_lines[5], white)--ALL
+            Font.print(fnt22, 84 + 260, 112, lang_lines[33], white)--@@CUSTOM previously ALL. Requires new Hexlauncher Custom 0.7 "translations" language pack which is installed with the vpk.
         elseif startCategory == 1 then
             Font.print(fnt22, 84 + 260, 112, lang_lines[1], white)--GAMES
         elseif startCategory == 2 then
-            Font.print(fnt22, 84 + 260, 112, lang_lines[2], white)--HOMEBREWS
+--@@            Font.print(fnt22, 84 + 260, 112, lang_lines[2], white)--HOMEBREWS
+            Font.print(fnt22, 84 + 260, 112, lang_lines[5], white)--@@ALL previously HOMEBREWS
         elseif startCategory == 3 then
             Font.print(fnt22, 84 + 260, 112, lang_lines[3], white)--PSP
         elseif startCategory == 4 then
@@ -2005,12 +2013,14 @@ while true do
             end
         elseif (Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE)) then
             -- CATEGORY
-            if showCat < 4 then
-				if showCat==1 and showHomebrews==0 then
-					showCat = 3
-				else
-					showCat = showCat + 1
-				end
+--@@            if showCat < 4 then
+--@@				if showCat==1 and showHomebrews==0 then
+--@@					showCat = 3
+--@@				else
+--@@					showCat = showCat + 1
+--@@				end
+            if showCat == 0 then	--@@ always be category 0 or 2
+		showCat = 2		--@@ always be category 0 or 2
             else
                 showCat = 0
             end
@@ -2022,11 +2032,12 @@ while true do
             FreeIcons()
         elseif (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE)) then
             -- VIEW
-            if showView < 4 then
-                showView = showView + 1
-            else
-                showView = 0
-            end
+--@@            if showView < 4 then
+--@@                showView = showView + 1
+--@@            else
+--@@                showView = 0
+--@@            end
+            showView = 1	--@@ always view icons flatly.
             menuY = 0
             startCovers = false
 			local file_config = System.openFile(cur_dir .. "/config.dat", FCREATE)
