@@ -16,7 +16,7 @@
 <h3>Custom Category</h3>
 <p>In v0.6 and above, take the <strong>applist.dat</strong> file in "<em>ux0:data/HexFlow/</em>" and rename it to <strong>customsort.dat</strong>. This will generate a 5th category - "Custom" - and you can put what games you want or reorder it within Vitashell, or on your PC in a unix-compatible text editor such as gVim Easy. Windows notepad won't work.</p>
 <h3>Custom Music</h3>
-<p>Place your  <strong>Music.mp3</strong> file in "<em>ux0:data/HexFlow/</em>" (music will play automaticaly when the "Sounds" option is enabled)</p>
+<p>Place your  <strong>Music.ogg</strong> or <strong>Music.mp3</strong> file in "<em>ux0:data/HexFlow/</em>" (music will play automaticaly when the "Sounds" option is enabled)</p>
 <p>&nbsp;</p>
 <h2>AutoBoot</h2>
 <p>If you want to auto-launch <strong>HexFlow Launcher</strong> every time your PS Vita boots up you can use the <a href="https://vitadb.rinnegatamante.it/#/info/261" target="_blank" rel="noopener"><strong>AutoBoot</strong></a> plugin by Rinnegatamante.</p>
