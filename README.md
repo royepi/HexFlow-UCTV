@@ -10,8 +10,8 @@
 <p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). In v0.9 and above, games in the PS1 category can have cover png's named to match the <strong>App ID</strong>, or the <strong>App Name</strong>, or the <strong>PSX Serial</strong> as found in the triangle menu. <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
 <h3>Download Covers and Backgrounds</h3>
 <p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. A big thanks to <b>astuermer</b> for his contribution.</p>
-<p><s><a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">https://github.com/andiweli/hexflow-covers</a></s></p>
-<p><a href="https://github.com/jimbob4000/hexflow-covers/" target="_blank" rel="noopener">https://github.com/jimbob4000/hexflow-covers/</a></p>
+<p><s><a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">https://github.com/andiweli/hexflow-covers</a></s> (v0.9.1 and below)</p>
+<p><a href="https://github.com/jimbob4000/hexflow-covers/" target="_blank" rel="noopener">https://github.com/jimbob4000/hexflow-covers/</a> (v1.0 and above)</p>
 <h3>Custom Background</h3>
 <p>Place your <strong>Background.png</strong> or <strong>Background.jpg</strong> image in "<em>ux0:/data/HexFlow/</em>" (recomended resolution 1280x720px or less). Some custom backgrounds are available <a href="https://github.com/andiweli/hexflow-covers/tree/main/Backgrounds">HERE</a>. In v0.9 and above, these sample custom backgrounds are included by default.</p>
 <h3>Custom Category</h3>
@@ -51,8 +51,8 @@
 <p>Developed with <a href="http://rinnegatamante.github.io/lpp-vita/" target="_blank" rel="noopener">Lua Player Plus</a> by <strong>Rinnegatamante</strong></p>
 <h3>Special Thanks</h3>
 <p><strong>Creckeryop</strong></p>
-<p><s><strong>andiweli</strong> (<a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">HEXFlow Covers database</a>)</s></p>
-<p><strong>jimbob4000</strong> (<a href="https://github.com/jimbob4000/hexflow-covers" target="_blank" rel="noopener">RetroFlow Covers database</a>)</p>
+<p><s><strong>andiweli</strong> (<a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">HEXFlow Covers database</a>)</s> (v0.9.1 and below)</p>
+<p><strong>jimbob4000</strong> (<a href="https://github.com/jimbob4000/hexflow-covers" target="_blank" rel="noopener">RetroFlow Covers database</a>) (v1.0 and above)</p>
 <h3>Translations</h3>
 <p>French - @chronoss</p>
 <p>German - @stuermerandreas</p>
