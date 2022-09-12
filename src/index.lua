@@ -3,7 +3,7 @@
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "0.5"
+local appversion = "0.6"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir
@@ -311,6 +311,54 @@ function FreeMemory()
     Graphics.freeImage(imgBox)
 end
 
+function WriteAppList()
+
+	local file_over = System.openFile(cur_dir .. "/applist.dat", FCREATE)
+	System.closeFile(file_over)
+
+	file = io.open(cur_dir .. "/applist.dat", "w")
+	for k, v in pairs(files_table) do
+		local sanitized_apptitle = string.gsub(v.apptitle, "\n", " ")
+		file:write(v.name .. "," .. sanitized_apptitle .. "\n")
+	end
+
+	file:close()
+
+end
+
+function stringSplit (inputstr, sep)
+	if sep == nil then
+			sep = "%s"
+	end
+	local t={}
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+			table.insert(t, str)
+	end
+	return t
+end
+
+-- If app in the custom sort doesn't exist, then it won't be found in files_table, 
+-- therefore it will be omitted as desired. If an installed app is not present in 
+-- the custom sort, then it won't be displayed, working as a "hide" function.
+function ReadCustomSort()
+	if System.doesFileExist(cur_dir .. "/customsort.dat") then
+		local new_files_table = {}
+		for line in io.lines(cur_dir .. "/customsort.dat") do
+			if not (line == "" or line == " " or line == "\n") then
+				local app = stringSplit(line, ",")
+				for k, v in pairs(files_table) do
+					if v.name == app[1] then
+						table.insert(new_files_table, v)
+						table.remove(files_table, k)
+					end
+				end
+			end
+		end
+
+		files_table = new_files_table
+	end
+end
+
 function listDirectory(dir)
     dir = System.listDirectory(dir)
     folders_table = {}
@@ -517,6 +565,7 @@ function listDirectory(dir)
         table.insert(files_table, 4, file.apptitle)
         
     end
+	
     table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
     table.sort(folders_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
     
@@ -539,6 +588,8 @@ function loadImage(img_path)
 end
 
 files_table = listDirectory(System.currentDirectory())
+WriteAppList()
+ReadCustomSort()
 
 function getAppSize(dir)
     local size = 0
