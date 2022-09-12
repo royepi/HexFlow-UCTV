@@ -51,7 +51,8 @@
 <p>Developed with <a href="http://rinnegatamante.github.io/lpp-vita/" target="_blank" rel="noopener">Lua Player Plus</a> by <strong>Rinnegatamante</strong></p>
 <h3>Special Thanks</h3>
 <p><strong>Creckeryop</strong></p>
-<p><strong>andiweli</strong> (<a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">HEXFlow Covers database</a>)</p>
+<p><s><strong>andiweli</strong> (<a href="https://github.com/andiweli/hexflow-covers" target="_blank" rel="noopener">HEXFlow Covers database</a>)</s></p>
+<p><strong>jimbob4000</strong> (<a href="https://github.com/jimbob4000/hexflow-covers" target="_blank" rel="noopener">RetroFlow Covers database</a>)</p>
 <h3>Translations</h3>
 <p>French - @chronoss</p>
 <p>German - @stuermerandreas</p>
