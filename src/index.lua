@@ -16,7 +16,7 @@ local applistReadTime = 0
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "0.9"
+local appversion = "0.9.1"
 function System.currentDirectory(dir) --@@ Upgrade this function to work with pspemu/rom folders before v1.0 release.
     if dir == nil then
         return working_dir --"ux0:/app"
@@ -441,6 +441,8 @@ end
 
 local lang_lines = {}
 local lang_default = "PS VITA\nHOMEBREWS\nPSP\nPS1\nALL\nSETTINGS\nLaunch\nDetails\nCategory\nView\nClose\nVersion\nAbout\nStartup Category\nReflection Effect\nSounds\nTheme Color\nCustom Background\nDownload Covers\nReload Covers Database\nLanguage\nON\nOFF\nRed\nYellow\nGreen\nGrey\nBlack\nPurple\nOrange\nBlue\nSelect"
+		  .. "Nintendo 64\nSuper Nintendo\nNintendo Entertainment System\nGame Boy Advance\nGame Boy Color\nGame Boy\nSega Genesis/Mega Drive\nSega Master System\nSega Game Gear\nMAME\nAmiga\nTurboGrafx-16\nPC Engine\nHomebrews Category\nStartup scan\nRefresh cache\nCUSTOM\nCover style\nScan\nPlease wait...\nMenu\nDark Purple"
+		  .. "Done. Please 'Refresh cache' via the start menu\nCover * found!\nCache has been updated.\nwriting to cache... please don't suspend/power off"
 function ChangeLanguage()
     lang_lines = {}
     local lang = "EN.ini"
@@ -1400,9 +1402,9 @@ function DownloadSingleCover()
 			-- Update cache if it exists					  --@@NEW @@ update cover in cache (2/3)
 			UpdateCacheSect(app_titleid, 4, new_path)			  --@@NEW @@ update cover in cache (3/3)
 			if (apptype == 3) and (psx_serial ~= nil) and (psx_serial ~= "-") then --@@ Low quality code (3/4)... revert this part back how was in HEXFlow launcher 0.5
-			    System.setMessage("Cover " .. psx_serial .. " found!\nCache has been updated.", false, BUTTON_OK)
+			    System.setMessage(lang_lines[56]:gsub("*", psx_serial) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. psx_serial .. " found!\nCache has been updated."
 			else
-			    System.setMessage("Cover " .. app_titleid .. " found!\nCache has been updated.", false, BUTTON_OK)
+			    System.setMessage(lang_lines[56]:gsub("*", app_titleid) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. app_titleid .. " found!\nCache has been updated."
 			end
 		    end
 		else
@@ -2106,7 +2108,7 @@ while true do
             .. "\n\nCustom Category\nTake the file 'ux0:/data/HexFlow/applist.dat' and rename it to customsort.dat then\nrearrange the titles how you like. It will spawn in a new category ('Custom')"
             .. "\n\nOriginal app by VitaHEX. OG code by Sakis RG. Lua Player Plus by Rinnegatamante."
             .. "\nSpecial Thanks: VitaHEX and everyone who worked on HexFlow Launcher 0.5 which this"
-            .. "\nis based on. jimbob4000 and everyone who worked on RetroFlow Launcher 3.0, from whom"
+            .. "\nis based on. jimbob4000 and everyone who worked on RetroFlow Launcher 3.4, from whom"
             .. "\na lot of inspiration and a little code was taken. Google Translate, and one or more coders"
             .. "\nwho helped in HexLauncher Custom who wish to remain anonymous", white)-- Draw info
     
@@ -2183,8 +2185,6 @@ while true do
 		label3AltImgX = 0
                 showMenu = 2
             end
-	elseif (Controls.check(pad, SCE_CTRL_SELECT) and not Controls.check(oldpad, SCE_CTRL_SELECT)) then
-	    System.setMessage(Font.getTextWidth(fnt22, BGroundText), false, BUTTON_OK)
         elseif (Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE)) then
             -- CATEGORY
             if showCat < 5 then
