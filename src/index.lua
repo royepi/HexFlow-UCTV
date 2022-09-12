@@ -1,4 +1,4 @@
--- HexFlow Launcher Custom version 1.0.0
+-- HexFlow Launcher Custom version 1.0.1
 -- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2, and jimbob4000's Retroflow v3.6.1
 -- https://www.patreon.com/vitahex
 -- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
@@ -7,7 +7,7 @@ local oneLoopTimer = Timer.new()	 --Startup speed timer, view result in menu>abo
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "1.0.0"
+local appversion = "1.0.1"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
@@ -141,7 +141,7 @@ local app_title = info.title
 sanitized_title = app_title --@@string.gsub(app_title, "\n", " ")	 --@@ NEW!
 local app_category = info.category
 local app_titleid = info.titleid
-local app_titleid_backup = 0	 --@@NEW. Cheap workaround to get psx_serial to work. Should be removed later...
+local app_titleid_psx = 0	 --@@NEW. Workaround for PSX single cover download.
 local app_size = 0
 local psx_serial = "-"		 --@@NEW
 
@@ -668,7 +668,7 @@ function Respec_Entry(file, pspemu_translate_tmp, ovrrd_str)
     custom_path =    coversptable(file.app_type) .. app_title .. ".png"
     custom_path_id = coversptable(file.app_type) .. file.name .. ".png"
     if file.app_type == 3 then
-	table.insert(psx_table, file)
+	--@@table.insert(psx_table, file) @@ Can't believe this line got left in the v1.0 release accidentally.
 	if not pspemu_translate_tmp then
 	    pspemu_translate_tmp = readBin(working_dir .. "/" .. file.name .. "/data/boot.bin")	 --@@ example: "SLUS00453"
 	end
@@ -717,7 +717,7 @@ function listDirectory(dir)
     psx_table = {}
     custom_table = {}
     homebrews_table = {}
-    pspemu_translation_table = {} --@@only used for ps1 right now.
+    --@@ pspemu_translation_table = {} @@ UNUSED. For filtering Adrenaline LAUNCHER vs Adrenaline MANAGER entries.
     -- app_type = 0 -- 0 homebrew, 1 psvita, 2 psp, 3 psx
 	
     local file_over = System.openFile(cur_dir .. "/overrides.dat", FREAD)
@@ -772,20 +772,14 @@ function listDirectory(dir)
 --@@	    -- END ROM GAMES SCAN
         end
 
-	 --@@ NEW! Applies overrides and sets ".icon_path" accordingly. Also used for instant inline overrides.
+	-- Respec applies overrides, adds item to table, and sets icon_path. Also used for instant inline overrides.
 	file.app_type, file.icon_path = Respec_Entry(file, pspemu_translate_tmp, ovrrd_str)
-
-        --@@table.insert(files_table, 4, file.app_type)	 @@ Now set during Respec_Entry()
 		
 		
         --add blank icon to all
         file.icon = imgCoverTmp
-        --@@file.icon_path = img_path			 @@ Now set during Respec_Entry()
-		
-        --@@table.insert(files_table, 4, file.icon)	 @@ unneccesary
         
         file.apptitle = app_title
-        --@@table.insert(files_table, 4, file.apptitle)	 @@ unneccesary
         
     end
     --#return_table = TableConcat(folders_table, files_table)
@@ -975,13 +969,8 @@ function GetInfoSelected()
     else
         app_title = "-"
     end
---@@    elseif showCat == 2 then
---@@        if #homebrews_table > 0 then
---@@Above 2 lines kept here so Beyond Compare software will properly compare the above to HexFlow Launcher 0.5 or RetroFlow 1.0
-
-    --@@The below 2 lines may cause a crash if Emu-launch is added.
-    app_titleid = tostring(info.titleid)
-    app_version = tostring(info.version)
+    app_titleid = tostring(info.titleid)	 --@@ (1/2) May cause a crash if Emu-launch is added.
+    app_version = tostring(info.version)	 --@@ (2/2)
     if not (apptype ~= 3)										 --@@ NEW! @@ finds easiest disqualifiers first for speed (1/5, invalid apptype and/or not PS1)
     and #xCatLookup(showCat) > 0									 --@@ NEW! @@ finds easiest disqualifiers first for speed (2/5, empty category. Maybe this should be first?
     and xCatLookup(showCat)[p].name ~= nil								 --@@ NEW! @@ finds easiest disqualifiers first for speed (3/5, I'm not sure if this check is necessary.
@@ -1046,20 +1035,22 @@ function OverrideCategory()
 	    end
 	end
 	lines = lines .. app_titleid .. "=" .. tmpappcat .. "\n"
-	inf:write(lines)
+	--@@inf:write(lines)				 --@@ (1/4) Didn't work quite right in v1.0.0, so now in v1.0.1 it has been restored to be like the very old versions.
 	inf:close()
+	file = io.open(cur_dir .. "/overrides.dat", "w") --@@ (2/4)
+	file:write(lines)				 --@@ (3/4)
+	file:close()					 --@@ (4/4)
 
 	if rolling_overrides then
-	    --@@ NEW! Applies overrides and sets ".icon_path" accordingly. Also used during the "listDirectory" app scan.
+	    -- Respec applies overrides, adds item to table, and set icon_path. @@ Also used during the "listDirectory" app scan.
 	    xCatLookup(showCat)[p].app_type, xCatLookup(showCat)[p].icon_path = Respec_Entry(xCatLookup(showCat)[p], nil, lines)
-	    --@@ NEW! forces icon change NOW, not later!!!!
+	    -- force icon change
 	    xCatLookup(showCat)[p].ricon = Graphics.loadImage(xCatLookup(showCat)[p].icon_path)
 
 	    UpdateCacheSect(app_titleid, 7, tmpappcat)
 	    UpdateCacheSect(app_titleid, 4, xCatLookup(showCat)[p].icon_path)
 
-	    --@@ Game was added to target table during respec, now target table just needs sorted and the old table needs cleaned up.
-
+	    -- Tidy up: remove game from old table, sort target table.
 	    for k, v in pairs(xCatLookup(appt_hotfix(apptype))) do
 		if (v.name ~= nil) and (v.name == app_titleid) then
 		    table.remove(xCatLookup(appt_hotfix(apptype)), k)
@@ -1360,91 +1351,65 @@ function DownloadSingleCover()
     cvrfound = 0
     app_idx = p
     running = false
-	status = System.getMessageState()
-	
-	local coverspath = ""
-	local onlineCoverspath = ""
+    status = System.getMessageState()
 
-	
-	if Network.isWifiEnabled() then
-		app_titleid_backup = 0
-		if (apptype == 3) and psx_serial and psx_serial ~= "-" then
-			app_titleid_backup = app_titleid
-			app_titleid = psx_serial	 --@@Low quality code (1/4)... please make it more like COBOL by having a separate routine instead of this workaround.
-		end
-		if apptype == 1 then
-			coverspath = covers_psv			 -- ux0:/data/HexFlow/COVERS/PSVITA/
-			onlineCoverspath = onlineCovers		 -- https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PSVita/
-		elseif apptype == 2 then
-			coverspath = covers_psp			 -- ux0:/data/HexFlow/COVERS/PSP/
-			onlineCoverspath = onlineCoversPSP	 -- https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PSP/
-		elseif apptype == 3 then
-			coverspath = covers_psx			 -- ux0:/data/HexFlow/COVERS/PSX/
-			onlineCoverspath = onlineCoversPSX	 -- https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PS1/
-		else
-			coverspath = covers_psv
-			onlineCoverspath = onlineCovers
-		end
-	
-		Network.downloadFile(onlineCoverspath .. app_titleid .. ".png", "ux0:/data/HexFlow/" .. app_titleid .. ".png")
-		
-		if System.doesFileExist("ux0:/data/HexFlow/" .. app_titleid .. ".png") then
-			tmpfile = System.openFile("ux0:/data/HexFlow/" .. app_titleid .. ".png", FREAD)
-			size = System.sizeFile(tmpfile)
-			if size < 1024 then
-				System.deleteFile("ux0:/data/HexFlow/" .. app_titleid .. ".png")
-			else
-				System.rename("ux0:/data/HexFlow/" .. app_titleid .. ".png", coverspath .. app_titleid .. ".png")
-				cvrfound = 1
-			end
-			System.closeFile(tmpfile)
-		end
-		
-		if cvrfound==1 then
-		    xCatLookup(showCat)[app_idx].icon_path=coverspath .. app_titleid .. ".png"
-		    if FileLoad[xCatLookup(showCat)[app_idx]] == true then
-			FileLoad[xCatLookup(showCat)[app_idx]] = nil
-			Threads.remove(xCatLookup(showCat)[app_idx])
-		    end
-		    if xCatLookup(showCat)[app_idx].ricon then
-			xCatLookup(showCat)[app_idx].ricon = nil
-				--"homebrews_table"
---@@The above line is kept here so Beyond Compare software will properly compare the preceeding lines to HexFlow Launcher 0.5's.
-		    end
-			
-		    -- Update cache if it exists --@@NEW
-		    local new_path = coverspath .. app_titleid .. ".png" --@@NEW
-		    UpdateCacheSect(app_titleid, 4, new_path) --@@NEW
-			
-		    if status ~= RUNNING then
-			local new_path = coverspath .. app_titleid .. ".png"		  --@@NEW @@ update cover in cache (1/3)
-			if (app_titleid_backup ~= nil) and (app_titleid_backup ~= 0) then --@@NEW
-			    app_titleid = app_titleid_backup				  --@@NEW @@ Low quality code (2/4)... please make it more like COBOL by having a separate routine instead of this workaround. (1/2)
-			end								  --@@NEW
-			-- Update cache if it exists					  --@@NEW @@ update cover in cache (2/3)
-			UpdateCacheSect(app_titleid, 4, new_path)			  --@@NEW @@ update cover in cache (3/3)
-			if (apptype == 3) and psx_serial and psx_serial ~= "-" then	  --@@ Low quality code (3/4)... revert this part back how was in HEXFlow launcher 0.5
-			    System.setMessage(lang_lines[56]:gsub("*", psx_serial) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. psx_serial .. " found!\nCache has been updated."
-			else
-			    System.setMessage(lang_lines[56]:gsub("*", app_titleid) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. app_titleid .. " found!\nCache has been updated."
-			end
-		    end
-		else
-		    if (app_titleid_backup ~= nil) and (app_titleid_backup ~= 0) then	 --@@NEW
-			app_titleid = app_titleid_backup				 --@@NEW @@ Low quality code (4/4)... please make it more like COBOL by having a separate routine instead of this workaround. (1/2)
-		    end	
-		    if status ~= RUNNING then
-			System.setMessage("Cover not found", false, BUTTON_OK)
-		    end
-		end
-		
-	else
-		if status ~= RUNNING then
-			System.setMessage("Internet Connection Required", false, BUTTON_OK)
-		end
+    local coverspath = ""
+    local onlineCoverspath = ""
+
+    if Network.isWifiEnabled() then
+	local app_titleid_psx = nil
+	if (apptype == 3) and (psx_serial ~= nil) and (psx_serial ~= "-") then
+	    app_titleid_psx = psx_serial
 	end
-	
-	gettingCovers = false
+	coverspath = coversptable(apptype)
+	onlineCoverspath = onlcovtable(apptype)
+	--@@ covers_psv:	 ux0:/data/HexFlow/COVERS/PSVITA/
+	--@@ onlineCovers:	 https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/
+	--@@ covers_psp:	 ux0:/data/HexFlow/COVERS/PSP/
+	--@@ onlineCoversPSP:	 https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSP/
+	--@@ covers_psx:	 ux0:/data/HexFlow/COVERS/PSX/
+	--@@ onlineCoversPSX:	 https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PS1/
+
+	Network.downloadFile(onlineCoverspath .. (app_titleid_psx or app_titleid) .. ".png", "ux0:/data/HexFlow/" .. app_titleid .. ".png")
+	local new_path = coverspath .. (app_titleid_psx or app_titleid) .. ".png"
+
+	if System.doesFileExist("ux0:/data/HexFlow/" .. app_titleid .. ".png") then
+	    tmpfile = System.openFile("ux0:/data/HexFlow/" .. app_titleid .. ".png", FREAD)
+	    size = System.sizeFile(tmpfile)
+	    if size < 1024 then
+		System.deleteFile("ux0:/data/HexFlow/" .. app_titleid .. ".png")
+	    else
+		System.rename("ux0:/data/HexFlow/" .. app_titleid .. ".png", new_path)
+		cvrfound = 1
+	    end
+	    System.closeFile(tmpfile)
+	end
+
+	if cvrfound==1 then
+	    xCatLookup(showCat)[app_idx].icon_path = new_path
+
+	    Threads.addTask(xCatLookup(showCat)[app_idx], {
+	    Type = "ImageLoad",
+	    Path = xCatLookup(showCat)[app_idx].icon_path,
+	    Table = xCatLookup(showCat)[app_idx],
+	    Index = "ricon"
+	    })
+			
+	    -- Update cache if it exists
+	    UpdateCacheSect(app_titleid, 4, new_path)
+	    if status ~= RUNNING then
+		System.setMessage(lang_lines[56]:gsub("*", (app_titleid_psx or app_titleid)) .. "\n" .. lang_lines[57], false, BUTTON_OK) --Cover XXXXXXXXX found!\nCache has been updated.
+
+	    end
+	elseif status ~= RUNNING then
+	    System.setMessage("Cover not found", false, BUTTON_OK)
+	end
+
+    elseif status ~= RUNNING then
+	System.setMessage("Internet Connection Required", false, BUTTON_OK)
+    end
+
+    gettingCovers = false
 end
 
 function RestoreAppTitle()	 --@@ NEW!
