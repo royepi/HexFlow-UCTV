@@ -1,23 +1,14 @@
--- HexFlow Launcher Custom version 0.9,
--- based in HexFlow Launcher by VitaHEX version 0.5. Inspired from Retroflow.
+-- HexFlow Launcher Custom version 1.0.0
+-- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2, and jimbob4000's Retroflow v3.6.1
 -- https://www.patreon.com/vitahex
--- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and replace the index.lua inside with your own.
+-- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
 
---@@Startup speed timers. View results in the start menu's "about" section.
-local oneLoopTimer = Timer.new()
-local oneLoopTime = 0
-local bOneLoop = false --Blocks oneloop timer after the first frame is rendered.
---local functionTimer = Timer.new()
-local functionTime = 0
-local sortTimer = 0
-local sortTime = 0
-local applistReadTimer = 0
-local applistReadTime = 0
+local oneLoopTimer = Timer.new()	 --Startup speed timer, view result in menu>about
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "0.9.1"
-function System.currentDirectory(dir) --@@ Upgrade this function to work with pspemu/rom folders before v1.0 release.
+local appversion = "1.0.0"
+function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
     else
@@ -25,11 +16,10 @@ function System.currentDirectory(dir) --@@ Upgrade this function to work with ps
     end
 end
 
-
-Network.init()
-local onlineCovers = "https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PSVita/"
-local onlineCoversPSP = "https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PSP/"
-local onlineCoversPSX = "https://raw.githubusercontent.com/andiweli/hexflow-covers/main/Covers/PS1/"
+Network.init()	 --@@ NEW! Now using the Retroflow cover archive: more homebrew covers and it's just more complete in general.
+local onlineCovers = "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/"
+local onlineCoversPSP = "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSP/"
+local onlineCoversPSX = "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PS1/"
 
 Sound.init()
 local click = Sound.open("app0:/DATA/click2.ogg") --@@ now "ogg" instead of "wav"
@@ -42,20 +32,21 @@ local btnS = Graphics.loadImage("app0:/DATA/s.png")
 local btnO = Graphics.loadImage("app0:/DATA/o.png")
 local imgWifi = Graphics.loadImage("app0:/DATA/wifi.png")
 local imgBattery = Graphics.loadImage("app0:/DATA/bat.png")
-local imgCacheIcon = Graphics.loadImage("app0:/DATA/cache_icon_25x25.png") --@@ NEW
+local imgCacheIcon = Graphics.loadImage("app0:/DATA/cache_icon_25x25.png")
 local imgBack = Graphics.loadImage("app0:/DATA/back_01.jpg")
 local imgFloor = Graphics.loadImage("app0:/DATA/floor.png")
 Graphics.setImageFilters(imgFloor, FILTER_LINEAR, FILTER_LINEAR)
 
---@@ Footer button margins
-local btnMargin = 44 --@@ Retroflow v3.4.2 uses 64. HEXFlow Launcher v0.5 uses ~46
+local SwitchviewAssetsAreLoaded = false				 --@@ NEW!
+
+-- Footer button margins
+local btnMargin = 44	 --Retroflow: 64. HEXFlow: ~46
 local btnImgWidth = 20
---@@local btnImgWidth = Graphics.getImageWidth("app0:/DATA/x.png") --@@20
+--local btnImgWidth = Graphics.getImageWidth("app0:/DATA/x.png") --20
 
 --@@ Footer button X coordinates. Calculated in changeLanguage() (except new alt 3). Alts are for start menu.
 local label1AltImgX = 0
 local label2AltImgX = 0
-local label3AltImgX = 0
 local label1AltX = 0
 local label2AltX = 0
 local label1ImgX = 0
@@ -66,9 +57,15 @@ local label1X = 0
 local label2X = 0
 local label3X = 0
 local label4X = 0
+local toggle1X = nil	 --@@ NEW!
+local toggle2X = nil	 --@@ NEW!
 
 local working_text = ""
 local byte_errorlevel = ""
+local spin_allowance = 0	  --@@ NEW
+local bottomMenu = false	  --@@ NEW!
+local menuSel = 1		  --@@ NEW!
+local render_distance = 8	  --@@ NEW!
 
 local cur_dir = "ux0:/data/HexFlow/"
 local covers_psv = "ux0:/data/HexFlow/COVERS/PSVITA/"
@@ -87,9 +84,6 @@ if not System.doesFileExist(cur_dir .. "/overrides.dat") then
     System.writeFile(file_over, " ", 1)
     System.closeFile(file_over)
 end
-
--- load oneshot images (loading screens)
-local loadingCache = Graphics.loadImage("app0:/DATA/oneshot_cache_write.png")
 
 -- load textures
 local imgBox = Graphics.loadImage("app0:/DATA/vita_cover.png")
@@ -121,18 +115,18 @@ local modFloor = Render.loadObject("app0:/DATA/planefloor.obj", imgFloor)
 
 local img_path = ""
 
-local fnt = Font.load("app0:/DATA/font.ttf")
+--local fnt = Font.load("app0:/DATA/font.ttf")
 local fnt15 = Font.load("app0:/DATA/font.ttf")
 local fnt20 = Font.load("app0:/DATA/font.ttf")
 local fnt22 = Font.load("app0:/DATA/font.ttf")
 local fnt25 = Font.load("app0:/DATA/font.ttf")
-local fnt35 = Font.load("app0:/DATA/font.ttf")
+--local fnt35 = Font.load("app0:/DATA/font.ttf")
 
 Font.setPixelSizes(fnt15, 15)
 Font.setPixelSizes(fnt20, 20)
 Font.setPixelSizes(fnt22, 22)
 Font.setPixelSizes(fnt25, 25)
-Font.setPixelSizes(fnt35, 35)
+--Font.setPixelSizes(fnt35, 35)
 
 
 local menuX = 0
@@ -144,6 +138,7 @@ local showView = 0
 local info = System.extractSfo("app0:/sce_sys/param.sfo")
 local app_version = info.version
 local app_title = info.title
+sanitized_title = app_title --@@string.gsub(app_title, "\n", " ")	 --@@ NEW!
 local app_category = info.category
 local app_titleid = info.titleid
 local app_titleid_backup = 0	 --@@NEW. Cheap workaround to get psx_serial to work. Should be removed later...
@@ -171,9 +166,11 @@ local red = Color.new(190, 0, 0)
 local blue = Color.new(2, 72, 158)
 local yellow = Color.new(225, 184, 0)
 local green = Color.new(79, 152, 37)
-local orange = Color.new(220, 120, 0)
 local purple = Color.new(151, 0, 185)
-local darkpurple = Color.new(77, 4, 160) --@@ New! Also, purples are now after orange.
+local orange = Color.new(220, 120, 0)
+local darkpurple = Color.new(77, 4, 160)
+local lightblue = Color.new(67,178,255)      --@@ NEW! "blue" from SwitchView UI v0.1.2
+local greyalpha = Color.new(45, 45, 45, 180) --@@ NEW! "grey" theme becomes greyalpha in view #5.
 local bg = Color.new(153, 217, 234)
 local themeCol = Color.new(2, 72, 158)
 
@@ -190,6 +187,7 @@ local getCovers = 1 --1 PSV, 2 Homebrews, 3 PSP, 4 PS1
 local getBGround = 1 --1 Custom, 2 Citylights, 3 Aurora, 4 "Wood 1", 5 "Wood 2", 6 Dark, 7 Marble
 local BGroundText = "-"
 local tmpappcat = 0
+local background_brackets = true
 local verif_ref = 0
 local v_info = 0
 
@@ -198,10 +196,10 @@ local prevZ = 0
 local prevRot = 0
 
 --@@local total_all = 0
-local total_games = 0
+--@@local total_games = 0
 --@@local total_homebrews = 0
-local total_pspemu = 0
-local total_roms = 0
+--@@local total_pspemu = 0
+--@@local total_roms = 0
 local working_entry_count = 0
 local curTotal = 1
 
@@ -209,11 +207,33 @@ local curTotal = 1
 local startCategory = 1
 local setReflections = 1
 local setSounds = 1
-local themeColor = 0 -- 0 blue, 1 red, 2 yellow, 3 green, 4 grey, 5 black, 7 orange, 6 purple, 8 darkpurple. (reorder hack)
-local menuItems = 3
-local setBackground = 1
-local setLanguage = 0
-local showHomebrews = 0
+local musicLoop = 1		 --@@ NEW
+local themeColor = 0 -- 0 blue, 1 red, 2 yellow, 3 green, 4 grey, 5 black, 7 orange, 6 purple, 8 darkpurple. (reorder hack) 
+local menuItems = 3 
+local setBackground = 1 
+local setLanguage = 0 
+local showHomebrews = 0 
+local setSwitch = 0		 --@@ NEW 
+local proTriangleMenu = 0	 --@@ NEW but unused
+local setRetroFlow = 0		 --@@ NEW 
+local hideEmptyCats = 0		 --@@ NEW 
+local dCategoryButton = 0	 --@@ NEW 
+local smoothView = 0		 --@@ NEW 
+local superSkip = 1		 --@@ NEW but lacking start menu entry
+local View5VitaCropTop = 1	 --@@ NEW
+local lockView = 0		 --@@ NEW
+
+function write_config()	 --@@ NEW! This function called 1: when config.dat doesn't exist, 2: when current view mode or any start menu setting is changed
+    local file_config = System.openFile(cur_dir .. "/config.dat", FCREATE)
+    writeLanguage, writeBackground = nil, nil
+    if setLanguage == 10 then writeLanguage = "C" end
+    if setBackground == 10 then writeBackground = "W"
+    elseif setBackground == 11 then writeBackground = "P"
+    elseif setBackground == 12 then writeBackground = "Q"
+    elseif setBackground == 13 then writeBackground = "M" end
+    System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. (writeBackground or setBackground) .. (writeLanguage or setLanguage) .. showView .. showHomebrews .. musicLoop .. setSwitch .. hideEmptyCats .. dCategoryButton .. View5VitaCropTop .. setRetroFlow .. lockView .. proTriangleMenu, 16)
+    System.closeFile(file_config)
+end
 
 function stringSplit(inputstr, sep) --@@used for verify_cache() & ReadCustomSort()
     if sep == nil then
@@ -228,121 +248,41 @@ end
 
 
 -- PS1 binary translator
---@@ a better solution might be found in Adrenaline Bubble Manager's "str2int" function (untested), shown in the following 5 lines:
---@@-- Convert 4 bytes (32 bit) string to number int...
---@@function str2int(str)
---@@	local b1, b2, b3, b4 = string.byte(str, 1, 4)
---@@	return (b4 << 24) + (b3 << 16) + (b2 << 8) + b1
---@@end
-
---@@ local byte_convert_table was made from trial and error off these contents of a PS1 megaman 8 Adrenaline Bubble Manager boot.bin file:
---@@ variable b#     65, 66, 67, 68, 69  70  71  72  73  74  75  76  77  78  79  80  81  82  83  84  85  86  87  88  89  90  91  92  93 ...
---@@ string.byte val 117 120 48  58  112 115 112 101 109 117 47  112 115 112 47  103 97  109 101 47  115 108 117 115 48  48  52  53  51 ...
---@@ actual          u   x   0   :   p   s   p   e   m   u   /   p   s   p   /   g   a   m   e   /   s   l   u   s   0   0   4   5   3   /eboot.pbp
-
-local byte_convert_table = {
---[47] = "/",
-[48] = "0",
-[49] = "1",
-[50] = "2",
-[51] = "3",
-[52] = "4",
-[53] = "5",
-[54] = "6",
-[55] = "7",
-[56] = "8",
-[57] = "9",
---[58] = ":",
-[97] = "a",
-[98] = "b",
-[99] = "c",
-[100] = "d",
-[101] = "e",
-[102] = "f",
-[103] = "g",
-[104] = "h",
-[105] = "i",
-[106] = "j",
-[107] = "k",
-[108] = "l",
-[109] = "m",
-[110] = "n",
-[111] = "o",
-[112] = "p",
-[113] = "q",
-[114] = "r",
-[115] = "s",
-[116] = "t",
-[117] = "u",
-[118] = "v",
-[119] = "w",
-[120] = "x",
-[121] = "y",
-[122] = "z"}
-
-
-function bytesToStr(bytes_table)
-    working_text = ""
-    byte_errorlevel = ""
-    if #bytes_table > 0 then
-	for index=1, #bytes_table do
-	    if bytes_table[index] ~= nil then
-		if byte_convert_table[bytes_table[index]] ~= nil then
-		    working_text = working_text .. byte_convert_table[bytes_table[index]]
-		else
-		    -- working_text = working_text .. "?"
-		    byte_errorlevel = "error" --@@character not on case sensitive convert list
-		end
-	    else
-		byte_errorlevel = "error" --@@unexpected end to bytes list.
-	    end
-	end
-    else
-	byte_errorlevel = "error" --@@totally empty bytes table
-    end
-    if (byte_errorlevel ~= "error") and (working_text ~= nil) and (working_text ~= "") then
-	return working_text
-    else
-	return nil --@@not sure if necessary.
-    end
-end
-	    
+--location:	     65, 66, 67, 68, 69  70  71  72  73  74  75  76  77  78  79  80  81  82  83  84  85  86  87  88  89  90  91  92  93 ...
+--string.byte val:  117 120 48  58  112 115 112 101 109 117 47  112 115 112 47  103 97  109 101 47  115 108 117 115 48  48  52  53  51 ...
+--string.char val:  u   x   0   :   p   s   p   e   m   u   /   p   s   p   /   g   a   m   e   /   s   l   u   s   0   0   4   5   3   /eboot.pbp
+--
 function readBin(filename)
+    local path_game = nil
     if System.doesFileExist(filename) and string.match(filename, ".bin") then
-	local path_game = ""
-	local b76,b77,b85,b86,b87,b88,b89,b90,b91,b92,b93,b94 = nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil
 	local inp = assert(io.open(filename, "rb"), "Failed to open boot.bin") --@@ I feel assert should be used to prevent rest of this function if fail.
-	local data = inp:read("*all")
+	local data = inp:read(94)	 --@@ used to be: inp:read("*all"). Revert if psp scan is added.
 	inp:close()
 
-	--@@I'm ~99.9% sure there's a better way to do this (the below line) @@ I'm also 69% sure if you read a blanked binary (from a psp bubble created manually, back before adrenaline bubble manager), the app will crash on startup, untested.
-	b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17,b18,b19,b20,b21,b22,b23,b24,b25,b26,b27,b28,b29,b30,b31,b32,b33,b34,b35,b36,b37,b38,b39,b40,b41,b42,b43,b44,b45,b46,b47,b48,b49,b50,b51,b52,b53,b54,b55,b56,b57,b58,b59,b60,b61,b62,b63,b64,b65,b66,b67,b68,b69,b70,b71,b72,b73,b74,b75,b76,b77,b78,b79,b80,b81,b82,b83,b84,b85,b86,b87,b88,b89,b90,b91,b92,b93,b94,b95,b96,b97,b98,b99,b100 = string.byte(data,1,100)
+	-- If you read a blanked binary (from a psp bubble created manually, back before adrenaline bubble manager), the app may crash on startup? Untested.
+	-- untested code marked with "--#"
 
-	--@@ untested code marked with "--#"
-	--@@ find "0" (char 48) in "ux0:", "uma0:", "ur0:", "imc0:", or "xmc0:" (binary slot 67/68 for ux0/uma0 respectively)
-	if not (b67 ~= 48) then						 --@@ux0
-	    --#if not (b76 ~= 112) then					 --@@ux0:pspemu/p   [sp/game/] @@ ps1 & eboots.
-		b85,b86,b87,b88,b89,b90,b91,b92,b93 = string.byte(data,85,93)
-		path_game = bytesToStr({b85,b86,b87,b88,b89,b90,b91,b92,b93})
-	    --#elseif not (b76 ~= 105) then				 --@@ux0:pspemu/i   [so/] @@ psp.
+	if string.sub(data, 67, 67) == "0" then		    --ux0
+	    --#if string.sub(data, 76, 76) == "p" then	    --ux0:pspemu/p   [sp/game/] (ps1 & eboots)
+		path_game = string.sub(data, 85, 93)	    --@@ example: "slus00453"
+	    --#elseif string.sub(data, 76, 76) == "i" then  --ux0:pspemu/i   [so/] (normal psp iso files)
 	    --#--@@blah blah scan psp iso param blah blah
 	    --#end
-	elseif not (b68 ~= 48) then					 --@@uma0
-	    --#if not (b77 ~= 112) then					 --@@uma0:pspemu/p  [sp/game/] @@ ps1 & eboots.
-		b86,b87,b88,b89,b90,b91,b92,b93,b94 = string.byte(data,86,94)
-		path_game = bytesToStr({b86,b87,b88,b89,b90,b91,b92,b93,b94,})
-	    --#elseif not (b77 ~= 105) then				 --@@uma0:pspemu/i  [so/] @@ psp.
+	elseif string.sub(data, 68, 68) == "0" then	    --uma0  (memory card #2)
+	    --#if string.sub(data, 77, 77) == "p" then	    --uma0:pspemu/p  [sp/game/]
+		path_game = string.sub(data, 86, 94)	    --@@ example: "slus00453"
+	    --#elseif string.sub(data, 77, 77) == "i" then  --uma0:pspemu/i  [so/]
 	    --#--@@blah blah scan psp iso param blah blah
 	    --#end
-	end
-	if path_game ~= nil then
-	    return path_game
-	    --@@   slus00453
-	else
-	    return nil --@@not sure if necessary.
 	end
     end
+    if path_game and not path_game:match("%W") then	    --@@ NEW! if path_game isn't nil, and it does NOT contain any NON-alphanumeric characters then...
+	return path_game:upper()			    -- Example: SLUS00453
+    else						    --@@ NEW!
+	return "-"					    --@@ NEW! "-" debug character allows cleaner code in function OverrideCategory()
+    end
 end
+
 
 if System.doesFileExist(cur_dir .. "/config.dat") then
     local file_config = System.openFile(cur_dir .. "/config.dat", FREAD)
@@ -355,48 +295,81 @@ if System.doesFileExist(cur_dir .. "/config.dat") then
     local getSounds = tonumber(string.sub(str, 3, 3)); if getSounds ~= nil then setSounds = getSounds end
     local getthemeColor = tonumber(string.sub(str, 4, 4)); if getthemeColor ~= nil then themeColor = getthemeColor end
     local getBackground = tonumber(string.sub(str, 5, 5)); if getBackground ~= nil then setBackground = getBackground end
+    if not (string.sub(str, 5, 5) ~= "P") then setBackground = 11 end --@@ Cheap workaround to add a 11th background. (1/2)
+    if not (string.sub(str, 5, 5) ~= "Q") then setBackground = 12 end --@@ Cheap workaround to add a 12th background. (1/2)
+    if not (string.sub(str, 5, 5) ~= "M") then setBackground = 12 end --@@ Cheap workaround to add a 12th background. (1/2)
     local getLanguage = tonumber(string.sub(str, 6, 6)); if getLanguage ~= nil then setLanguage = getLanguage end
     if not (string.sub(str, 6, 6) ~= "C") then setLanguage = 10 end --@@ Cheap workaround to add a 10th language. (1/2)
     local getView = tonumber(string.sub(str, 7, 7)); if getView ~= nil then showView = getView end
     local getHomebrews = tonumber(string.sub(str, 8, 8)); if getHomebrews ~= nil then showHomebrews = getHomebrews end
+    local getMusicLoop = tonumber(string.sub(str, 9, 9)); if getMusicLoop ~= nil then musicLoop = getMusicLoop end	    --@@ NEW!
+    local getSwitch = tonumber(string.sub(str, 10, 10)); if getSwitch ~= nil then setSwitch = getSwitch end		    --@@ NEW!
+    local getHempCats = tonumber(string.sub(str, 11, 11)); if getHempCats ~= nil then hideEmptyCats = getHempCats end	    --@@ NEW! @@ get hemp cats lol
+    local getCButton = tonumber(string.sub(str, 12, 12)); if getCButton ~= nil then dCategoryButton = getCButton end	    --@@ NEW!
+    local getV5CropTop = tonumber(string.sub(str, 13, 13)); if getV5CropTop ~= nil then View5VitaCropTop = getV5CropTop end --@@ NEW!
+    local getRetroFlow = tonumber(string.sub(str, 14, 14)); if getRetroFlow ~= nil then setRetroFlow = getRetroFlow end	    --@@ NEW!
+    local getLockView = tonumber(string.sub(str, 15, 15)); if getLockView ~= nil then lockView = getLockView end	    --@@ NEW!
+    local getTriMenu = tonumber(string.sub(str, 16, 16)); if getTriMenu ~= nil then proTriangleMenu = getTriMenu end	    --@@ NEW!
 else
-    local file_config = System.openFile(cur_dir .. "/config.dat", FCREATE)
-    if setLanguage == 10 then --@@ Cheap workaround to add a 10th language. (2/2)
-	System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. "C" .. showView .. showHomebrews, 8)
-    else
-	System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. setLanguage .. showView .. showHomebrews, 8)
-    end
-    System.closeFile(file_config)
+    write_config()
 end
+if showView == 5 then
+    fnt23_5 = Font.load("app0:/DATA/font.ttf")
+    Font.setPixelSizes(fnt23_5, 23.5)
+    imgCart = Graphics.loadImage("app0:/DATA/cart.png")
+    --@@imgAvatar = Graphics.loadImage("app0:/AVATARS/AV01.png")
+    btnMenu1 = Graphics.loadImage("app0:/DATA/btm1.png")
+    btnMenu2 = Graphics.loadImage("app0:/DATA/btm2.png")
+    btnMenu3 = Graphics.loadImage("app0:/DATA/btm3.png")
+    btnMenu4 = Graphics.loadImage("app0:/DATA/btm4.png")
+    btnMenu5 = Graphics.loadImage("app0:/DATA/btm5.png")
+    btnMenu6 = Graphics.loadImage("app0:/DATA/btm6.png")
+    btnMenuSel = Graphics.loadImage("app0:/DATA/selct.png")
+    SwitchviewAssetsAreLoaded = true
+end
+if dCategoryButton == 1 then			  --@@ NEW!
+    btnD = Graphics.loadImage("app0:/DATA/d.png") --@@ NEW! This stupid image takes so long to load, f*ck knows why.
+    btDIsLoaded = true				  --@@ NEW!
+end						  --@@ NEW!
+    
 showCat = startCategory
 
--- Custom Background
-local imgCustomBack = imgBack
-if (setBackground > 1.5) and (setBackground < 8.5) then
-    if System.doesFileExist("app0:/DATA/back_0" .. setBackground .. ".png") then
-	imgCustomBack = Graphics.loadImage("app0:/DATA/back_0" .. setBackground .. ".png")
-	Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-	Render.useTexture(modBackground, imgCustomBack)
-    end
-else
-    if System.doesFileExist("ux0:/data/HexFlow/Background.png") then
-	imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.png")
-	Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-	Render.useTexture(modBackground, imgCustomBack)
+-- Custom Backgrounds
+function ApplyBackground()
+    imgCustomBack = imgBack
+    if (setBackground >= 10) and (setBackground < 99) and (System.doesFileExist("app0:/DATA/back_" .. setBackground .. ".png")) then
+	imgCustomBack = Graphics.loadImage("app0:/DATA/back_" .. setBackground .. ".png") --@@ default BG's "back_10.png" through "back_12.png"
+    elseif (setBackground > 1.5) and (setBackground < 10) and (System.doesFileExist("app0:/DATA/back_0" .. setBackground .. ".png")) then
+	imgCustomBack = Graphics.loadImage("app0:/DATA/back_0" .. setBackground .. ".png") --@@ default BG's "back_02.png" through "back_08.png"
+    elseif System.doesFileExist("ux0:/data/HexFlow/Background.png") then
+	imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.png")		   --@@ BG custom png
     elseif System.doesFileExist("ux0:/data/HexFlow/Background.jpg") then
-	imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.jpg")
-	Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-	Render.useTexture(modBackground, imgCustomBack)
+	imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.jpg")		   --@@ BG custom jpg
     end
+
+    Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
+    Render.useTexture(modBackground, imgCustomBack)
 end
+ApplyBackground()
 
 -- Custom Music
-if System.doesFileExist(cur_dir .. "/Music.mp3") then
-    sndMusic = Sound.open(cur_dir .. "/Music.mp3")
+function play_music()
     if setSounds == 1 then
-        Sound.play(sndMusic, LOOP)
+	if System.doesFileExist(cur_dir .. "/Music.mp3") then
+	  sndMusic = Sound.open(cur_dir .. "/Music.mp3")
+	elseif System.doesFileExist(cur_dir .. "/Music.ogg") then
+	      sndMusic = Sound.open(cur_dir .. "/Music.ogg")
+	else
+	    return	 --@@ closes the play_music function before it causes a crash due to no music file existing.
+	end
+	if musicLoop == 1 then
+	    Sound.play(sndMusic, true)
+	else
+	    Sound.play(sndMusic, false)
+	end
     end
 end
+play_music()
 
 function SetThemeColor()
     if themeColor == 1 then
@@ -429,14 +402,16 @@ System.setGpuXbarSpeed(166)
 System.setCpuSpeed(cpu_speed)
 
 function OneShotPrint(my_func)
+	local loadingCacheImg = Graphics.loadImage("app0:/DATA/oneshot_cache_write.png")
 	-- Draw loading screen for caching process
 	Graphics.termBlend()  -- End main loop blending if still running
 	Graphics.initBlend()
 	Screen.clear(black)
-	Graphics.drawImage(0, 0, loadingCache) --@@in the future, replace "loadingCache" image with a textless version of bg.png and write the text using "old" font from data folder.
+	Graphics.drawImage(0, 0, loadingCacheImg) --@@in the future, replace "loadingCache" image with a textless version of bg.png and write the text using "old" font from data folder.
 	Graphics.drawImage(587, 496, imgCacheIcon)
 	Graphics.termBlend()
 	Screen.flip()
+	Graphics.freeImage(loadingCacheImg)
 end
 
 local lang_lines = {}
@@ -487,8 +462,8 @@ function ChangeLanguage()
         lang_lines[#lang_lines+1] = line
     end
 
---@@Good luck understanding this, future self. @@ btnMargin: 44 @@ btnImgWidth: 20 @@ 8px img-text buffer.
 
+--Set footer button spacing.   btnMargin: 44    btnImgWidth: 20    8px img-text buffer.
     label1ImgX = 900-Font.getTextWidth(fnt20, lang_lines[7])			 --X
     label1X = label1ImgX+btnImgWidth+8						 --Launch
     label2ImgX = label1ImgX-(Font.getTextWidth(fnt20, lang_lines[8])+btnMargin)	 --Tri
@@ -503,7 +478,7 @@ function ChangeLanguage()
     label2AltImgX = label1AltImgX-(Font.getTextWidth(fnt20, lang_lines[32])+btnMargin)	--X
     label2AltX = label2AltImgX+btnImgWidth+8						--Select
     
-    BGroundText = "" --Re-texts and re-brackets "Custom Background" option.
+    toggle1X = nil	 --@@ NEW!
 end
 ChangeLanguage()
 
@@ -521,7 +496,9 @@ function TableConcat(t1, t2)
 end
 
 function FreeMemory()
-    if System.doesFileExist(cur_dir .. "/Music.mp3") then
+    if (System.doesFileExist(cur_dir .. "/Music.mp3")
+     or System.doesFileExist(cur_dir .. "/Music.ogg"))
+     and setSounds == 1 then
         Sound.close(sndMusic)
     end
     Graphics.freeImage(imgCoverTmp)
@@ -533,7 +510,17 @@ function FreeMemory()
     Graphics.freeImage(imgBattery)
     Graphics.freeImage(imgBack)
     Graphics.freeImage(imgBox)
-    Graphics.freeImage(loadingCache)
+    if SwitchviewAssetsAreLoaded == true then
+	Graphics.freeImage(imgCart)
+	--@@Graphics.freeImage(imgAvatar)
+	Graphics.freeImage(btnMenu1)
+	Graphics.freeImage(btnMenu2)
+	Graphics.freeImage(btnMenu3)
+	Graphics.freeImage(btnMenu4)
+	Graphics.freeImage(btnMenu5)
+	Graphics.freeImage(btnMenu6)
+	Graphics.freeImage(btnMenuSel)
+    end
 end
 
 
@@ -638,16 +625,72 @@ end
 --        return lang_lines[5] --ALL
 --    end
 
+function appt_hotfix(apptype)
+    if apptype == 2 then
+	return 3
+    elseif apptype == 3 then
+	return 4
+    elseif apptype == 0 or apptype == 4 then
+	return 2
+    else		 --@@ vita
+	return apptype
+    end
+end
+
 function coversptable(getCovers) --@@For categorical cover download (1/2)
-    if getCovers == 1 then
-	return covers_psv
-    elseif getCovers == 2 then
+    if getCovers == 2 then
 	return covers_psp
     elseif getCovers == 3 then
 	return covers_psx
-    else
+    else		 --@@ vita & homebrew (0, 1, and 4)
 	return covers_psv
     end
+end
+
+--@@ NEW! Resets table entry specifications (app_type and icon_path) based on override.dat
+function Respec_Entry(file, pspemu_translate_tmp, ovrrd_str)
+    custom_path, custom_path_id, custom_path_psx = nil, nil, nil
+    if file.directory and ovrrd_str then	 --@@ the directory check is only here so the app functions exactly like HEXflow launcher v0.5, it's probably not necessary at all.
+	--0 default, 1 vita, 2 psp, 3 psx, 4 homebrew
+	if string.match(ovrrd_str, file.name .. "=1") then
+	    file.app_type=1
+	elseif string.match(ovrrd_str, file.name .. "=2") then
+	    file.app_type=2
+	elseif string.match(ovrrd_str, file.name .. "=3") then
+	    file.app_type=3
+	elseif string.match(ovrrd_str, file.name .. "=4") then
+	    file.app_type=0
+	end
+    end
+
+    table.insert(xCatLookup(appt_hotfix(file.app_type)), file)
+
+    custom_path =    coversptable(file.app_type) .. app_title .. ".png"
+    custom_path_id = coversptable(file.app_type) .. file.name .. ".png"
+    if file.app_type == 3 then
+	table.insert(psx_table, file)
+	if not pspemu_translate_tmp then
+	    pspemu_translate_tmp = readBin(working_dir .. "/" .. file.name .. "/data/boot.bin")	 --@@ example: "SLUS00453"
+	end
+	if pspemu_translate_tmp ~= "-" then
+	    custom_path_psx = covers_psx .. pspemu_translate_tmp .. ".png"
+	end
+    end
+
+    if custom_path and System.doesFileExist(custom_path) then
+	file.icon_path = custom_path --custom cover by app name
+    elseif custom_path_id and System.doesFileExist(custom_path_id) then
+	file.icon_path = custom_path_id --custom cover by app id
+    elseif custom_path_psx and System.doesFileExist(custom_path_psx) then
+	file.icon_path = custom_path_psx --custom cover by special ps1 ID read from binary.
+    else
+	if System.doesFileExist("ur0:/appmeta/" .. file.name .. "/icon0.png") then
+	    file.icon_path = "ur0:/appmeta/" .. file.name .. "/icon0.png"  --app icon
+	else
+	    file.icon_path = "app0:/DATA/noimg.png" --blank grey
+	end
+    end
+    return file.app_type, file.icon_path
 end
 
 function onlcovtable(getCovers)  --@@For categorical cover download (2/2)
@@ -679,7 +722,7 @@ function listDirectory(dir)
 	
     local file_over = System.openFile(cur_dir .. "/overrides.dat", FREAD)
     local filesize = System.sizeFile(file_over)
-    local str = System.readFile(file_over, filesize)
+    local ovrrd_str = System.readFile(file_over, filesize)
     System.closeFile(file_over)
     
     --@@ psx.lua taken from Retroflow 3.4 and completely repurposed
@@ -689,9 +732,9 @@ function listDirectory(dir)
     System.closeFile(file_over)
 
     for i, file in pairs(dir) do
-	local custom_path, custom_path_id, app_type, pspemu_translate_tmp = nil, nil, nil, nil
+	local custom_path, custom_path_id, custom_path_psx, app_type, pspemu_translate_tmp = nil, nil, nil, nil, nil
         if file.directory == true then
-	    --@@ START FOLDER-TYPE GAMES SCAN
+	    -- START FOLDER-TYPE GAMES SCAN
             -- get app name to match with custom cover file name
             if System.doesFileExist(working_dir .. "/" .. file.name .. "/sce_sys/param.sfo") then
                 info = System.extractSfo(working_dir .. "/" .. file.name .. "/sce_sys/param.sfo")
@@ -700,107 +743,54 @@ function listDirectory(dir)
 
             if string.match(file.name, "PCS") and not string.match(file.name, "PCSI") then
                 -- Scan PSVita Games
-                table.insert(folders_table, file)
-                --table.insert(games_table, file)
 		file.app_type=1
             elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and not System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
-                -- Scan PSP Games (and improperly ID'd PS1 games) @@ Dear future self, good luck understanding the following line.
-		pspemu_translate_tmp = readBin(working_dir .. "/" .. file.name .. "/data/boot.bin")
-		if (pspemu_translate_tmp ~= nil) and (string.match(psxdb, pspemu_translate_tmp:upper())) then
-		    pspemu_translation_table[file.name] = pspemu_translate_tmp:upper() --@@ For filtering Adrenaline launcher entries. Very cool. (not implemented yet at time of writing).
+                -- Scan PSP Games (and improperly ID'd PS1 games)
+		pspemu_translate_tmp = readBin(working_dir .. "/" .. file.name .. "/data/boot.bin")	 --@@ example: "SLUS00453"
+		if pspemu_translate_tmp and pspemu_translate_tmp ~= "-" and string.match(psxdb, pspemu_translate_tmp) then
+		    --@@pspemu_translation_table[file.name] = pspemu_translate_tmp			 --@@ UNUSED. For filtering Adrenaline LAUNCHER vs Adrenaline MANAGER entries.
 		    -- PSX
-		    table.insert(folders_table, file)
-		    --table.insert(psx_table, file)
 		    file.app_type=3
 		else
 		    -- PSP
-		    table.insert(folders_table, file)
-		    --table.insert(psp_table, file)
 		    file.app_type=2
 		end
             elseif System.doesFileExist(working_dir .. "/" .. file.name .. "/data/boot.bin") and System.doesFileExist("ux0:pspemu/PSP/GAME/" .. file.name .. "/EBOOT.PBP") then
                 -- Scan PSX Games
-                table.insert(folders_table, file)
-                --table.insert(psx_table, file)
 		file.app_type=3
             else
                 -- Scan Homebrews.
-                table.insert(folders_table, file)
-                --table.insert(homebrews_table, file)
 		file.app_type=0
             end
-	    if System.doesFileExist(cur_dir .. "/overrides.dat") then
-	        --0 default, 1 vita, 2 psp, 3 psx, 4 homebrew
-		if string.match(str, file.name .. "=1") then
-		    file.app_type=1
-		elseif string.match(str, file.name .. "=2") then
-		    file.app_type=2
-		elseif string.match(str, file.name .. "=3") then
-		    file.app_type=3
-		elseif string.match(str, file.name .. "=4") then
-		    file.app_type=0
-	        end
-	    end
-	    --@@ END FOLDER-TYPE GAMES SCAN
-	--else
-	    --@@ START ROM GAMES SCAN
-	    --blah blah indentification blah blah system overrides blah blah
-	    --@@ END ROM GAMES SCAN
+	    table.insert(folders_table, file)
+--@@	    -- END FOLDER-TYPE GAMES SCAN
+--@@	else
+--@@	    -- START ROM GAMES SCAN
+--@@	    --blah blah indentification blah blah system overrides blah blah
+--@@	    --@@ Please note: the retroflow implementation in HexLauncher Custom V1.0 bugtester edition uses cache import and doesn't actually have rom-scan ability (yet?)
+--@@	    --blah blah insert to files_table
+--@@	    -- END ROM GAMES SCAN
         end
-	if file.app_type == 1 then
-	    table.insert(games_table, file)
-	    custom_path = covers_psv .. app_title .. ".png"
-	    custom_path_id = covers_psv .. file.name .. ".png"
-	elseif file.app_type == 2 then
-	    table.insert(psp_table, file)
-	    custom_path = covers_psp .. app_title .. ".png"
-	    custom_path_id = covers_psp .. file.name .. ".png"
-	elseif file.app_type == 3 then
-	    table.insert(psx_table, file)
-	    custom_path = covers_psx .. app_title .. ".png"
-	    custom_path_id = covers_psx .. file.name .. ".png"
-	else
-	    table.insert(homebrews_table, file)
-	    custom_path = covers_psv .. app_title .. ".png"
-	    custom_path_id = covers_psv .. file.name .. ".png"
-	end
-        
-        if custom_path and System.doesFileExist(custom_path) then
-            img_path = custom_path --custom cover by app name
-        elseif custom_path_id and System.doesFileExist(custom_path_id) then
-            img_path = custom_path_id --custom cover by app id
-        elseif custom_path_id and (pspemu_translation_table[file.name] ~= nil) then
-	    custom_path_id = custom_path_id:gsub(file.name .. ".png", pspemu_translation_table[file.name] .. ".png")
-	    if System.doesFileExist(custom_path_id) then
-                img_path = custom_path_id
-	    else
-	        if System.doesFileExist("ur0:/appmeta/" .. file.name .. "/icon0.png") then
-	            img_path = "ur0:/appmeta/" .. file.name .. "/icon0.png"  --app icon
-	        else
-	            img_path = "app0:/DATA/noimg.png" --blank grey
-	        end
-	    end
-        else
-            if System.doesFileExist("ur0:/appmeta/" .. file.name .. "/icon0.png") then
-                img_path = "ur0:/appmeta/" .. file.name .. "/icon0.png"  --app icon
-            else
-                img_path = "app0:/DATA/noimg.png" --blank grey
-            end
-        end
-        
-        table.insert(files_table, 4, file.app_type)
+
+	 --@@ NEW! Applies overrides and sets ".icon_path" accordingly. Also used for instant inline overrides.
+	file.app_type, file.icon_path = Respec_Entry(file, pspemu_translate_tmp, ovrrd_str)
+
+        --@@table.insert(files_table, 4, file.app_type)	 @@ Now set during Respec_Entry()
 		
 		
         --add blank icon to all
         file.icon = imgCoverTmp
-        file.icon_path = img_path
+        --@@file.icon_path = img_path			 @@ Now set during Respec_Entry()
 		
-        table.insert(files_table, 4, file.icon)
+        --@@table.insert(files_table, 4, file.icon)	 @@ unneccesary
         
         file.apptitle = app_title
-        table.insert(files_table, 4, file.apptitle)
+        --@@table.insert(files_table, 4, file.apptitle)	 @@ unneccesary
         
     end
+    --#return_table = TableConcat(folders_table, files_table)
+    --#table.sort(return_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
+
     table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
     table.sort(folders_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
     
@@ -866,9 +856,9 @@ function RestoreTitleTable()
     homebrews_table = {}
     custom_table = {}
 
-	if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
-		for line in io.lines(cur_dir .. "/apptitlecache.dat") do
-			if not (line == "" or line == " " or line == "\n") then
+    if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
+	for line in io.lines(cur_dir .. "/apptitlecache.dat") do
+	    if not (line == "" or line == " " or line == "\n") then
                 -- {directory,size,icon,icon_path,apptitle,name,app_type}
                 local app = stringSplit(line, "\t")
                 file = {}
@@ -883,9 +873,9 @@ function RestoreTitleTable()
                 
                 table.insert(files_table, file)
                 
-                if file.app_type == 0 then --@@not sure if necessary
-                    table.insert(homebrews_table, file)
-                elseif file.app_type == 1 then
+                --@@if file.app_type == 0 then
+                --@@    table.insert(homebrews_table, file)
+                if file.app_type == 1 then
                     table.insert(games_table, file) 
                 elseif file.app_type == 2 then
                     table.insert(psp_table, file) 
@@ -894,10 +884,9 @@ function RestoreTitleTable()
                 else
                     table.insert(homebrews_table, file)
                 end
-			end		
-		end
-        
+	    end		
 	end
+    end
 end
 
 -- Loads App list if cache exists, or generates a new one if it doesn't
@@ -908,6 +897,39 @@ function LoadAppTitleTables()
         files_table = listDirectory(System.currentDirectory())
         CacheTitleTable()
         WriteAppList()
+    end
+    ReadCustomSort()
+end
+
+function UpdateCacheSect(app_id, working_sect, new_path) --@@ This function is like magic. I have no idea how it works but it works so good.
+    if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
+--	for line in io.lines(cur_dir .. "/apptitlecache.dat") do
+--	    if not (line == "" or line == " " or line == "\n") then
+--		{directory,size,icon,icon_path,apptitle,name,app_type}
+--		local app = stringSplit(line, "\t")
+--		if string.find(app_id)
+--		    file.name = tostring(app[6])
+--		    file.app_type = tonumber(app[7])
+--		end
+--	    end
+	local inf = assert(io.open(cur_dir .. "/apptitlecache.dat", "r"), "Failed to open apptitlecache.dat")
+	local lines = ""
+	while(true) do
+	    local line = inf:read("*line")
+	    if not line then break end
+	    if string.find(line, app_id, 1) then
+	        local app = stringSplit(line, "\t")
+		app[working_sect] = new_path
+		new_line = table.concat(app,"\t")
+		lines = lines .. new_line .. "\n"
+	    else
+	        lines = lines .. line .. "\n"
+	    end
+	end
+	inf:close()
+	file = io.open(cur_dir .. "/apptitlecache.dat", "w")
+	file:write(lines)
+	file:close()
     end
 end
 
@@ -931,36 +953,24 @@ function getAppSize(dir)
     return size
 end
 
-function GetInfoSelected()
-    if #xCatLookup(showCat) > 0 then --if the currently-shown category isn't empty
-        if System.doesFileExist(working_dir .. "/" .. xCatLookup(showCat)[p].name .. "/sce_sys/param.sfo") then
-            info = System.extractSfo(working_dir .. "/" .. xCatLookup(showCat)[p].name .. "/sce_sys/param.sfo")
-            icon_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/icon0.png"
-            pic_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/pic0.png"
-	    app_title = tostring(info.title)
-	    apptype = xCatLookup(showCat)[p].app_type
-        end
+function GetNameSelected() --@@NEW! This gives a massive performance boost VS reading whole app info.
+    if #xCatLookup(showCat) > 0 then	 --if the currently-shown category isn't empty
+	app_title = xCatLookup(showCat)[p].apptitle
     else
-        app_title = "-"
+	app_title = "-"
     end
---@@    elseif showCat == 2 then
---@@        if #homebrews_table > 0 then
---@@Above 2 lines kept here so Beyond Compare software will properly compare the above to HexFlow Launcher 0.5 or RetroFlow 1.0
-
-    --@@The below 2 lines may cause a crash if Emu-launch is added.
-    app_titleid = tostring(info.titleid)
-    app_version = tostring(info.version)
 end
 
-function GetHeavyInfoSelected()
+function GetInfoSelected()
     if #xCatLookup(showCat) > 0 then --if the currently-shown category isn't empty then:
         if System.doesFileExist(working_dir .. "/" .. xCatLookup(showCat)[p].name .. "/sce_sys/param.sfo") then
-            info = System.extractSfo(working_dir .. "/" .. xCatLookup(showCat)[p].name .. "/sce_sys/param.sfo")
+	    appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name	 --@@example: "ux0:app/SLUS00453"
+            info = System.extractSfo(appdir .. "/sce_sys/param.sfo")
             icon_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/icon0.png"
             pic_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/pic0.png"
 	    app_title = tostring(info.title)
+	    sanitized_title = string.gsub(app_title, "\n", " ")	 --@@ NEW!
 	    apptype = xCatLookup(showCat)[p].app_type
-	    appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name
         end
     else
         app_title = "-"
@@ -984,48 +994,85 @@ function GetHeavyInfoSelected()
     end
 end
 
-local rolling_overrides = false --@@I got this working before, now it causes crash. Not sure why. Try at your own risk.
-function OverrideCategory()
-	--@@[1]=VITA, [2]=PSP, [3]=PS1, [4]=HOMEBREWS. (0 is default but it does nothing right now)
-	if System.doesFileExist(cur_dir .. "/overrides.dat") then
-		local inf = assert(io.open(cur_dir .. "/overrides.dat", "rw"), "Failed to open overrides.dat")
-		local lines = ""
-		while(true) do
-			local line = inf:read("*line")
-			if not line then break end
-			
-			if not string.find(line, app_titleid .. "", 1) then
-				lines = lines .. line .. "\n"
-			end
-		end
-		if tmpappcat>0 then
-			lines = lines .. app_titleid .. "=" .. tmpappcat .. "\n"
-			if (rolling_overrides ~= nil) and (rolling_overrides == true) then
-			    if (tmpappcat == 1) or (tmpappcat == 2) or (tmpappcat == 3) then
-				UpdateCacheSect(app_titleid, 7, tmpappcat)
-			    elseif tmpappcat == 4 then
-				UpdateCacheSect(app_titleid, 7, "0")
-			    end
-			end
-		end
-		inf:close()
-		file = io.open(cur_dir .. "/overrides.dat", "w")
-		file:write(lines)
-		file:close()
-		
-		if (rolling_overrides ~= nil) and (rolling_overrides == true) then
-		    --Reload
-		    FreeIcons()
-		    FreeMemory()
-		    Network.term()
-		    dofile("app0:index.lua")
-		else
-		    System.setMessage(lang_lines[55], false, BUTTON_OK)--"Done. Please 'refresh cache' via the start menu."
-		end
-	end
+function close_triangle_preview()
+    GetNameSelected()
+    oldpad = pad	 --@@ NEW! prevents it from launching next game accidentally.
+    showMenu = 0
+    prvRotY = 0
+    spin_allowance = 0	 --@@ NEW!
+    if setBackground > 0.5 then
+	Render.useTexture(modBackground, imgCustomBack)
+    end
 end
 
+function check_for_out_of_bounds()
+    curTotal = #xCatLookup(showCat) --@@number of entries in the category shown.
+    if curTotal == 0 then
+        p = 0 --@@Lock into position 0 in empty categories.
+        master_index = p
+    end
+    if p < 1 then
+        p = curTotal
+	if showView == 5 then		 --@@ NEW!
+	    if curTotal > 3 then	 --@@ NEW!
+		master_index = p - 3	 --@@ NEW!
+	    else			 --@@ NEW!
+		master_index = 1	 --@@ NEW! In SwitchView, don't move the camera in categories with less than 3 entries.
+	    end				 --@@ NEW!
+        elseif curTotal > 0 then
+            master_index = p	 -- 0
+        end
+        startCovers = false
+        GetNameSelected()
+    elseif p > curTotal then
+        p = 1
+        master_index = p
+        startCovers = false
+        GetNameSelected()
+    end
+end
 
+local rolling_overrides = true
+function OverrideCategory()
+    --@@[1]=VITA, [2]=PSP, [3]=PS1, [4]=HOMEBREWS. (0 is default but it does nothing right now)
+    if tmpappcat>0 and System.doesFileExist(cur_dir .. "/overrides.dat") then
+	local inf = assert(io.open(cur_dir .. "/overrides.dat", "rw"), "Failed to open overrides.dat")
+	local lines = ""
+	while(true) do
+	    local line = inf:read("*line")
+	    if not line then break end
+	    if not string.find(line, app_titleid .. "", 1) then
+		lines = lines .. line .. "\n"
+	    end
+	end
+	lines = lines .. app_titleid .. "=" .. tmpappcat .. "\n"
+	inf:write(lines)
+	inf:close()
+
+	if rolling_overrides then
+	    --@@ NEW! Applies overrides and sets ".icon_path" accordingly. Also used during the "listDirectory" app scan.
+	    xCatLookup(showCat)[p].app_type, xCatLookup(showCat)[p].icon_path = Respec_Entry(xCatLookup(showCat)[p], nil, lines)
+	    --@@ NEW! forces icon change NOW, not later!!!!
+	    xCatLookup(showCat)[p].ricon = Graphics.loadImage(xCatLookup(showCat)[p].icon_path)
+
+	    UpdateCacheSect(app_titleid, 7, tmpappcat)
+	    UpdateCacheSect(app_titleid, 4, xCatLookup(showCat)[p].icon_path)
+
+	    --@@ Game was added to target table during respec, now target table just needs sorted and the old table needs cleaned up.
+
+	    for k, v in pairs(xCatLookup(appt_hotfix(apptype))) do
+		if (v.name ~= nil) and (v.name == app_titleid) then
+		    table.remove(xCatLookup(appt_hotfix(apptype)), k)
+		    break
+		end
+	    end
+	    table.sort(xCatLookup(appt_hotfix(tmpappcat)), function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
+	    
+	else
+	    System.setMessage(lang_lines[55], false, BUTTON_OK)--"Done. Please 'refresh cache' via the start menu."
+	end
+    end
+end
 
 function DownloadCovers()
     local txt = "Downloading covers..."
@@ -1179,7 +1226,7 @@ local function DrawCover(x, y, text, icon, sel, apptype)
             extraz = 2 - (x / 1.5)
             extrax = -1
         end
-    else
+    elseif showView ~= 5 then	 --@@ NOTE: ~=
         -- default view
         space = 1
         zoom = 0
@@ -1197,7 +1244,18 @@ local function DrawCover(x, y, text, icon, sel, apptype)
     Render.setCamera(camX, 0, 0, 0.0, 0.0, 0.0)
     
     if hideBoxes <= 0 then
-        if apptype==1 then
+	if showView == 5 then	 --@@ NEW! SwitchView UI v0.1.2 integration!!!
+	    if sel and not bottomMenu then
+		Graphics.fillRect(x*200+85-6, x*200+85+198,152-6,152+198,lightblue)
+	    end
+	    View5IconHeightBaseTmp = Graphics.getImageHeight(icon)
+	    if (apptype==1) and (View5VitaCropTop == 1) and (View5IconHeightBaseTmp ~= 128) then
+		View5IconHeightModTmp = math.ceil(Graphics.getImageHeight(icon)*31/320)	 --@@ <--- this is how big the blue top of the vita cover is - 29/320 will work but 31/320 looks better. @@ dear future self... good luck figuring out the below line.
+		Graphics.drawImageExtended(x*200+85+96, 152+96, icon, 0, View5IconHeightModTmp, Graphics.getImageWidth(icon), View5IconHeightBaseTmp-View5IconHeightModTmp, 0, 192 / Graphics.getImageWidth(icon), 192 / (View5IconHeightBaseTmp-View5IconHeightModTmp))
+	    else
+		Graphics.drawScaleImage(x*200+85, 152, icon, 192 / Graphics.getImageWidth(icon), 192 / View5IconHeightBaseTmp) --@@ NEW!
+	    end
+        elseif apptype==1 then
             -- PSVita Boxes
             if setReflections == 1 then
                 Render.useTexture(modCover, icon)
@@ -1298,42 +1356,6 @@ function FreeIcons()
     end
 end
 
-
-
-function UpdateCacheSect(app_id, working_sect, new_path) --@@ This function is like magic. I have no idea how it works but it works so good.
-    if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
---	for line in io.lines(cur_dir .. "/apptitlecache.dat") do
---	    if not (line == "" or line == " " or line == "\n") then
---		{directory,size,icon,icon_path,apptitle,name,app_type}
---		local app = stringSplit(line, "\t")
---		if string.find(app_id)
---		    file.name = tostring(app[6])
---		    file.app_type = tonumber(app[7])
---		end
---	    end
-	local inf = assert(io.open(cur_dir .. "/apptitlecache.dat", "r"), "Failed to open apptitlecache.dat")
-	local lines = ""
-	while(true) do
-	    local line = inf:read("*line")
-	    if not line then break end
-	    if string.find(line, app_id, 1) then
-	        local app = stringSplit(line, "\t")
-		app[working_sect] = new_path
-		new_line = table.concat(app,"\t")
-		lines = lines .. new_line .. "\n"
-	    else
-	        lines = lines .. line .. "\n"
-	    end
-	end
-	inf:close()
-	file = io.open(cur_dir .. "/apptitlecache.dat", "w")
-	file:write(lines)
-	file:close()
-    end
-end
-
-
-
 function DownloadSingleCover()
     cvrfound = 0
     app_idx = p
@@ -1346,7 +1368,7 @@ function DownloadSingleCover()
 	
 	if Network.isWifiEnabled() then
 		app_titleid_backup = 0
-		if (apptype == 3) and (psx_serial ~= nil) and (psx_serial ~= "-") then
+		if (apptype == 3) and psx_serial and psx_serial ~= "-" then
 			app_titleid_backup = app_titleid
 			app_titleid = psx_serial	 --@@Low quality code (1/4)... please make it more like COBOL by having a separate routine instead of this workaround.
 		end
@@ -1401,7 +1423,7 @@ function DownloadSingleCover()
 			end								  --@@NEW
 			-- Update cache if it exists					  --@@NEW @@ update cover in cache (2/3)
 			UpdateCacheSect(app_titleid, 4, new_path)			  --@@NEW @@ update cover in cache (3/3)
-			if (apptype == 3) and (psx_serial ~= nil) and (psx_serial ~= "-") then --@@ Low quality code (3/4)... revert this part back how was in HEXFlow launcher 0.5
+			if (apptype == 3) and psx_serial and psx_serial ~= "-" then	  --@@ Low quality code (3/4)... revert this part back how was in HEXFlow launcher 0.5
 			    System.setMessage(lang_lines[56]:gsub("*", psx_serial) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. psx_serial .. " found!\nCache has been updated."
 			else
 			    System.setMessage(lang_lines[56]:gsub("*", app_titleid) .. "\n" .. lang_lines[57], false, BUTTON_OK) --"Cover " .. app_titleid .. " found!\nCache has been updated."
@@ -1425,6 +1447,150 @@ function DownloadSingleCover()
 	gettingCovers = false
 end
 
+function RestoreAppTitle()	 --@@ NEW!
+    local running = false
+    status = System.getMessageState()
+    if status ~= RUNNING then
+	if xCatLookup(showCat)[p].apptitle ~= sanitized_title then
+	    xCatLookup(showCat)[p].apptitle = sanitized_title
+	    UpdateCacheSect(app_titleid, 5, sanitized_title)
+	    System.setMessage(lang_lines[57], false, BUTTON_OK) --Cache has been updated.
+	else
+	    System.setMessage("Can't restore, app hasn't been renamed. To do so, please edit ux0:data/HexFlow/apptitlecache.dat\nNote: 'refresh cache' & 'refresh icons' will reset this file.", false, BUTTON_OK)
+	end
+    end
+end
+
+function p_plus(plus_num)
+    if setSounds == 1 then
+	Sound.play(click, NO_LOOP)
+    end
+    if bottomMenu == true then			 --@@ NEW!
+	menuSel = menuSel + 1			 --@@ NEW!
+	if (menuSel>6) then			 --@@ NEW!
+	    menuSel=1				 --@@ NEW!
+	end					 --@@ NEW!
+    else					 --@@ NEW!
+	p = p + plus_num
+	if p <= curTotal then
+	    GetNameSelected()
+	end
+	if (showView == 5) then			 --@@ NEW!
+	    if (p >= master_index+3) then	 --@@ NEW!
+		master_index = p - 3		 --@@ NEW!
+	    end					 --@@ NEW!
+	else					 --@@ NEW!
+	    if (p >= master_index) then
+		master_index = p
+	    end
+	end
+    end						 --@@ NEW!
+end
+
+function p_minus(minus_num)
+    if setSounds == 1 then
+	Sound.play(click, NO_LOOP)
+    end
+    if bottomMenu == true then		 --@@ NEW!
+	menuSel = menuSel - 1		 --@@ NEW!
+	if (menuSel<1) then		 --@@ NEW!
+	    menuSel=6			 --@@ NEW!
+	end				 --@@ NEW!
+    else				 --@@ NEW!
+	p = p - minus_num
+	if p > 0 then
+	    GetNameSelected()
+	end
+	if (showView == 5) then		  --@@ NEW!
+	    if (p <= master_index-1) then --@@ NEW! Remove the "-1" for it to act just like SwitchView UI v0.1.2
+		master_index = p	  --@@ NEW! Add "-1" to the end for it to act just like SwitchView UI v0.1.2
+	    end				  --@@ NEW!
+	else				  --@@ NEW!
+	    if (p <= master_index) then
+		master_index = p
+	    end
+	end
+    end					 --@@ NEW!
+end
+
+function Category_Minus()
+	    while true do		 --@@loop in case hideEmptyCats is enabled.
+		if showCat ~= 0 then
+		    if showCat==3 and showHomebrews==0 then
+			showCat = 1
+		    else
+			showCat = showCat -1
+		    end
+		elseif System.doesFileExist(cur_dir .. "/customsort.dat") == true then
+		    --@@showCat = 40 	 --@@skip #41, "search result category"
+		    showCat = 5
+		else
+		    --@@showCat = 39
+		    showCat = 4
+		end
+		if #xCatLookup(showCat) > 0 or hideEmptyCats == 0 or showCat == 0 then
+		    break
+		end
+	    end
+	    hideBoxes = 8
+	    p = 1
+	    master_index = p
+	    startCovers = false
+	    GetNameSelected()
+	    FreeIcons()
+end
+
+function Category_Plus()
+	    while true do		 --@@loop in case hideEmptyCats is enabled.
+		--@@if showCat < 40 then	 --@@skip #41, "search result category"
+		if showCat < 5 then
+		    if showCat==1 and showHomebrews==0 then
+			showCat = 3
+		    elseif (setRetroFlow == 0 and showCat > 3.5)
+		    --@@or     (setRetroFlow == 1 and showCat == 39) then
+		    then
+			if System.doesFileExist(cur_dir .. "/customsort.dat") == true then
+			    --@@showCat = 40
+			    showCat = 5
+			else
+			    showCat = 0
+			end
+		    else
+			showCat = showCat + 1
+		    end
+		else
+		    showCat = 0
+		end
+		if #xCatLookup(showCat) > 0 or hideEmptyCats == 0 or showCat == 0 then
+		    break
+		end
+	    end
+            hideBoxes = 8
+            p = 1
+            master_index = p
+            startCovers = false
+            GetNameSelected()
+            FreeIcons()
+end
+
+ --@@ NEW! @@ credit to VitaHex's SwitchView UI v0.1.2
+function execute_switch_bottom_menu()
+    if menuSel==1 then
+	System.executeUri("wbapp0:")	   --@@1: News (Internet Browser)
+    elseif menuSel==2 then
+	System.executeUri("psns:")	   --@@2: Store
+    elseif menuSel==3 then
+	System.executeUri("photo:")	   --@@3: Album
+    elseif menuSel==4 then			
+	System.executeUri("scecomboplay:") --@@4: Controls (PS3 Cross-Controller). Note: to launch moonlight it's FreeMemory() + System.launchApp(XYZZ00002) + System.exit()
+    elseif menuSel==5 then
+	System.executeUri("settings_dlg:") --@@5: System Settings
+    elseif menuSel==6 then
+	FreeMemory()			   --@@6: Exit
+	System.exit()
+    end
+end
+
 -- Loads App list if cache exists, or generates a new one if it doesn't
 local applistReadTimer = Timer.new()
 LoadAppTitleTables()
@@ -1434,8 +1600,6 @@ Timer.destroy(applistReadTimer)
 --functionTime = Timer.getTime(functionTimer)
 functionTime = Timer.getTime(oneLoopTimer)
 --Timer.destroy(functionTimer)
-
-ReadCustomSort()
 
 -- Main loop
 while true do
@@ -1484,32 +1648,60 @@ while true do
 	Font.print(fnt20, label1X, 508, lang_lines[7], white)--Launch
 	Graphics.drawImage(label2ImgX, 510, btnT)
 	Font.print(fnt20, label2X, 508, lang_lines[8], white)--Details
-	Graphics.drawImage(label3ImgX, 510, btnS)
+	if dCategoryButton == 1 then
+	    Graphics.drawImage(label3ImgX, 510, btnD)
+	else
+	    Graphics.drawImage(label3ImgX, 510, btnS)
+	end
 	Font.print(fnt20, label3X, 508, lang_lines[9], white)--Category
-	Graphics.drawImage(label4ImgX, 510, btnO)
-	Font.print(fnt20, label4X, 508, lang_lines[10], white)--View
+	if lockView == 0 then
+	    Graphics.drawImage(label4ImgX, 510, btnO)
+	    Font.print(fnt20, label4X, 508, lang_lines[10], white)--View
+	end
+	if showView == 5 and setSwitch == 1 then
+	    --Graphics.drawLine(21, 940, 489, 489, white)	 --@@ NEW!
+	    Graphics.drawLine(21, 940, 496, 496, white)		 --@@ NEW!
+	    Graphics.drawImage(27, 108, imgCart)		 --@@ NEW!
+	    Font.print(fnt23_5, 60, 106, app_title:gsub("\n",""), lightblue)	 --@@ NEW! Draw title in SwitchView UI style.
+	    Graphics.drawImage(240, 378, btnMenu1)		 --@@ NEW! News
+	    Graphics.drawImage(322, 378, btnMenu2)		 --@@ NEW! Store
+	    Graphics.drawImage(404, 378, btnMenu3)		 --@@ NEW! Album
+	    Graphics.drawImage(486, 378, btnMenu4)		 --@@ NEW! Controls
+	    Graphics.drawImage(568, 378, btnMenu5)		 --@@ NEW! System Settings
+	    Graphics.drawImage(650, 378, btnMenu6)		 --@@ NEW! Exit
+	    if bottomMenu then
+		Graphics.drawImage(menuSel*82-82+240-2, 378-2, btnMenuSel)
+		PrintCentered(fnt23_5, menuSel*82-82+240+39, 452, lang_lines[menuSel+78], lightblue, 22) --@@ News/Store/Album/Controls/System Settings/Exit. @@ Note: old font style + font size 27 was used for this in SwitchView UI v0.1.2
+		--@@ This is a really cheap way to put lang lines. I'll fix it later maybe (probably not honestly)
+	    end
+        elseif showView ~= 2 then
+            Graphics.fillRect(0, 960, 424, 496, black)-- black footer bottom
+            PrintCentered(fnt25, 480, 430, app_title, white, 25)-- Draw title
+	else
+            Font.print(fnt22, 24, 508, app_title, white)
+        end
 
 	Font.print(fnt22, 32, 34, xCatTextLookup(showCat), white)--PS VITA/HOMEBREWS/PSP/PSX/CUSTOM/ALL
         if Network.isWifiEnabled() then
             Graphics.drawImage(800, 38, imgWifi)-- wifi icon
         end
         
-        if showView ~= 2 then
-            Graphics.fillRect(0, 960, 424, 496, black)-- black footer bottom
-            PrintCentered(fnt25, 480, 430, app_title, white, 25)-- Draw title
-        else
-            Font.print(fnt22, 24, 508, app_title, white)
-        end
-        
         -- Draw Covers
         base_x = 0
         
         --GAMES
+	--@@ NEW! If the cover 7 tiles away has been loaded, increase render distance.
+	if xCatLookup(showCat)[p+7] and xCatLookup(showCat)[p+7].ricon then
+	    render_distance = 16
+	else
+	    render_distance = 8
+	end
         for l, file in pairs(xCatLookup(showCat)) do
             if (l >= master_index) then
                 base_x = base_x + space
             end
-            if l > p-8 and base_x < 10 then
+	    --@@ if l > p-8 and base_x < 10 then
+	    if l > p-render_distance and l < p+render_distance+2 then	 --@@ NEW!
                 if FileLoad[file] == nil then --add a new check here
                     FileLoad[file] = true
                     Threads.addTask(file, {
@@ -1519,11 +1711,15 @@ while true do
                         Index = "ricon"
                     })
                 end
-                if file.ricon ~= nil then
-                    DrawCover((targetX + l * space) - (#xCatLookup(showCat) * space + space), -0.6, file.name, file.ricon, base_x, file.app_type)--draw visible covers only
-                else
-                    DrawCover((targetX + l * space) - (#xCatLookup(showCat) * space + space), -0.6, file.name, file.icon, base_x, file.app_type)--draw visible covers only
-                end
+                --@@if file.ricon ~= nil then
+                --@@    DrawCover((targetX + l * space) - (#xCatLookup(showCat) * space + space), -0.6, file.name, file.ricon, base_x, file.app_type)--draw visible covers only
+                --@@else
+                --@@    DrawCover((targetX + l * space) - (#xCatLookup(showCat) * space + space), -0.6, file.name, file.icon, base_x, file.app_type)--draw visible covers only
+                --@@end
+
+		--draw visible covers only @@ Now using "or" to order a protected call on ricon. @@ Now uses l==p (which returns as true or false) to say where selector goes.
+		DrawCover((targetX + l * space) - (#xCatLookup(showCat) * space + space), -0.6, file.name, file.ricon or file.icon, l==p, file.app_type)
+
             else
                 if FileLoad[file] == true then
                     FileLoad[file] = nil
@@ -1535,25 +1731,27 @@ while true do
                 end
             end
         end
-        if showView ~= 2 then
+        if showView ~= 2 and not bottomMenu then
             PrintCentered(fnt20, 480, 462, p .. " of " .. #xCatLookup(showCat), white, 20)-- Draw total items
         end
             --HOMEBREWS --@@This is kept here so Beyond Compare software will properly compare the above to HexFlow Launcher 0.5
         
         
         -- Smooth move items horizontally
-        if targetX ~= base_x then
+        if (targetX < (base_x - 0.0001)) or (targetX > (base_x + 0.0001)) then	 --@@ NEW! Stops drift (represented by targetX) when within 0.0001 of base_x
             targetX = targetX - ((targetX - base_x) * 0.1)
+        else
+            targetX = base_x
         end
         
         -- Instantly move to selection
         if startCovers == false then
             targetX = base_x
             startCovers = true
-            GetInfoSelected()
+            GetNameSelected()
         end
         
-        if setReflections==1 then
+        if setReflections==1 and not (showView == 5 and setSwitch == 1) then
             floorY = 0
             if showView == 2 then
                 floorY = -0.6
@@ -1673,29 +1871,42 @@ while true do
 			tmpcatText = "Default"
 		end
 
-		menuItems = 1
-		if menuY==1 then
-			Graphics.fillRect(24, 470, 350 + (menuY * 40), 430 + (menuY * 40), themeCol)-- selection two lines
-		else
-			Graphics.fillRect(24, 470, 350 + (menuY * 40), 390 + (menuY * 40), themeCol)-- selection
-		end
+		menuItems = 2
+		Graphics.fillRect(24, 470, 350 + (menuY * 40), 390 + (menuY * 40), themeCol)-- selection
 		Font.print(fnt22, 50, 352, "Download Cover", white)
-		Font.print(fnt22, 50, 352+40, "Override Category: < " .. tmpcatText .. " >\n(Press X to apply Category)", white)
-		
+		--@@Font.print(fnt22, 50, 352+40, "Override Category: < " .. tmpcatText .. " >\n(Press X to apply Category)", white)
+		Font.print(fnt22, 50, 352+40, "Override Category: < " .. tmpcatText .. " >", white)
+		if xCatLookup(showCat)[p].apptitle ~= sanitized_title then		  --@@ NEW!
+		    Font.print(fnt22, 50, 352+80, "Restore app title", white)	  --@@ NEW!
+		else								  --@@ NEW!
+		    Font.print(fnt22, 50, 352+80, "Restore app title", lightgrey) --@@ NEW!
+		end								  --@@ NEW!
 
 		status = System.getMessageState()
         if status ~= RUNNING then
             
             if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
                 if menuY == 0 then
-					if gettingCovers == false then
+		    if gettingCovers == false then
                         gettingCovers = true
                         DownloadSingleCover()
                     end
-				elseif menuY == 1 then
-					OverrideCategory()
-				end
-			elseif (Controls.check(pad, SCE_CTRL_UP)) and not (Controls.check(oldpad, SCE_CTRL_UP)) then
+		elseif menuY == 1 then
+		    if spin_allowance < 0.1 then
+			if rolling_overrides and (showCat == 0 or showCat == 5) then
+			    spin_allowance = 3
+			else
+			    OverrideCategory()
+			    if rolling_overrides then
+				check_for_out_of_bounds()
+				close_triangle_preview()
+			    end
+			end
+		    end
+		elseif menuY == 2 then	 --@@ NEW!
+		    RestoreAppTitle()	 --@@ NEW!
+		end			 --@@ NEW!
+	    elseif (Controls.check(pad, SCE_CTRL_UP)) and not (Controls.check(oldpad, SCE_CTRL_UP)) then
                 if menuY > 0 then
                     menuY = menuY - 1
 					else
@@ -1727,7 +1938,25 @@ while true do
 		end
 		
     elseif showMenu == 2 then
-        
+	if btDIsLoaded ~= true then			  --@@ NEW!
+	    btnD = Graphics.loadImage("app0:/DATA/d.png") --@@ NEW! This stupid image takes so long to load, f*ck knows why.
+	    btDIsLoaded = true				  --@@ NEW!
+	end						  --@@ NEW!
+	--@@ Set Setting Menu Tab Spacing. @@ This bit of code is so ugly sorry >.<
+	if not toggle1X then
+	    if (Font.getTextWidth(fnt22, lang_lines[91] .. ": ")) > 260 then
+		toggle1X = (Font.getTextWidth(fnt22, lang_lines[91] .. ": ")) - 260 --Background #9 & View #5
+	    elseif (Font.getTextWidth(fnt22, lang_lines[95] .. ": ")) > 260 then
+		toggle1X = (Font.getTextWidth(fnt22, lang_lines[95] .. ": ")) - 260 --Pro Triangle Menu
+	    else
+		toggle1X = 0
+	    end
+	    if (Font.getTextWidth(fnt22, lang_lines[99] .. ": ")) > 275 then
+		toggle2X = (Font.getTextWidth(fnt22, lang_lines[99] .. ": ")) - 275 --Hide Empty Categories
+	    else
+		toggle2X = 0
+	    end
+	end
         -- SETTINGS
         -- Footer buttons and icons @@ label X's are set in function ChangeLanguage()
         Graphics.drawImage(label1AltImgX, 510, btnO)
@@ -1735,168 +1964,212 @@ while true do
         Graphics.drawImage(label2AltImgX, 510, btnX)
         Font.print(fnt20, label2AltX, 508, lang_lines[32], white)--Select
         Graphics.fillRect(60, 900, 24, 488, darkalpha)
-        Font.print(fnt22, 84, 37, lang_lines[6], white)--SETTINGS
-        Graphics.drawLine(60, 900, 74, 74, white)
-        Graphics.fillRect(60, 900, 86 + (menuY * 40), 126 + (menuY * 40), themeCol)-- selection
+        Font.print(fnt22, 84, 34, lang_lines[6], white)--SETTINGS
+	if menuY < 5 then
+	    Graphics.fillRect(60, 900, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
+	elseif menuY == 11 then
+	    Graphics.fillRect(60 + (280 * menuX), 60 + 280 + (280 * menuX), 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
+	elseif menuX == 0 then		--@@and (5 < menuY < 11) then
+	    Graphics.fillRect(60, 460, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
+	else				--@@elseif (5 < menuY < 11) then
+	    Graphics.fillRect(460, 900, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
+	end
+        Graphics.drawLine(60, 900, 70, 70, white)
+        Graphics.drawLine(60, 900, 248, 248, white)
+        Graphics.drawLine(60, 900, 452, 452, white)
         
-        menuItems = 9
+        menuItems = 11
         
-        Font.print(fnt22, 84, 90, lang_lines[14] .. ": ", white)--Startup Category
+        Font.print(fnt22, 84, 79, lang_lines[14] .. ": ", white)--Startup Category
         if startCategory == 0 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[5], white)--ALL
+            Font.print(fnt22, 84 + 260, 79, lang_lines[5], white)--ALL
         elseif startCategory == 1 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[1], white)--PS VITA
+            Font.print(fnt22, 84 + 260, 79, lang_lines[1], white)--PS VITA
         elseif startCategory == 2 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[2], white)--HOMEBREWS
+            Font.print(fnt22, 84 + 260, 79, lang_lines[2], white)--HOMEBREWS
         elseif startCategory == 3 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[3], white)--PSP
+            Font.print(fnt22, 84 + 260, 79, lang_lines[3], white)--PSP
         elseif startCategory == 4 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[4], white)--PSX
+            Font.print(fnt22, 84 + 260, 79, lang_lines[4], white)--PSX
         elseif startCategory == 5 then
-            Font.print(fnt22, 84 + 260, 90, lang_lines[49], white)--CUSTOM
+            Font.print(fnt22, 84 + 260, 79, lang_lines[49], white)--CUSTOM
         end
         
-        Font.print(fnt22, 84, 90 + 40, lang_lines[15] .. ": ", white)
-        if setReflections == 1 then
-            Font.print(fnt22, 84 + 260, 90 + 40, lang_lines[22], white)--ON
-        else
-            Font.print(fnt22, 84 + 260, 90 + 40, lang_lines[23], white)--OFF
-        end
-        
-        Font.print(fnt22, 84, 90 + 80, lang_lines[16] .. ": ", white)--SOUNDS
-        if setSounds == 1 then
-            Font.print(fnt22, 84 + 260, 90 + 80, lang_lines[22], white)--ON
-        else
-            Font.print(fnt22, 84 + 260, 90 + 80, lang_lines[23], white)--OFF
-        end
-        
-        Font.print(fnt22, 84, 90 + 120,  lang_lines[17] .. ": ", white)
+        Font.print(fnt22, 84, 79 + 34,  lang_lines[17] .. ": ", white)--Theme Color
         if themeColor == 1 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[24], white)--Red
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[24], white)--Red
         elseif themeColor == 2 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[25], white)--Yellow
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[25], white)--Yellow
         elseif themeColor == 3 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[26], white)--Green
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[26], white)--Green
         elseif themeColor == 4 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[27], white)--Grey
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[27], white)--Grey
         elseif themeColor == 5 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[28], white)--Black
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[28], white)--Black
         elseif themeColor == 7 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[30], white)--Orange --@@reorder hack
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[30], white)--Orange --@@reorder hack
         elseif themeColor == 6 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[29], white)--Purple
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[29], white)--Purple
         elseif themeColor == 8 then
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[54], white)--Dark Purple
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[54], white)--Dark Purple
         else
-            Font.print(fnt22, 84 + 260, 90 + 120, lang_lines[31], white)--Blue
+            Font.print(fnt22, 84 + 260, 79 + 34, lang_lines[31], white)--Blue
         end
-        
-        Font.print(fnt22, 84, 90 + 160,  lang_lines[18] .. ": ", white)
-        if (label3AltImgX == nil) or (label3AltImgX == 0) then --@@image alt 3 is at X900 when not in use.
-	    if getBGround == 1 then
-		if System.doesFileExist("ux0:/data/HexFlow/Background.jpg") or System.doesFileExist("ux0:/data/HexFlow/Background.png") then
-		    BGroundText = "<  " .. lang_lines[49] .. "  >" --<  CUSTOM  >
-		else
-		    BGroundText = "<  " .. lang_lines[22] .. "  >" --<  ON  >
-		end
-	    elseif getBGround == 2 then
-		BGroundText = "<  Citylights  >"
-	    elseif getBGround == 3 then
-		BGroundText = "<  Aurora  >"
-	    elseif getBGround == 4 then
-		BGroundText = "<  Wood 1  >"
-	    elseif getBGround == 5 then
-		BGroundText = "<  Wood 2  >"
-	    elseif getBGround == 6 then
-		BGroundText = "<  Dark  >"
-	    elseif getBGround == 7 then
-		BGroundText = "<  Marble  >"
-	    elseif getBGround == 8 then
-		BGroundText = "<  Retro  >"
-	    else
-		BGroundText = "<  " .. lang_lines[23] .. "  >" --<  OFF  >
-	    end
-	    label3AltImgX = 84 + 260 + Font.getTextWidth(fnt22, BGroundText) + 20
+
+	if scanComplete == false then
+--@@	    if setLanguage == 2 then --French Language Fix @@ No longer necessary due to better French Translations.
+--@@		Font.print(fnt22, 84, 79 + 68, lang_lines[19] .. ":   <  " .. xCatTextLookup(getCovers) .. "  >", white)--Download Covers < PS VITA/HOMEBREWS/PSP/PSX/CUSTOM/ALL >
+--@@	    else
+		Font.print(fnt22, 84, 79 + 68, lang_lines[19] .. ":", white)--Download Covers
+		Font.print(fnt22, 84 + 260, 79 + 68, "<  " .. xCatTextLookup(getCovers) .. "  >", white) --PS VITA/HOMEBREWS/PSP/PSX/CUSTOM/ALL
+--@@	    end
+	else
+	    Font.print(fnt22, 84, 79 + 170,  lang_lines[20], white)--Reload Covers Database
 	end
-	if (BGroundText == nil) or (BGroundText == "") then
-	    if setBackground == 1 then
-		if System.doesFileExist("ux0:/data/HexFlow/Background.jpg") or System.doesFileExist("ux0:/data/HexFlow/Background.png") then
-		    BGroundText = lang_lines[49] --CUSTOM
-		else
-		    BGroundText = lang_lines[22] --ON
-		end
-	    elseif setBackground == 2 then
-		BGroundText = "Citylights"
-	    elseif setBackground == 3 then
-		BGroundText = "Aurora"
-	    elseif setBackground == 4 then
-		BGroundText = "Wood 1"
-	    elseif setBackground == 5 then
-		BGroundText = "Wood 2"
-	    elseif setBackground == 6 then
-		BGroundText = "Dark"
-	    elseif setBackground == 7 then
-		BGroundText = "Marble"
-	    elseif setBackground == 8 then
-		BGroundText = "Retro"
-	    else
-		BGroundText = lang_lines[23] --OFF
-	    end
-	    label3AltImgX = 900
-	end
-        Font.print(fnt22, 84 + 260, 90 + 160, BGroundText, white)
-	--Graphics.drawImage(label3ImgX, 90 + 160, btnX)
-	
         
-		if scanComplete == false then
-		    if setLanguage == 2 then --French Language Fix
-		        Font.print(fnt22, 84, 90 + 200, lang_lines[19] .. ":   <  " .. xCatTextLookup(getCovers) .. "  >", white)--Download Covers < PS VITA/HOMEBREWS/PSP/PSX/CUSTOM/ALL >
-		    else
-			Font.print(fnt22, 84, 90 + 200, lang_lines[19] .. ":", white)--Download Covers
-			Font.print(fnt22, 84 + 260, 90 + 200, "<  " .. xCatTextLookup(getCovers) .. "  >", white) --PS VITA/HOMEBREWS/PSP/PSX/CUSTOM/ALL
-		    end
-		else
-			Font.print(fnt22, 84, 90 + 200,  lang_lines[20], white)--Reload Covers Database
-		end
-		
-        Font.print(fnt22, 84, 90 + 240, lang_lines[21] .. ": ", white)--Language
+        Font.print(fnt22, 84, 79 + 102,  lang_lines[18] .. ": ", white)
+	if getBGround == 1 then
+	    if System.doesFileExist("ux0:/data/HexFlow/Background.jpg") or System.doesFileExist("ux0:/data/HexFlow/Background.png") then
+		BGroundText = lang_lines[49] --CUSTOM
+	    else
+		BGroundText = lang_lines[22] --ON
+	    end
+	elseif getBGround == 2 then
+	    BGroundText = lang_lines[65] --Citylights
+	elseif getBGround == 3 then
+	    BGroundText = lang_lines[66] --Aurora
+	elseif getBGround == 4 then
+	    BGroundText = lang_lines[67] --Wood 1
+	elseif getBGround == 5 then
+	    BGroundText = lang_lines[68] --Wood 2
+	elseif getBGround == 6 then
+	    BGroundText = lang_lines[69] --Dark
+	elseif getBGround == 7 then
+	    BGroundText = lang_lines[70] --Marble
+	elseif getBGround == 8 then
+	    BGroundText = lang_lines[71] --Retro
+	elseif getBGround == 9 then
+	    BGroundText = lang_lines[72] --SwitchView Basic Black
+	elseif getBGround == 10 then
+	    BGroundText = lang_lines[73] --SwitchView Basic White
+	elseif getBGround == 11 then
+	    BGroundText = lang_lines[74] --Playstation Pattern 1
+	elseif getBGround == 12 then
+	    BGroundText = lang_lines[75] --Playstation Pattern 2
+	elseif getBGround == 13 then
+	    BGroundText = lang_lines[76] --MVPlayer 1
+	else
+	    BGroundText = lang_lines[23] --OFF
+	end
+	if (background_brackets == true) and (BGroundText ~= nil) then
+	    BGroundText = "<  " .. BGroundText .. "  >"
+	    --@@if (setBackground ~= getBGround) and (XNextToBG ~= false) then	 --@@ Puts X icon next to unconfirmed background selection @@ Uncomment these 3 lines to try it. I didn't like it personally.
+	    --@@    Graphics.drawImage(Font.getTextWidth(fnt20, BGroundText) + btnMargin + 84 + 260, 5 + 79 + 102, btnX)
+	    --@@end
+	end
+        Font.print(fnt22, 84 + 260, 79 + 102, BGroundText, white)
+
+        Font.print(fnt22, 84, 79 + 136, lang_lines[21] .. ": ", white)--Language
         if setLanguage == 1 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "German", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "German", white)
         elseif setLanguage == 2 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "French", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "French", white)
         elseif setLanguage == 3 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Italian", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Italian", white)
         elseif setLanguage == 4 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Spanish", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Spanish", white)
         elseif setLanguage == 5 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Russian", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Russian", white)
         elseif setLanguage == 6 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Swedish", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Swedish", white)
         elseif setLanguage == 7 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Portugese", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Portugese", white)
         elseif setLanguage == 8 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Polish", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Polish", white)
         elseif setLanguage == 9 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Japanese", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Japanese", white)
         elseif setLanguage == 10 then
-            Font.print(fnt22, 84 + 260, 90 + 240, "Chinese", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "Chinese", white)
         else
-            Font.print(fnt22, 84 + 260, 90 + 240, "English", white)
+            Font.print(fnt22, 84 + 260, 79 + 136, "English", white)
+        end
+
+
+        Font.print(fnt22, 84, 79 + 170, lang_lines[16] .. ": ", white)--SOUNDS
+        if setSounds == 1 then
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 170, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 170, lang_lines[23], white)--OFF
+        end
+        Font.print(fnt22, 484, 79 + 170, lang_lines[96] .. ": ", lightgrey)--RetroFlow
+        if setRetroFlow == 1 then
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 170, lang_lines[22], lightgrey)--ON
+        else
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 170, lang_lines[23], lightgrey)--OFF
+        end
+
+                Font.print(fnt22, 84, 79 + 204, lang_lines[15] .. ": ", white)--Reflection Effect
+        if setReflections == 1 then
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 204, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 204, lang_lines[23], white)--OFF
+        end
+        Font.print(fnt22, 484, 79 + 204, lang_lines[99] .. ": ", white)--Hide Empty Categories
+	if hideEmptyCats == 1 then
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 204, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 204, lang_lines[23], white)--OFF
         end
 		
-        Font.print(fnt22, 84, 90 + 280, lang_lines[46] .. ": ", white)--Show Homebrews
-		if showHomebrews == 1 then
-            Font.print(fnt22, 84 + 260, 90 + 280, lang_lines[22], white)--ON
+        Font.print(fnt22, 84, 79 + 238, lang_lines[46] .. ": ", white)--Show Homebrews
+	if showHomebrews == 1 then
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 238, lang_lines[22], white)--ON
         else
-            Font.print(fnt22, 84 + 260, 90 + 280, lang_lines[23], white)--OFF
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 238, lang_lines[23], white)--OFF
         end
-		
-        Font.print(fnt22, 84, 90 + 320, lang_lines[48], white)--Refresh Cache
---@@        if ????????????? == 1 then --while loading, say "please wait..."
---@@            Font.print(fnt22, 84 + 260, 90 + 320, lang_lines[52], white) --Please wait...
---@@        end
+	Graphics.drawImage(484, 79 + 238 + 3, btnD)
+        Font.print(fnt22, 484+28, 79 + 238, lang_lines[100] .. ": ", white)--* Category Button
+	if dCategoryButton == 1 then
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 238, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 238, lang_lines[23], white)--OFF
+        end
+
+        Font.print(fnt22, 84, 79 + 272, lang_lines[90] .. ": ", white)--Music: Shuffle
+        if musicLoop == 1 then
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 272, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 84 + 260 + toggle1X, 79 + 272, lang_lines[23], white)--OFF
+        end
+        Font.print(fnt22, 484, 79 + 272, lang_lines[94] .. ": ", white)--Lock Current View (#*)
+        if lockView == 1 then
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[23], white)--OFF
+        end
         
-        Font.print(fnt22, 84, 90 + 360, lang_lines[13], white)--About
+        Font.print(fnt22, 84, 79 + 306, lang_lines[91] .. ": ", white)--Background #9 & View #5
+	if setSwitch == 1 then
+	    Font.print(fnt22, 84 + 260 + toggle1X, 79 + 306, lang_lines[22], white)--ON
+	    Font.print(fnt22, 84, 79 + 340, lang_lines[107] .. ": ", white)--Crop 'Vita' in View #5
+	    if View5VitaCropTop == 1 then
+		Font.print(fnt22, 84 + 260 + toggle1X, 79 + 340, lang_lines[22], white)--ON
+	    else
+		Font.print(fnt22, 84 + 260 + toggle1X, 79 + 340, lang_lines[23], white)--OFF
+	    end
+	else
+	    Font.print(fnt22, 84 + 260 + toggle1X, 79 + 306, lang_lines[23], white)--OFF
+	    Font.print(fnt22, 84, 79 + 340, lang_lines[107] .. ": ", lightgrey)--Crop 'Vita' in View #5
+	    if View5VitaCropTop == 1 then
+		Font.print(fnt22, 84 + 260 + toggle1X, 79 + 340, lang_lines[22], lightgrey)--ON
+	    else
+		Font.print(fnt22, 84 + 260 + toggle1X, 79 + 340, lang_lines[23], lightgrey)--OFF
+	    end
+	end
+
+        PrintCentered(fnt22, 60+140, 79 + 374, lang_lines[98], white, 22)--Refresh Icons
+        PrintCentered(fnt22, 60+140+280, 79 + 374, lang_lines[48], white, 22)--Refresh Cache
+        PrintCentered(fnt22, 60+140+560, 79 + 374, lang_lines[13], white, 22)--About
         
         status = System.getMessageState()
         if status ~= RUNNING then
@@ -1909,28 +2182,6 @@ while true do
                         startCategory = 0
                     end
                 elseif menuY == 1 then
-                    if setReflections == 1 then
-                        setReflections = 0
-                    else
-                        setReflections = 1
-                    end
-                elseif menuY == 2 then
-                    if setSounds == 1 then
-                        setSounds = 0
-						if System.doesFileExist(cur_dir .. "/Music.mp3") then
-							if Sound.isPlaying(sndMusic) then
-								Sound.pause(sndMusic)
-							end
-						end
-                    else
-                        setSounds = 1
-						if System.doesFileExist(cur_dir .. "/Music.mp3") then
-							if not Sound.isPlaying(sndMusic) then
-								Sound.play(sndMusic, LOOP)
-							end
-						end
-                    end
-                elseif menuY == 3 then
                     if themeColor == 5 then	 --@@ new 1/6. reorder hack so I can have purple after orange but keep HEXFlow Launcher 0.5 compatibility. Maybe I'll find a better solution later.
                         themeColor = 7		 --@@ new 2/6
                     elseif themeColor == 7 then	 --@@ new 3/6
@@ -1943,118 +2194,178 @@ while true do
                         themeColor = 0
                     end
                     SetThemeColor()
-                elseif menuY == 4 then
-                    if setBackground == getBGround then
-			if getBGround > 0 then --elseif setBackground > 0.5 then --@@click "<OFF>" turns it to "OFF", also click something that's ON turns it OFF.
-			    setBackground, getBGround = 0, 0
-			    BGroundText = ""	 --remove brackets 1/2
-			    label3AltImgX = 961	 --remove brackets 2/2
-			else	 --@@ if you click OFF, turn it to ON ("< CUSTOM >")
-			    setBackground, getBGround = 1, 1
-			    label3AltImgX = 0 --add brackets
-			    imgCustomBack = imgBack
-			    if System.doesFileExist("ux0:/data/HexFlow/Background.png") then
-				imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.png")
-				Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-				Render.useTexture(modBackground, imgCustomBack)
-			    elseif System.doesFileExist("ux0:/data/HexFlow/Background.jpg") then
-				imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.jpg")
-				Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-				Render.useTexture(modBackground, imgCustomBack)
-			    else
-				Render.useTexture(modBackground, imgBack)
-			    end
-			end
-		    elseif getBGround == 0 then
-			setBackground, getBGround = 0, 0
-			BGroundText = ""	 --remove brackets 1/2
-			label3AltImgX = 961	 --remove brackets 2/2
-		    else --elseif getBGround > 0.5 then
-                        setBackground = getBGround
-			BGroundText = ""	 --remove brackets 1/2
-			label3AltImgX = 961	 --remove brackets 2/2
-			imgCustomBack = imgBack
-			if (setBackground > 1.5) and (setBackground < 8.5) then
-			    if System.doesFileExist("app0:/DATA/back_0" .. setBackground .. ".png") then
-				imgCustomBack = Graphics.loadImage("app0:/DATA/back_0" .. setBackground .. ".png")
-				Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-				Render.useTexture(modBackground, imgCustomBack)
-			    end
-			else
-			    if System.doesFileExist("ux0:/data/HexFlow/Background.png") then
-				imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.png")
-				Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-				Render.useTexture(modBackground, imgCustomBack)
-			    elseif System.doesFileExist("ux0:/data/HexFlow/Background.jpg") then
-				imgCustomBack = Graphics.loadImage("ux0:/data/HexFlow/Background.jpg")
-				Graphics.setImageFilters(imgCustomBack, FILTER_LINEAR, FILTER_LINEAR)
-				Render.useTexture(modBackground, imgCustomBack)
-			    else
-				Render.useTexture(modBackground, imgBack)
-			    end
-			end
-                    end
-                elseif menuY == 5 then
+                elseif menuY == 2 then
                     if gettingCovers == false then
                         gettingCovers = true
                         DownloadCovers()
                     end
-                elseif menuY == 6 then
-                    if setLanguage < 10 then
+                elseif menuY == 3 then
+                    if (setBackground == 0) and (getBGround == 0) then	 --@@ "OFF" becomes "<ON>"
+			setBackground, getBGround = 1, 1
+			background_brackets = true
+		    else
+			if (getBGround == 0) or (setBackground == getBGround) then
+			    setBackground, getBGround = 0, 0	 --@@ "<OFF>" (with <>) and everything else (without <>) becomes "OFF"
+			else
+			    setBackground = getBGround		 --@@ "<Name of Background>" becomes "Name of Background"
+			end
+			background_brackets = false
+		    end
+		    ApplyBackground(setBackground)
+                elseif menuY == 4 then
+		    if setLanguage < 10 then
                         setLanguage = setLanguage + 1
                     else
                         setLanguage = 0
                     end
-					ChangeLanguage()
+		    ChangeLanguage()
+
+                elseif menuY == 5 then
+		    if menuX == 0 then
+			if setSounds == 1 then
+			    setSounds = 0
+			--@@if System.doesFileExist(cur_dir .. "/Music.mp3")
+				if Sound.isPlaying(sndMusic) then
+				    --@@Sound.pause(sndMusic)
+				    Sound.close(sndMusic)	   --@@ NEW!
+				    sndMusic = click--temp	   --@@ NEW!
+				end
+			--@@end
+			else
+			    setSounds = 1
+			    play_music()
+			end
+		    else
+			local running = false
+			status = System.getMessageState()
+			if status ~= RUNNING then
+			    System.setMessage("Retroflow integration, rolling cache, and the triangle-menu-integrated L_con/PSVShell overclock profile editor have all been fully coded but are completely stripped from the public release until bugtesting is finished so they don't mess up anyone's Vita. This option is just here as a placeholder because it's the perfect spot I.M.O.", false, BUTTON_OK)
+			end
+			--@@if setRetroFlow == 1 then
+			--@@    setRetroFlow = 0
+			--@@else
+			--@@    setRetroFlow = 1
+			--@@end
+			--@@LoadAppTitleTables()
+			--@@GetNameSelected()	 --@@ refreshs selected app's name when toggling Retroflow
+		    end
+                elseif menuY == 6 then
+		    if menuX == 0 then
+			if setReflections == 1 then
+			    setReflections = 0
+			else
+			    setReflections = 1
+			end
+		    else
+			if hideEmptyCats == 1 then
+			    hideEmptyCats = 0
+			else
+			    hideEmptyCats = 1
+			end
+		    end
                 elseif menuY == 7 then
-                    if showHomebrews == 1 then
-                        showHomebrews = 0
-                    else
-                        showHomebrews = 1
-                    end
+		    if menuX == 0 then
+			if showHomebrews == 1 then
+			    showHomebrews = 0
+			else
+			    showHomebrews = 1
+			end
+		    else
+			if dCategoryButton == 1 then
+			    dCategoryButton = 0
+			else
+			    dCategoryButton = 1
+			end
+		    end
                 elseif menuY == 8 then
-                    if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
-                        System.deleteFile(cur_dir .. "/apptitlecache.dat")
-                    end
-                    FreeIcons()
-                    FreeMemory()
-                    Network.term()
-                    dofile("app0:index.lua")
+		    if menuX == 0 then
+                	if musicLoop == 1 then
+                            musicLoop = 0
+                	else
+                	    musicLoop = 1
+			end
+			if Sound.isPlaying(sndMusic) then
+			    --@@Sound.pause(sndMusic)
+			    Sound.close(sndMusic)	   --@@ NEW!
+			    sndMusic = click--temp	   --@@ NEW!
+			end
+			play_music()	 --@@ only does anything if setsound equals 1.
+		    else
+			if lockView == 1 then
+			    lockView = 0
+			else
+			    lockView = 1
+			end
+		    end
                 elseif menuY == 9 then
-                    showMenu = 3
-                    menuY = 0
+		    if menuX == 0 then
+                	if setSwitch == 1 then
+			    bottomMenu = false
+			    --menuSel = 0
+                            setSwitch = 0
+                	else
+                	    setSwitch = 1
+			end
+		    end
+                elseif menuY == 10 then
+		    if menuX == 0 then
+                	if View5VitaCropTop == 1 then
+			    View5VitaCropTop = 0
+                	else
+                	    View5VitaCropTop = 1
+			end
+		    end
+                elseif menuY == 11 then
+		    if menuX == 0 then
+			--@@ Refresh Icons
+			FreeIcons()
+			FreeMemory()
+			Network.term()
+			if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
+			    System.deleteFile(cur_dir .. "/apptitlecache.dat")
+			end
+			System.launchEboot("app0:/copyicons.bin")
+		    elseif menuX == 1 then
+			--@@ Refresh Cache
+			FreeIcons()
+			FreeMemory()
+			Network.term()
+			if System.doesFileExist(cur_dir .. "/apptitlecache.dat") then
+			    System.deleteFile(cur_dir .. "/apptitlecache.dat")
+			end
+			dofile("app0:index.lua")
+		    else
+			--@@ About
+			showMenu = 3
+			menuY = 0
+			menuX = 0
+		    end
                 end
                 
                 
-                --Save settings
-                local file_config = System.openFile(cur_dir .. "/config.dat", FCREATE)
-		if setLanguage == 10 then --@@ Cheap workaround to add a 10th language. A clean solution has been worked out, coming in next update, but it won't be back compatible with HexFlow Launcher v0.5.
-		    System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. "C" .. showView .. showHomebrews, 8)
-		else
-		    System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. setLanguage .. showView .. showHomebrews, 8)
-		end
-                System.closeFile(file_config)
+		write_config()	 --Save settings
             elseif (Controls.check(pad, SCE_CTRL_UP)) and not (Controls.check(oldpad, SCE_CTRL_UP)) then
-                if menuY > 0 then
+		if menuY == 5 or (menuY == 11 and menuX ~= 2) then --@@ NEW! When moving to start menu rows with LESS columns, round "menuX" DOWN.
+		    menuX = 0
                     menuY = menuY - 1
-					else
-					menuY=menuItems
+                elseif menuY > 0 then
+                    menuY = menuY - 1
+		else
+		    menuX = 0
+		    menuY = menuItems
                 end
             elseif (Controls.check(pad, SCE_CTRL_DOWN)) and not (Controls.check(oldpad, SCE_CTRL_DOWN)) then
-                if menuY < menuItems then
+		if menuY == 10 and menuX == 2 then	 --@@NEW! When moving to start menu rows with MORE columns, round "menuX" DOWN.
+		    menuX = 1
+		    menuY = menuY + 1
+                elseif menuY < menuItems then
                     menuY = menuY + 1
-					else
-					menuY=0
+		else
+		    menuX=0				 --@@NEW! When going from bottom to top of settings, set menuX to 0.
+		    menuY=0
                 end
             elseif (Controls.check(pad, SCE_CTRL_LEFT)) and not (Controls.check(oldpad, SCE_CTRL_LEFT)) then
-		if menuY==4 then --Background selection --@@ [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Wood 1, [5]=Wood 2, [6]=Dark, [7]=Marble, [8]=Retro.
-		    if getBGround > 0 then
-			getBGround = getBGround - 1
-		    else
-			getBGround = 8
-		    end
-		    label3AltImgX = 0
-		elseif menuY==5 then --covers download selection --@@ [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
+		if menuY==2 then --covers download selection --@@ [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
 		    if getCovers == 3 then
 			--if showHomebrews == 1 then
 			--    getCovers = 2
@@ -2066,16 +2377,34 @@ while true do
 		    else
 			getCovers=4
 		    end
+		elseif menuY==3 then --Background selection --@@ [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Wood 1, [5]=Wood 2, [6]=Dark, [7]=Marble, [8]=Retro.
+		    if getBGround == 11 then--@@needs to be 10 but SwitchView basic White is not added which 10 is reserved for.
+			if setSwitch ~= 0 then
+			    getBGround = 9
+			else
+			    getBGround = 8
+			end
+		    elseif getBGround > 0 then
+			getBGround = getBGround - 1
+		    else
+			getBGround = 13
+		    end
+		    background_brackets = true
+		elseif menuY == 11 then
+		    if menuX > 0 then
+			menuX = menuX - 1
+		    else
+			menuX=2
+		    end
+		elseif menuY > 4 then
+		    if menuX == 0 then
+			menuX = 1
+		    else
+			menuX = 0
+		    end
 		end
             elseif (Controls.check(pad, SCE_CTRL_RIGHT)) and not (Controls.check(oldpad, SCE_CTRL_RIGHT)) then
-		if menuY==4 then --Background selection --@@ [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Wood 1, [5]=Wood 2, [6]=Dark, [7]=Marble, [8]=Retro.
-		    if getBGround < 8 then
-			getBGround = getBGround + 1
-		    else
-			getBGround = 0
-		    end
-		    label3AltImgX = 0
-		elseif menuY==5 then --covers download selection --@@ [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
+		if menuY==2 then --covers download selection --@@ [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
 		    if getCovers == 1 then
 			--if showHomebrews == 1 then
 			--    getCovers = 2
@@ -2086,6 +2415,33 @@ while true do
 			getCovers = getCovers + 1
 		    else
 			getCovers=1
+		    end
+		elseif menuY==3 then --Background selection --@@ [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Wood 1, [5]=Wood 2, [6]=Dark, [7]=Marble, [8]=Retro.
+		    if getBGround == 9 then
+			getBGround = 11 --@@needs to be 10 but SwitchView basic White is not added which 10 is reserved for.
+		    elseif getBGround == 8 then
+			if setSwitch ~= 0 then
+			    getBGround = 9
+			else
+			    getBGround = 11
+			end
+		    elseif getBGround < 8 or getBGround == 11 or getBGround == 12 then
+			getBGround = getBGround + 1
+		    else
+			getBGround = 0
+		    end
+		    background_brackets = true
+		elseif menuY == 11 then
+		    if menuX > 1 then
+			menuX = 0
+		    else
+			menuX = menuX + 1
+		    end
+		elseif menuY > 4 then
+		    if menuX == 0 then
+			menuX = 1
+		    else
+			menuX = 0
 		    end
 		end
 	    end --End of Control Section
@@ -2104,7 +2460,7 @@ while true do
         Graphics.drawLine(30, 930, 124, 124, white)
         Graphics.drawLine(30, 930, 364, 364, white)
         Font.print(fnt20, 54, 132, "Custom Covers\nPlace your custom covers in 'ux0:/data/HexFlow/COVERS/PSVITA' or '/PSP' or '/PS1'\nCover images must be in png format and file name must match the App ID or the App Name"
-            .. "\n\nCustom Background\nPlace your custom background image in 'ux0:/data/HexFlow/'\nBackground image must be named 'Background.jpg' or 'Background.png' (1280 x 720 max)"
+            .. "\n\nCustom Backgrounds & Music\nIn 'ux0:/data/HexFlow/', place your image - 'background.png' or 'background.jpg'\n(1280x720 max) and song - 'music.ogg' or 'music.mp3' (mp3 not recommended)"
             .. "\n\nCustom Category\nTake the file 'ux0:/data/HexFlow/applist.dat' and rename it to customsort.dat then\nrearrange the titles how you like. It will spawn in a new category ('Custom')"
             .. "\n\nOriginal app by VitaHEX. OG code by Sakis RG. Lua Player Plus by Rinnegatamante."
             .. "\nSpecial Thanks: VitaHEX and everyone who worked on HexFlow Launcher 0.5 which this"
@@ -2118,163 +2474,156 @@ while true do
     Graphics.termBlend()
     if showMenu == 1 then
         --Left Analog rotate preview box
-        if mx < 64 then
-			if prvRotY>-0.5 then
-				prvRotY=prvRotY-0.02
-			end
+	if spin_allowance > 0 then
+	    if (prvRotY > 1.70) and (prvRotY < 2) then
+		prvRotY = -1.3 --@@never show the back of the cover lol
+		OverrideCategory()
+		GetInfoSelected()
+	    else
+		prvRotY=prvRotY+0.1
+		spin_allowance = spin_allowance - 0.1
+	    end
+	elseif mx < 64 then
+	    if prvRotY>-0.5 then
+		prvRotY=prvRotY-0.02
+	    end
         elseif mx > 180 then
-			if prvRotY<0.6 then
-				prvRotY=prvRotY+0.02
-			end
+	    if prvRotY<0.6 then
+		prvRotY=prvRotY+0.02
+	    end
         end
-	end
+    end
     --Controls Start
     if showMenu == 0 then
         --Navigation Left Analog
+	--@@if bottomMenu then
+	--@@    put something here later to allow analog in bottomMenu
+        --@@elseif mx < 64 then
         if mx < 64 then
             if delayButton < 0.5 then
                 delayButton = 1
-                if setSounds == 1 then
-                    Sound.play(click, NO_LOOP)
-                end
-                p = p - 1
-                
-                if p > 0 then
-                    GetInfoSelected()
-                end
-                
-                if (p <= master_index) then
-                    master_index = p
-                end
+		bottomMenu = false	 --@@ NEW! delete if analog in bottomMenu is added.
+                p_minus(1)		 --@@ NEW!
             end
         elseif mx > 180 then
             if delayButton < 0.5 then
                 delayButton = 1
-                if setSounds == 1 then
-                    Sound.play(click, NO_LOOP)
-                end
-                p = p + 1
-                
-                if p <= curTotal then
-                    GetInfoSelected()
-                end
-                
-                if (p >= master_index) then
-                    master_index = p
-                end
+		bottomMenu = false	 --@@ NEW! delete if analog in bottomMenu is added.
+                p_plus(1)		 --@@ NEW!
             end
         end
         
         -- Navigation Buttons
         if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
-            if gettingCovers == false and app_title~="-" then
+	    if bottomMenu then		 --@@NEW! Bottom menu functionality from SwitchView UI v0.1.2
+		execute_switch_bottom_menu()
+	    elseif gettingCovers == false and app_title~="-" then
                 FreeMemory()
-		local Working_Launch_ID = xCatLookup(showCat)[p].name --@@ Example: VITASHELL
+		local Working_Launch_ID = xCatLookup(showCat)[p].name --@@ Example: VITASHELL @@ This hotfix seems to 99% stop the "please close HexLauncher Custom" errors.
                 System.launchApp(Working_Launch_ID)
                 System.exit()
             end
         elseif (Controls.check(pad, SCE_CTRL_TRIANGLE) and not Controls.check(oldpad, SCE_CTRL_TRIANGLE)) then
             if showMenu == 0 and app_title~="-" then
 				prvRotY = 0
-		GetHeavyInfoSelected()
+		GetInfoSelected()	 --@@ NEW! Full info scan is only here now.
                 showMenu = 1
             end
         elseif (Controls.check(pad, SCE_CTRL_START) and not Controls.check(oldpad, SCE_CTRL_START)) then
             if showMenu == 0 then
 		getBGround = setBackground
-		label3AltImgX = 0
+		background_brackets = true
                 showMenu = 2
             end
-        elseif (Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE)) then
-            -- CATEGORY
-            if showCat < 5 then
-	        if showCat==1 and showHomebrews==0 then
-		    showCat = 3
-		elseif showCat == 4 and System.doesFileExist(cur_dir .. "/customsort.dat") == false then
-		    showCat = 0
-		else
-		    showCat = showCat + 1
+	elseif (dCategoryButton == 0 and Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE))
+	or     (dCategoryButton == 1 and Controls.check(pad, SCE_CTRL_DOWN) and not Controls.check(oldpad, SCE_CTRL_DOWN)) then
+	    Category_Plus()
+	elseif (dCategoryButton == 1 and Controls.check(pad, SCE_CTRL_UP) and not Controls.check(oldpad, SCE_CTRL_UP)) then
+	    Category_Minus()
+    --@@elseif (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE)) then
+        elseif (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE)) and (lockView == 0) then
+            -- VIEW
+	    if showView == 4 and setSwitch == 0 then	 --@@ NEW! Skip switch view if the option for it is off.
+		showView = 0				 --@@ NEW!
+	    elseif showView < 5 then
+                showView = showView + 1
+		if showView == 5 and SwitchviewAssetsAreLoaded ~= true then
+		    fnt23_5 = Font.load("app0:/DATA/font.ttf")
+		    Font.setPixelSizes(fnt23_5, 23.5)
+		    imgCart = Graphics.loadImage("app0:/DATA/cart.png")
+		    --@@imgAvatar = Graphics.loadImage("app0:/AVATARS/AV01.png")
+		    btnMenu1 = Graphics.loadImage("app0:/DATA/btm1.png")
+		    btnMenu2 = Graphics.loadImage("app0:/DATA/btm2.png")
+		    btnMenu3 = Graphics.loadImage("app0:/DATA/btm3.png")
+		    btnMenu4 = Graphics.loadImage("app0:/DATA/btm4.png")
+		    btnMenu5 = Graphics.loadImage("app0:/DATA/btm5.png")
+		    btnMenu6 = Graphics.loadImage("app0:/DATA/btm6.png")
+		    btnMenuSel = Graphics.loadImage("app0:/DATA/selct.png")
+		    SwitchviewAssetsAreLoaded = true
 		end
             else
-                showCat = 0
-            end
-            hideBoxes = 8
-            p = 1
-            master_index = p
-            startCovers = false
-            GetInfoSelected()
-            FreeIcons()
-        elseif (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE)) then
-            -- VIEW
-            if showView < 4 then
-                showView = showView + 1
-            else
+		master_index = p	 --@@ NEW! (1/3) Makes it not act weird when leaving switch view.
+		bottomMenu = false	 --@@ NEW! (2/3) Exit the switch view bottom menu...
+		menuSel = 1		 --@@ NEW! (3/3) ... and reset your position in it.
                 showView = 0
             end
             menuY = 0
             startCovers = false
-			local file_config = System.openFile(cur_dir .. "/config.dat", FCREATE)
-            System.writeFile(file_config, startCategory .. setReflections .. setSounds .. themeColor .. setBackground .. setLanguage .. showView .. showHomebrews, 8)
-            System.closeFile(file_config)
+	    write_config()	 --Save settings
         elseif (Controls.check(pad, SCE_CTRL_LEFT)) and not (Controls.check(oldpad, SCE_CTRL_LEFT)) then
-            if setSounds == 1 then
-                Sound.play(click, NO_LOOP)
-            end
-            p = p - 1
-            
-            if p > 0 then
-                GetInfoSelected()
-            end
-            
-            if (p <= master_index) then
-                master_index = p
-            end
+	    p_minus(1)
         elseif (Controls.check(pad, SCE_CTRL_RIGHT)) and not (Controls.check(oldpad, SCE_CTRL_RIGHT)) then
-            if setSounds == 1 then
-                Sound.play(click, NO_LOOP)
-            end
-            p = p + 1
-            
-            if p <= curTotal then
-                GetInfoSelected()
-            end
-            
-            if (p >= master_index) then
-                master_index = p
-            end
+	    p_plus(1)
+
         elseif (Controls.check(pad, SCE_CTRL_LTRIGGER)) and not (Controls.check(oldpad, SCE_CTRL_LTRIGGER)) then
-            if setSounds == 1 then
-                Sound.play(click, NO_LOOP)
-            end
-            p = p - 5
-            
-            if p > 0 then
-                GetInfoSelected()
-            end
-            
-            if (p <= master_index) then
-                master_index = p
-            end
+	    bottomMenu = false
+	    if superSkip == 1 and (Controls.check(pad, SCE_CTRL_SELECT)) and p~=0 and p~=1 then	 --@@ Hold select + press L to move left by alphabet. Doesn't work at p == 1 (position 1) or p == 0 (the debug position)
+		for i=0, #xCatLookup(showCat) do		 --@@the loop.
+		    local v = #xCatLookup(showCat) - i		 --@@go from the back.
+		    if v == 0 then	 --@@ If you ran out of stuff to check...
+			p_minus(p - 1)	 --@@ ... then move to position 1...
+			break		 --@@ ... and exit the loop.
+		    elseif p > v and string.sub(xCatLookup(showCat)[v].apptitle, 1, 1):lower() < string.sub(xCatLookup(showCat)[p].apptitle, 1, 1):lower() then
+			p_minus(p-v)	 --@@ Jump to item with EARLIER-in-alphabet first character.
+			break
+		    end
+		end
+	    else
+		p_minus(5)
+	    end
         elseif (Controls.check(pad, SCE_CTRL_RTRIGGER)) and not (Controls.check(oldpad, SCE_CTRL_RTRIGGER)) then
-            if setSounds == 1 then
-                Sound.play(click, NO_LOOP)
-            end
-            p = p + 5
-            
-            if p <= curTotal then
-                GetInfoSelected()
-            end
-            
-            if (p >= master_index) then
-                master_index = p
-            end
-        
+	    bottomMenu = false
+	    if superSkip == 1 and (Controls.check(pad, SCE_CTRL_SELECT)) and p ~= #xCatLookup(showCat) then	 --@@ Hold select + press R to move right by alphabet. Doesn't work at position max
+		for i=1, #xCatLookup(showCat) do		 --@@the loop.
+		    if i == #xCatLookup(showCat) then	 --@@ If you ran out of stuff to check...
+			p_plus(i - p)			 --@@ ... then move to position max...
+			break				 --@@ ... and exit the loop.
+		    elseif p < i and string.sub(xCatLookup(showCat)[i].apptitle, 1, 1):lower() > string.sub(xCatLookup(showCat)[p].apptitle, 1, 1):lower() then
+			p_plus(i-p)	 --@@ Jump to item with LATER-in-alphabet first character.
+			break
+		    end
+		end
+	    else
+		p_plus(5)
+	    end
+	elseif (Controls.check(pad,SCE_CTRL_UP)) and not (Controls.check(oldpad,SCE_CTRL_UP)) --@@then
+	 and showView == 5 and bottomMenu == true then
+	    bottomMenu = false
+	    if setSounds == 1 then
+		Sound.play(click, NO_LOOP)
+	    end
+	elseif (Controls.check(pad,SCE_CTRL_DOWN)) and not (Controls.check(oldpad,SCE_CTRL_DOWN)) --@@then
+	 and showView == 5 and bottomMenu == false then
+	    bottomMenu = true
+	    if setSounds == 1 then
+		Sound.play(click, NO_LOOP)
+	    end
         end
         
         -- Touch Input
         if x1 ~= nil then
             if xstart == nil then
-		--@@Start tracking touch upon touchdown:
+		--Start tracking touch upon touchdown
                 xstart = x1
             end
             if showView == 1 then
@@ -2283,77 +2632,79 @@ while true do
 	    elseif (showView == 2) or (showView == 3) then
 		-- zoomin view & left side view - pan camera 1/1000 p per pixel moved.
 	        targetX = targetX + ((x1 - xstart) / 1000)
+	    elseif showView == 5 then
+		-- SwitchView - pan camera 1/1840 p per pixel moved with gentle bump back at ends @@ Not only is this ugly AF, it's undercommented AF... but it works but I have no idea why.
+		if targetX + ((x1 - (xstart)) / 1840) > curTotal + 0.2 then
+		    targetX = curTotal + 0.2	 --@@ NOTICE: PLUS 0.2
+		elseif curTotal <= 3 and targetX + ((x1 - (xstart)) / 1840) < curTotal - 0.2 then
+		    targetX = curTotal - 0.2	 --@@ NOTICE: MINUS 0.2
+		elseif curTotal > 3 and targetX + ((x1 - (xstart)) / 1840) < 3.8 then
+		    targetX = 3.8
+		else
+		    targetX = targetX + ((x1 - (falsified_xstart or xstart)) / 1840)
+		end
 	    else
 		-- all other views - pan camera 1/700 p per pixel moved.
 	        targetX = targetX + ((x1 - xstart) / 700)
 	    end
-            if x1 > xstart + 60 then
-                xstart = x1
+	    if x1 > xstart + 60 then			 --@@ If momentum is added, SwitchView should get 184 touch thresh instead of 60
+		if master_index > 1 then		 --@@NEW!
+		    master_index = master_index - 1	 --@@NEW! shift master_index instead of binding it to p, allowing better touch scrolling in view-mode #5
+		end					 --@@NEW!				 --@@NEW!
+                xstart = x1				 --@@refresh tracking start point
                 p = p - 1
                 if p > 0 then
-                    GetInfoSelected()
+                    GetNameSelected()
                 end
-                if (p <= master_index) then
-                    master_index = p
-                end
-            elseif x1 < xstart - 60 then
-                xstart = x1
+		bottomMenu = false			 --@@NEW
+	    elseif x1 < xstart - 60 then
+                xstart = x1				 --@@refresh tracking start point
                 p = p + 1
+		bottomMenu = false			 --@@NEW!				    --@@NEW!
+		if showView ~= 5 or master_index < curTotal - 3 then
+		    master_index = master_index + 1
+		end
                 if p <= curTotal then
-                    GetInfoSelected()
+                    GetNameSelected()
                 end
-                if (p >= master_index) then
-                    master_index = p
-                end
-
+	--# elseif showview == 5 then
+	--#     something something momentum = x1 - xstart?
             end
 	elseif xstart ~= nil then
 	    -- clear touch data upon touch off (important), NOT clear touch data based on a timer like HEXFlow 0.5
 	    xstart = nil
+	    if showView == 5 and master_index > curTotal - 3 then
+		if curTotal > 3 then
+		    master_index = curTotal - 3
+		else
+		    master_index = 1
+		end
+	    end	
         end
     -- End Touch
     elseif showMenu > 0 then
         if (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE)) then
             status = System.getMessageState()
             if status ~= RUNNING then
-                showMenu = 0
-                prvRotY = 0
-                if setBackground > 0.5 then
-                    Render.useTexture(modBackground, imgCustomBack)
-                end
+		if spin_allowance > 0 then
+		    OverrideCategory()
+		    spin_allowance = 0
+		end
+                close_triangle_preview()
             end
         end
     end
-    -- End Controls
-    curTotal = #xCatLookup(showCat) --@@number of entries in the category shown.
-    if curTotal == 0 then
-        p = 0 --@@Lock into position 0 in empty categories.
-        master_index = p
-    end
-    
-    -- Check for out of bounds in menu
-    if p < 1 then
-        p = curTotal
-        if p >= 1 then
-            master_index = p -- 0
-        end
-        startCovers = false
-        GetInfoSelected()
-    elseif p > curTotal then
-        p = 1
-        master_index = p
-        startCovers = false
-        GetInfoSelected()
-    end
+    -- End Controls    
+    check_for_out_of_bounds()
     
     -- Refreshing screen and oldpad
     Screen.waitVblankStart()
     Screen.flip()
     oldpad = pad
     
-    if bOneLoop == false then
-        bOneLoop = true
-        oneLoopTime = Timer.getTime(oneLoopTimer)
-        Timer.destroy(oneLoopTimer)
+    if oneLoopTimer then			  --@@ if the timer is running then...
+        oneLoopTime = Timer.getTime(oneLoopTimer) --@@ save the time
+        Timer.destroy(oneLoopTimer)		  --@@ not sure if this is necessary
+	oneLoopTimer = nil			  --@@ clear timer value
     end 
 end
