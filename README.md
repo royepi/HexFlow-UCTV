@@ -80,36 +80,49 @@
 <p>The great feature of lua files is they can open in a simple text editor such as Notepad, and you don't need VitaSDK.</p>
 <p>If your version works out, send it here as a github "pull request" and I'll see about adding your feature to this project so it can stay as the app updates. Otherwise you'll basicly have to wait for next release and hope I added a feature you want.<p>
 <h3>Known bugs</h3>
-<p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off". ✔️This is caused by the sound files taking up too much RAM. A low-RAM sound file has been developed that 100% makes the app never crash (though freezes still do rarely occur), but it doesn't sound quite the same and a more same version is being worked on. In tests, Retroflow's click2.ogg only reduced crashing by around 10%.</p>
+<p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off". ✔️Fix coming in v1.1 - it was an "Out of Memory"-type crash related to the uncompressed audio.</p>
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
 <p>⚫Suspending sometimes causes a crash if you're using music.</p>
-<p>⚫New glitch in v1 and above: hitting "download all PSP/PS1 covers" doesn't seem to work due to a typo in the code cleanup of v1.0, but all single downloads work fine.</p>
+<p>⚫New glitch in v1 and above: hitting "download all PSP covers" doesn't seem to work due to a typo in the code cleanup of v1.0, but all single downloads work fine.</p>
 <p>⚫Due to how the coding of the massive performance boost of v1.0.0+ is, some apps sometimes add garbage to the app title. A double scan on non-alphanumeric app titles might be able to fix this, or a better renaming function might work as a hotfix.</p>
 <p></p>
 <h3>Planned Features for Upcoming Updates</h3>
+<p>⚫Rolling cache (costs ~0.5s startup time) ✔️Done, coming in v1.1</p>
+<p>⚫Optimized Fonts for even faster startup and even better performance. (saves ~0.5s startup time) ✔️Done, coming in v1.1</p>
+<p>⚫RetroFlow ✔️Done, coming in v1.1</p>
+<p>⚫RetroFlow: option to combine "PCE-type categories" - PCE, PCECD, TG16, TGCD ✔️Done, coming in v1.1</p>
+<p>⚫RetroFlow: option to combine "Gameboy-type categories" - GBA, GBC, GB ✔️Done, coming in v1.1</p>
+<p>⚫RetroFlow: option to combine "Arcade Machine-type categories" - FBA, MAME2000, MAME2003, NeoGeo ✔️Done, coming in v1.1</p>
+<p>⚫Categories: Dreamcast ("Flycast")✔️Done, coming in v1.1</p>
+<p>⚫Categories: Nintendo DS ✔️Done, hidden feature in upcoming v1.1</p>
 <p>⚫Easier way to rename games</p>
-<p>⚫Emu-launch, as seen in Retroflow. Either using Retroflow's rom identification, Adrenaline Bubble Manager's rom identification, and/or "MD5/CDC32 scraping" rom identification. Hopefully not slowing down loading times for people uninterested in Emu-launch.✔️Done but too buggy for release right now</p>
+<p>⚫RetroFlow: "MD5/CDC32 ROM scraping" so you don't have to rename ROM's?</p>
+<p>⚫RetroFlow: change ROM directory - as in Retroflow v4.0.0+ (low priority)</p>
 <p>⚫Ability to use Adrenaline Bubble Manager, Adrenaline Launcher, and Retroarch for PSP/PS1 where possible, all at once if you so feel like it. ✔️ framework for this - "pspemu_translation_table" is included in v0.9+ but Adrenaline Launcher capabilities are not added yet, only this framework.</p>
-<p>⚫"Rolling Refresh" using a verification file that says 1: Current HexLauncher version, 2: # of entries in ux0:app folder and/or rom folders, 3: whether the last cache refresh was finished successfully. If any are untrue (ex: if you uninstall/install a new app), it will attempt a quick cache update - a "rolling refresh". ✔️Done but too buggy for release right now</p>
-<p>⚫Categories: all Retroflow categories, Nintendo DS category (✔️ Done, coming when Retroflow integration is added to public HexLauncher Custom release), Android-YoYo Loader category, Dreamcast category (low priority but easy to program), ScummVM category (low priority), Playstation Mobile category (low priority), Pico8 category (low priority but easy to program), remote play category (low priority), RPGMaker category (low priority).</p>
+<p>⚫Categories: Android ("YoYo Loader")</p>
+<p>⚫Categories: RPGMaker XP ("MKXP") ASAP.</p>
+<p>⚫Categories: RPGMaker 2000/2003 ("EasyRPG" - low priority)</p>
+<p>⚫Categories: Pico8 (low priority, easy to program)</p>
+<p>⚫Categories: ScummVM (low priority)</p>
+<p>⚫Categories: Playstation Mobile (low priority)</p>
+<p>⚫Categories: remote play category (low priority)</p>
+<p>⚫Categories: recently played</p>
+<p>⚫Categories: most played (maybe)</p>
+<p>⚫Categories: favorites</p>
 <p>⚫Either new setting "Jump to last played game on startup: ON/OFF" or new startup category: "ALL - *JUMP TO LAST PLAYED*" ✔️Done, trying to decide which of the two ways it should be implemented. This will probably also be released alongside "Recently Played".</p>
 <p>⚫"Pro Triangle Menu": add all these settings to the triangle menu: Open a game's trophies (via trophy app URI call), Open a game's manual (not sure how to code this), send game save data to a PSTV, set individual app overclock via PSVShell and the "L..." overclocking program profile writer. AKA the ability to launch an app at 500 overclock through triangle menu. ✔️Only the overclocker is done but the others are planned to come with it if possible. Coming to the public release when Retroflow integration is added to public HexLauncher Custom release</p>
 <p>⚫Select opens up a sidebar similar to Vitashell's triangle menu, it will have "search" and little checkboxes to only show games of a certain genre ex: "Puzzles" and "Mario", with "Mario Picross" being in both. Inspired by "Dig - Emulator Front-End" for android. </p>
 <p>⚫Absolute full translation for everything, including msg boxes (like retroflow)(easy but low priority)</p>
-<p>⚫The option for playing gameboy original games in color. More than likely just a switch that messes with retroarch settings. This would be great for games that were retroactively given color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
+<p>⚫RetroFlow: option to automatically colorize Game Boy (non-color) games that were officially retroactively given color when played on a GameBoy Color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
 <p>⚫Extra smooth cover size adjusting, like the XBox "Aurora" coverflow app, you can see it at about 9 minute, 15 seconds into this video: https://www.youtube.com/watch?v=Kqvruf8q3J0 ✔️ There is a janky unreleased implementation of this, but it will probably be scrapped in favor of stealing the smooth scroll code from WiiFlow.</p>
 <p>⚫Launchbox view, TN-X view, Wii view, and "List View" with a list of text of game names and maybe 1 cover?</p>
-<p>⚫"Advanced options" button at the bottom so start menu can fit more settings?</p>
+<p>⚫"Advanced options" button at the bottom so start menu can fit more settings? ...or just a RetroFlow style multi-tier settings menu?</p>
 <p>⚫Setting for "livearea replacement mode: enables a loading screen image similar to the Enso "Molecule" image. Maybe have it set up autoboot for you, too? This will only be added if "advanced options" button is added. (easy)</p>
-<p>⚫The ability to uninstall a game (via the triangle menu?). For now for that, you could technically use triangle menu to get app ID and delete it manually from ux0:app if you want. (easy, but this will only be added if "livearea replacement mode" is added)</p>
-<p>⚫Setting to read from any rom location such as "ux0:Retroarch_Roms". This will only be added if "MD5/CDC32 scraping" rom identification is added.</p>
-<p>⚫Setting to change between soundsets and background music (currently a hidden feature in VitaHEX's HexFlow Launcher v0.5 and all versions of HexLauncher Custom). May involve taking some code from Retroflow, which has more polished music code for this.</p>
+<p>⚫Setting to cycle and/or shuffle background musics as in RetroFlow v4.0.1+</p>
 <p>⚫Setting to change the category text color (on the top left of the screen) for when you're using a bright background (low priority)</p>
 <p>⚫Setting to let you use the touchscreen to touch the "X Launch" on the bottom right of the screen to launch a game starting 1 second after you start HexLauncher Custom. (low priority). Any other touch features probably won't be added because when the screen gets wet it touches random places for you and also because I'm a lazy.</p>
-<p>⚫Setting (or not as a setting just adding it normally?) to add categories/features: "recently played", "most played", "search", "all: sort by popularity", "all: sort by release date", and/or "favorites" ✔️Done (except sort by popularity/release date), coming when Retroflow integration is added to public HexLauncher Custom release</p>
-<p>⚫Setting "Homebrew Style: <Default>/<Vita Cover-Style>/<Utility Split+50% Vita Coverstyle>/<Utility Split+100% Vita Coverstyle>". If you select any option, it will refresh cache. Vita style would put Vita game boxes on every homebrew, Utility Split 50% would put ports like "Bad Company 2" in Vita category (as if by overrides) and leave stuff like VitaShell in homebrews with homebrew cover styles, and Utility Split 100% would do the same as Utility Split 50% as well as it will put Vita game boxes on every homebrew. This would so the app would be able to make better use of the vita-style homebrew cover archive by reddit user "CoolFiverIsABabe".</p>
+<p>⚫Cover downloads for homebrew, ex: CoolFiverIsABabe's homebrew cover archive. They might have to override to Vita if a cover is found, in order to look right.</p>
 <p>⚫The ability to quickly add an app to "Custom" (through triangle menu?). High priority if "rolling refresh" is added.</p>
-<p>⚫Setting to combine all PCEngine categories (or just have it combined by default, like psp and psp minis?). Setting to combine all gameboy categories. ✔️Done, coming when Retroflow integration is added to public HexLauncher Custom release</p>
-<p>⚫Setting for multi-memory card users to scan roms from all memory cards. Note: running PSP games on secondary memory cards - uma0: - requires the special hacked version of adrenaline, and running vita games on secondary memory cards might not be possible. (low priority)</p>
 <p>❌video/media category. Seems like an over-reach, just use MVPlayer.</p>
+<p>❌uninstalling or otherwise altering any games (such as in OneMenu). It might mess up someone's Vita.</p>
 <p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases</p>
