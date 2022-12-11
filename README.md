@@ -9,7 +9,7 @@
 <p>Place your custom covers in "<em>ux0:/data/HexFlow/COVERS/PSVITA/</em>"</p>
 <p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). In v0.9 and above, games in the PS1 category can have cover png's named to match the <strong>App ID</strong>, or the <strong>App Name</strong>, or the <strong>PSX Serial</strong> as found in the triangle menu. <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
 <h3>Download Covers and Backgrounds</h3>
-<p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. Thanks to <b>astuermer</b> for creating <a href="https://github.com/andiweli/hexflow-covers">the original cover archive</a> used in v0.9.1 and below, and big thanks to jimbob4000 for maintaining the current cover archive.</p>
+<p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. Thanks to <b>astuermer</b> for creating <a href="https://github.com/andiweli/hexflow-covers">the original cover archive</a> used in v0.9.1 and below, and big thanks to <b>jimbob4000</b> for maintaining the current cover archive.</p>
 <p><a href="https://github.com/jimbob4000/hexflow-covers/" target="_blank" rel="noopener">https://github.com/jimbob4000/hexflow-covers/</a></p>
 <h3>Custom Background</h3>
 <p>Place your <strong>Background.png</strong> or <strong>Background.jpg</strong> image in "<em>ux0:/data/HexFlow/</em>" (recomended resolution 1280x720px or less). Some custom backgrounds are available <a href="https://github.com/andiweli/hexflow-covers/tree/main/Backgrounds">HERE</a>. In v0.9 and above, these sample custom backgrounds are included by default.</p>
@@ -43,6 +43,7 @@
 <h1>Credits (Revamp Mod)</h1>
 <p>Programming: <strong>BlackSheepBoy69</strong> (me) and one or more coders who wish to remain anonymous</p>
 <h3>Special Thanks</h3>
+<p>Code for "Return to Last Played Game", coming soon in v1.1: <b>fwannmacher</b></p>
 <p>Inspiration + various help: <a href="https://github.com/jimbob4000/RetroFlow-Launcher/" target="_blank" rel="noopener">Team RetroFlow</a></p>
 <p>You! Users who enjoy HexFlow Launcher, HexLauncher Custom, and Retroflow, who submit feature requests to this/those projects (which I do watch), and occasionally code. Thank you!</p>
 <h1>Credits (General)</h1>
@@ -79,9 +80,9 @@
 <p>The great feature of lua files is they can open in a simple text editor such as Notepad, and you don't need VitaSDK.</p>
 <p>If your version works out, send it here as a github "pull request" and I'll see about adding your feature to this project so it can stay as the app updates. Otherwise you'll basicly have to wait for next release and hope I added a feature you want.<p>
 <h3>Known bugs</h3>
-<p>⚫It freezes/crashes every now and then, but it doesn't seem to happen while "sounds" are set to "Off". ✔️Fix coming in v1.1 - it was an "Out of Memory"-type crash related to the uncompressed audio.</p>
+<p>⚫It very rarely freezes/crashes every now and then, seems to be an "Out of Memory"-type crash related to the uncompressed audio.</p>
 <p>^All the above bugs are also present in VitaHEX's HexFlow Launcher 0.5</p>
-<p>⚫Suspending sometimes causes a crash if you're using music.</p>
+<p>⚫Suspending sometimes causes a crash if you're using custom music.</p>
 <p>⚫New glitch in v1 and above: hitting "download all PSP covers" doesn't seem to work due to a typo in the code cleanup of v1.0, but all single downloads work fine.</p>
 <p>⚫Due to how the coding of the massive performance boost of v1.0.0+ is, some apps sometimes add garbage to the app title. A double scan on non-alphanumeric app titles might be able to fix this, or a better renaming function might work as a hotfix.</p>
 <p></p>
@@ -89,10 +90,9 @@
 <p>⚫Rolling cache (costs ~0.5s startup time) ✔️Done, coming in v1.1</p>
 <p>⚫Optimized Fonts for even faster startup and even better performance. (saves ~0.5s startup time) ✔️Done, coming in v1.1</p>
 <p>⚫RetroFlow ✔️Done, coming in v1.1</p>
-<p>⚫RetroFlow: option to combine "PCE-type categories" - PCE, PCECD, TG16, TGCD ✔️Done, coming in v1.1</p>
-<p>⚫RetroFlow: option to combine "Gameboy-type categories" - GBA, GBC, GB ✔️Done, coming in v1.1</p>
-<p>⚫RetroFlow: option to combine "Arcade Machine-type categories" - FBA, MAME2000, MAME2003, NeoGeo ✔️Done, coming in v1.1</p>
+<p>⚫RetroFlow: option to combine categories that are similar to each other such as (PCE, PCECD, TG16, TGCD) or (GBA, GBC, GB) or (FBA, MAME2000, MAME2003) ✔️Done, hidden feature in upcoming v1.1</p>
 <p>⚫Categories: Dreamcast ("Flycast")✔️Done, coming in v1.1</p>
+<p>⚫Categories: Pico8 ✔️Done, coming in v1.1</p>
 <p>⚫Categories: Nintendo DS ✔️Done, hidden feature in upcoming v1.1</p>
 <p>⚫Easier way to rename games</p>
 <p>⚫RetroFlow: "MD5/CDC32 ROM scraping" so you don't have to rename ROM's?</p>
@@ -101,15 +101,15 @@
 <p>⚫Categories: Android ("YoYo Loader")</p>
 <p>⚫Categories: RPGMaker XP ("MKXP") ASAP.</p>
 <p>⚫Categories: RPGMaker 2000/2003 ("EasyRPG" - low priority)</p>
-<p>⚫Categories: Pico8 (low priority, easy to program)</p>
 <p>⚫Categories: ScummVM (low priority)</p>
 <p>⚫Categories: Playstation Mobile (low priority)</p>
 <p>⚫Categories: remote play category (low priority)</p>
 <p>⚫Categories: recently played</p>
 <p>⚫Categories: most played (maybe)</p>
 <p>⚫Categories: favorites</p>
-<p>⚫Either new setting "Jump to last played game on startup: ON/OFF" or new startup category: "ALL - *JUMP TO LAST PLAYED*" ✔️Done, trying to decide which of the two ways it should be implemented. This will probably also be released alongside "Recently Played".</p>
-<p>⚫"Pro Triangle Menu": add all these settings to the triangle menu: Open a game's trophies (via trophy app URI call), Open a game's manual (not sure how to code this), send game save data to a PSTV, set individual app overclock via PSVShell and the "L..." overclocking program profile writer. AKA the ability to launch an app at 500 overclock through triangle menu. ✔️Only the overclocker is done but the others are planned to come with it if possible. Coming to the public release when Retroflow integration is added to public HexLauncher Custom release</p>
+<p>⚫Categories: recently played</p>
+<p>⚫Categories: All+jump to last played game (ONLY AVAILABLE AS A STARTUP CATEGORY)✔️Done, coming in v1.1</p>
+<p>⚫"Pro Triangle Menu": add all these settings to the triangle menu: Open a game's trophies (via trophy app URI call), Open a game's manual (not sure how to code this), send game save data to a PSTV, set individual app overclock via PSVShell and the "L..." overclocking program profile writer. AKA the ability to launch an app at 500 overclock through triangle menu. ✔️Only the overclocker is done so far, others hopefully done soon. Coming in v1.1</p>
 <p>⚫Select opens up a sidebar similar to Vitashell's triangle menu, it will have "search" and little checkboxes to only show games of a certain genre ex: "Puzzles" and "Mario", with "Mario Picross" being in both. Inspired by "Dig - Emulator Front-End" for android. </p>
 <p>⚫Absolute full translation for everything, including msg boxes (like retroflow)(easy but low priority)</p>
 <p>⚫RetroFlow: option to automatically colorize Game Boy (non-color) games that were officially retroactively given color when played on a GameBoy Color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
