@@ -97,20 +97,30 @@
 <p>⚫Option for a "Lite" version of View #5 (SwitchView) with less images to load so startup time is not slowed down✔️Done, coming in v1.1</p>
 <p>⚫Easier way to rename games</p>
 <p>⚫RetroFlow: "MD5/CDC32 ROM scraping" so you don't have to rename ROM's?</p>
-<p>⚫RetroFlow: change ROM directory - as in Retroflow v4.0.0+ (low priority)</p>
-<p>⚫Ability to use Adrenaline Bubble Manager, Adrenaline Launcher, and Retroarch for PSP/PS1 where possible, all at once if you so feel like it. ✔️ framework for this - "pspemu_translation_table" is included in v0.9+ but Adrenaline Launcher capabilities are not added yet, only this framework.</p>
-<p>⚫Categories: Android ("YoYo Loader")</p>
-<p>⚫Categories: RPGMaker XP ("MKXP") ASAP.</p>
-<p>⚫Categories: RPGMaker 2000/2003 ("EasyRPG" - low priority)</p>
-<p>⚫Categories: ScummVM (low priority)</p>
-<p>⚫Categories: Playstation Mobile (low priority)</p>
-<p>⚫Categories: remote play category (low priority)</p>
-<p>⚫Categories: recently played</p>
-<p>⚫Categories: most played (maybe)</p>
+<p>⚫RetroFlow: change ROM directory - as in Retroflow v4.0.0+ (low priority and hard to code)</p>
+<p>⚫RetroFlow: Adrenaline Launcher option for PSP/PS1 and Retroarch option for PS1. And make it so both can be enabled.</p>
+<p>⚫Categories: Android ("YoYo Loader")... RPGMaker XP ("MKXP" - high priority)... RPGMaker 2000/2003 ("EasyRPG" - low priority)... ScummVM (low priority)... Playstation Mobile (Merge with Vita category. Low priority and hard to code)...  recently played</p>
 <p>⚫Categories: favorites</p>
 <p>⚫Categories: recently played</p>
 <p>⚫Categories: All+jump to last played game (ONLY AVAILABLE AS A STARTUP CATEGORY)✔️Done, coming in v1.1</p>
-<p>⚫"Pro Triangle Menu": add all these settings to the triangle menu: Open a game's trophies (via trophy app URI call), Open a game's manual (not sure how to code this), send game save data to a PSTV, set individual app overclock via PSVShell and the "L..." overclocking program profile writer. AKA the ability to launch an app at 500 overclock through triangle menu. ✔️Only the overclocker is done so far, others hopefully done soon. Coming in v1.1</p>
+<p>⚫PSP ID read</p>
+<p>⚫Triangle Menu Upgrade: Advanced Tab</p>
+<p>  ↳Renames:	 ◄Default/Rename now (press X)►</p>
+<p>  ↳CPU:   ◄Default/222 Underclock/444 Overclock► ✔️Done, coming in v1.1</p>
+<p>  ↳Salamander   ◄Default/CrazyMac/BlackSheepBoy69►</p>
+<p>  ↳Create .m3u file for this PS1 game</p>
+<p>  ↳Special launch (this time only) using the below checkboxes:</p>
+<p>  ↳☐Don't add to recently played</p>
+<p>  ↳☐Native Resolution PSP (will need a epilepsy warning and will require PSP ID read)</p>
+<p>  ↳☐Dual Analog PSP (will require PSP ID read)</p>
+<p>⚫Triangle Menu Upgrade: show this game's manual/Trophies.</p>
+<p>⚫Scrub default floor/background png metadata to maybe save startup time.</p>
+<p>⚫"True" SwitchView mode (low priority)</p>
+<p>⚫Special NES-cartridge style for NES RetroFlow ROM's in View #5 (SwitchView) (as seen in the V1.0.0 screenshot)</p>
+<p>⚫new homebrew modbox on/off</p>
+<p>⚫replace refresh cache button with "RetroFlow: Edit ROM dir's"</p>
+<p>⚫optionto to select shuffle/loop/no loop/OFF for music</p>
+<p>⚫autoboot setting? (low priority)</p>
 <p>⚫Select opens up a sidebar similar to Vitashell's triangle menu, it will have "search" and little checkboxes to only show games of a certain genre ex: "Puzzles" and "Mario", with "Mario Picross" being in both. Inspired by "Dig - Emulator Front-End" for android. </p>
 <p>⚫Absolute full translation for everything, including msg boxes (like retroflow)(easy but low priority)</p>
 <p>⚫RetroFlow: option to automatically colorize Game Boy (non-color) games that were officially retroactively given color when played on a GameBoy Color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
@@ -123,6 +133,7 @@
 <p>⚫Setting to let you use the touchscreen to touch the "X Launch" on the bottom right of the screen to launch a game starting 1 second after you start HexLauncher Custom. (low priority). Any other touch features probably won't be added because when the screen gets wet it touches random places for you and also because I'm a lazy.</p>
 <p>⚫Cover downloads for homebrew, ex: CoolFiverIsABabe's homebrew cover archive. They might have to override to Vita if a cover is found, in order to look right.</p>
 <p>⚫The ability to quickly add an app to "Custom" (through triangle menu?). High priority if "rolling refresh" is added.</p>
-<p>❌video/media category. Seems like an over-reach, just use MVPlayer.</p>
+<p>❌video/media category and remote play category. Reason: seems like an over-reach, just use MVPlayer for media and use Moonlight(Vita)+RetroArch(PC) for browsing your remote games.</p>
+<p>❌Option to sort games by "most played" (note: different than recently played). Seems like an over-reach, just use custom category. </p>
 <p>❌uninstalling or otherwise altering any games (such as in OneMenu). It might mess up someone's Vita.</p>
 <p>Releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases</p>
