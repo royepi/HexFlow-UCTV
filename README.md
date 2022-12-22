@@ -93,6 +93,8 @@
 <p>⚫Categories: Dreamcast ("Flycast")✔️Done, coming in v1.1</p>
 <p>⚫Categories: Pico8 ✔️Done, coming in v1.1</p>
 <p>⚫Categories: Nintendo DS ✔️Done, hidden feature in upcoming v1.1</p>
+<p>⚫Make it so when "category button" is set to DPad, startup time is not slowed down✔️Done, coming in v1.1</p>
+<p>⚫Option for a "Lite" version of View #5 (SwitchView) with less images to load so startup time is not slowed down✔️Done, coming in v1.1</p>
 <p>⚫Easier way to rename games</p>
 <p>⚫RetroFlow: "MD5/CDC32 ROM scraping" so you don't have to rename ROM's?</p>
 <p>⚫RetroFlow: change ROM directory - as in Retroflow v4.0.0+ (low priority)</p>
