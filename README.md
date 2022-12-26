@@ -103,7 +103,7 @@
 <p>⚫Categories: favorites</p>
 <p>⚫Categories: recently played</p>
 <p>⚫Categories: All+jump to last played game (ONLY AVAILABLE AS A STARTUP CATEGORY)✔️Done, coming in v1.1</p>
-<p>⚫PSP ID read</p>
+<p>⚫PSP ID read in Lua+✔️Done, coming in v1.1</p>
 <p>⚫Triangle Menu Upgrade: Advanced Tab</p>
 <p>  ↳Renames:	 ◄Default/Rename now (press X)►</p>
 <p>  ↳CPU:   ◄Default/222 Underclock/444 Overclock► ✔️Done, coming in v1.1</p>
