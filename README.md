@@ -125,7 +125,7 @@
 <p>⚫Absolute full translation for everything, including msg boxes (like retroflow)(easy but low priority)</p>
 <p>⚫RetroFlow: option to automatically colorize Game Boy (non-color) games that were officially retroactively given color when played on a GameBoy Color such as Super Mario Land, Super Mario Land 2, QIX, Hyper Lode Runner, DrMario, Metroid 2, etc)(low priority and this will be hard to program).</p>
 <p>⚫Extra smooth cover size adjusting, like the XBox "Aurora" coverflow app, you can see it at about 9 minute, 15 seconds into this video: https://www.youtube.com/watch?v=Kqvruf8q3J0 ✔️ There is a janky unreleased implementation of this, but it will probably be scrapped in favor of stealing the smooth scroll code from WiiFlow.</p>
-<p>⚫Launchbox view, TN-X view, Wii view, and "List View" with a list of text of game names and maybe 1 cover?</p>
+<p>⚫Grid/Launchbox view(✔️done coming in v1.1), TN-X view, Wii view, and "List View" with a list of text of game names and maybe 1 cover?</p>
 <p>⚫"Advanced options" button at the bottom so start menu can fit more settings? ...or just a RetroFlow style multi-tier settings menu?</p>
 <p>⚫Setting for "livearea replacement mode: enables a loading screen image similar to the Enso "Molecule" image. Maybe have it set up autoboot for you, too? This will only be added if "advanced options" button is added. (easy)</p>
 <p>⚫Setting to cycle and/or shuffle background musics as in RetroFlow v4.0.1+</p>
