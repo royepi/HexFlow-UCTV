@@ -103,23 +103,25 @@
 <p>⚫Categories: favorites</p>
 <p>⚫Categories: recently played</p>
 <p>⚫Categories: All+jump to last played game (ONLY AVAILABLE AS A STARTUP CATEGORY)✔️Done, coming in v1.1</p>
-<p>⚫PSP ID read in Lua+✔️Done, coming in v1.1</p>
-<p>⚫Triangle Menu Upgrade: Advanced Tab</p>
+<p>⚫PSP ID read in Lua+ ✔️Done, coming in v1.1</p>
+<p>⚫Triangle Menu Upgrade: Advanced Tab ✔️Done, coming in v1.1</p>
+<p>  ↳download snap.</p>
+<p>  ↳add app to "Favorites" or "Custom" categories. High priority.</p>
 <p>  ↳Renames:	 ◄Default/Rename now (press X)►</p>
 <p>  ↳CPU:   ◄Default/222 Underclock/444 Overclock► ✔️Done, coming in v1.1</p>
 <p>  ↳Salamander   ◄Default/CrazyMac/BlackSheepBoy69►</p>
 <p>  ↳Create .m3u file for this PS1 game</p>
+<p>  ↳Open game's manual and/or view game's trophies. OneLua might be needed for both these, so they'll be together.</p>
 <p>  ↳Special launch (this time only) using the below checkboxes:</p>
 <p>  ↳☐Don't add to recently played</p>
-<p>  ↳☐Native Resolution PSP (will need a epilepsy warning and will require PSP ID read)</p>
-<p>  ↳☐Dual Analog PSP (will require PSP ID read)</p>
-<p>⚫Triangle Menu Upgrade: show this game's manual/Trophies.</p>
+<p>  ↳☐Native Resolution PSP (will need a epilepsy warning)</p>
+<p>  ↳☐Dual Analog PSP</p>
 <p>⚫Scrub default floor/background png metadata to maybe save startup time.</p>
 <p>⚫"True" SwitchView mode (low priority)</p>
 <p>⚫Special NES-cartridge style for NES RetroFlow ROM's in View #5 (SwitchView) (as seen in the V1.0.0 screenshot)</p>
 <p>⚫new homebrew modbox on/off</p>
 <p>⚫replace refresh cache button with "RetroFlow: Edit ROM dir's"</p>
-<p>⚫optionto to select shuffle/loop/no loop/OFF for music</p>
+<p>⚫optionto to select shuffle/loop/no loop/OFF for music as in RetroFlow v4.0.1+✔️Done, coming in v1.1</p>
 <p>⚫autoboot setting? (low priority)</p>
 <p>⚫Select opens up a sidebar similar to Vitashell's triangle menu, it will have "search" and little checkboxes to only show games of a certain genre ex: "Puzzles" and "Mario", with "Mario Picross" being in both. Inspired by "Dig - Emulator Front-End" for android. </p>
 <p>⚫Absolute full translation for everything, including msg boxes (like retroflow)(easy but low priority)</p>
@@ -128,11 +130,9 @@
 <p>⚫Grid/Launchbox view(✔️done coming in v1.1), TN-X view, Wii view, and "List View" with a list of text of game names and maybe 1 cover?</p>
 <p>⚫"Advanced options" button at the bottom so start menu can fit more settings? ...or just a RetroFlow style multi-tier settings menu?</p>
 <p>⚫Setting for "livearea replacement mode: enables a loading screen image similar to the Enso "Molecule" image. Maybe have it set up autoboot for you, too? This will only be added if "advanced options" button is added. (easy)</p>
-<p>⚫Setting to cycle and/or shuffle background musics as in RetroFlow v4.0.1+</p>
 <p>⚫Setting to change the category text color (on the top left of the screen) for when you're using a bright background (low priority)</p>
 <p>⚫Setting to let you use the touchscreen to touch the "X Launch" on the bottom right of the screen to launch a game starting 1 second after you start HexLauncher Custom. (low priority). Any other touch features probably won't be added because when the screen gets wet it touches random places for you and also because I'm a lazy.</p>
 <p>⚫Cover downloads for homebrew, ex: CoolFiverIsABabe's homebrew cover archive. They might have to override to Vita if a cover is found, in order to look right.</p>
-<p>⚫The ability to quickly add an app to "Custom" (through triangle menu?). High priority if "rolling refresh" is added.</p>
 <p>❌video/media category and remote play category. Reason: seems like an over-reach, just use MVPlayer for media and use Moonlight(Vita)+RetroArch(PC) for browsing your remote games.</p>
 <p>❌Option to sort games by "most played" (note: different than recently played). Seems like an over-reach, just use custom category. </p>
 <p>❌uninstalling or otherwise altering any games (such as in OneMenu). It might mess up someone's Vita.</p>
