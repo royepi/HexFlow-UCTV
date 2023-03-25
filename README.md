@@ -8,7 +8,7 @@
 <p>Launching a game/app from <strong>HexFlow Launcher</strong> will close the launcher automaticaly without asking.</p>
 <h2>Custom Covers</h2>
 <p>Place your custom covers in "<em>ux0:/data/HexFlow/COVERS/PSVITA/</em>"</p>
-<p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). In v0.9 and above, games in the PS1 category can have cover png's named to match the <strong>App ID</strong>, or the <strong>App Name</strong>, or the <strong>PSX Serial</strong> as found in the triangle menu. <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
+<p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
 <h3>Download Covers and Backgrounds</h3>
 <p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. Thanks to <b>astuermer</b> for creating <a href="https://github.com/andiweli/hexflow-covers">the original cover archive</a> used in v0.9.1 and below, and big thanks to <b>jimbob4000</b> for maintaining the current cover archive.</p>
 <p><a href="https://github.com/jimbob4000/hexflow-covers/" target="_blank" rel="noopener">https://github.com/jimbob4000/hexflow-covers/</a></p>
