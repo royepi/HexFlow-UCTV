@@ -44,7 +44,7 @@
 <h1>Credits (Revamp Mod)</h1>
 <p>Programming: <strong>BlackSheepBoy69</strong> (me) and one or more coders who wish to remain anonymous</p>
 <h3>Special Thanks</h3>
-<p>Code for "Return to Last Played Game": <b>fwannmacher</b></p>
+<p>Code for "Return to Last Played Game": <b>fwannmacher</b> (v1.1 and above)</p>
 <p><strong>jimbob4000</strong> (<a href="https://github.com/jimbob4000/hexflow-covers" target="_blank" rel="noopener">RetroFlow Covers database</a>) (v1.0 and above)</p>
 <p>Inspiration + various help: <a href="https://github.com/jimbob4000/RetroFlow-Launcher/" target="_blank" rel="noopener">Team RetroFlow</a></p>
 <p>You! Users who enjoy HexFlow Launcher, HexLauncher Custom, and Retroflow, who submit feature requests to this/those projects (which I do watch), and occasionally code. Thank you!</p>
