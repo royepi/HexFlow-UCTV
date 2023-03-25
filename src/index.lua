@@ -1566,6 +1566,26 @@ Timer.destroy(applistReadTimer)
 functionTime = Timer.getTime(oneLoopTimer)
 --Timer.destroy(functionTimer)
 
+if startCategory==6 then -- LAST PLAYED GAME 
+    showCat = 0
+
+    if System.doesFileExist(cur_dir .. "/lastplayedgame.dat") then
+        local lastPlayedGameFile = assert(io.open(cur_dir .. "/lastplayedgame.dat", "r"), "Failed to open lastplayedgame.dat")
+        local lastPlayedGameCat = tonumber(lastPlayedGameFile:read("*line"))
+        local lastPlayedGameID = lastPlayedGameFile:read("*line")
+        lastPlayedGameFile:close()
+
+        for i=1,#xCatLookup(lastPlayedGameCat),1 do
+            if xCatLookup(lastPlayedGameCat)[i].name==lastPlayedGameID then
+                showCat = lastPlayedGameCat
+                p_plus(i - 1)
+                break
+            end
+        end
+
+    end
+end
+
 -- Main loop
 while true do
     
@@ -1958,6 +1978,8 @@ while true do
             Font.print(fnt22, 84 + 260, 79, lang_lines[4], white)--PSX
         elseif startCategory == 5 then
             Font.print(fnt22, 84 + 260, 79, lang_lines[49], white)--CUSTOM
+        elseif startCategory == 6 then
+            Font.print(fnt22, 84 + 260, 79, lang_lines[109], white)--LAST PLAYED GAME
         end
         
         Font.print(fnt22, 84, 79 + 34,  lang_lines[17] .. ": ", white)--Theme Color
@@ -2141,7 +2163,7 @@ while true do
             
             if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
                 if menuY == 0 then
-                    if startCategory < 5 then
+                    if startCategory < 6 then
                         startCategory = startCategory + 1
                     else
                         startCategory = 0
@@ -2480,11 +2502,18 @@ while true do
         
         -- Navigation Buttons
         if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
-	    if bottomMenu then		 --@@NEW! Bottom menu functionality from SwitchView UI v0.1.2
-		execute_switch_bottom_menu()
-	    elseif gettingCovers == false and app_title~="-" then
+            if bottomMenu then         --@@NEW! Bottom menu functionality from SwitchView UI v0.1.2
+                execute_switch_bottom_menu()
+            elseif gettingCovers == false and app_title~="-" then
                 FreeMemory()
-		local Working_Launch_ID = xCatLookup(showCat)[p].name --@@ Example: VITASHELL @@ This hotfix seems to 99% stop the "please close HexLauncher Custom" errors.
+                local Working_Launch_ID = xCatLookup(showCat)[p].name --@@ Example: VITASHELL @@ This hotfix seems to 99% stop the "please close HexLauncher Custom" errors.
+
+                -- for category LAST PLAYED GAME
+                local lastPlayedGameFile = assert(io.open(cur_dir .. "/lastplayedgame.dat", "w"), "Failed to open lastplayedgame.dat")
+                lastPlayedGameFile:write(showCat .. "\n")
+                lastPlayedGameFile:write(Working_Launch_ID)
+                lastPlayedGameFile.close()
+
                 System.launchApp(Working_Launch_ID)
                 System.exit()
             end
