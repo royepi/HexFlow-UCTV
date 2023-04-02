@@ -61,7 +61,6 @@
 <p>Swedish - @Spoxnus86</p>
 <p>Portuguese - @nighto (Retroflow)</p>
 <p>Japanese - @iGlitch (Retroflow)</p>
-<p>Chinese - @acd13141 (Retroflow)</p>
 <p>Polish - @SK00RUPA (Retroflow)</p>
 <p>Google Translate was used for HexFlow Launcher Unofficial Custom translations that weren't found on HexFlow Launcher and Retroflow. Retroflow's oddly formatted translation files have been standardized.</p>
 <p>&nbsp;</p>
