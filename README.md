@@ -20,7 +20,8 @@
 <p>Place your  <strong>Music.ogg</strong> or <strong>Music.mp3</strong> file in "<em>ux0:data/HexFlow/</em>" (music will play automaticaly when the "Sounds" option is enabled)</p>
 <p>&nbsp;</p>
 <h2>AutoBoot</h2>
-<p>If you want to auto-launch <strong>HexFlow Launcher</strong> every time your PS Vita boots up you can use the <a href="https://vitadb.rinnegatamante.it/#/info/261" target="_blank" rel="noopener"><strong>AutoBoot</strong></a> plugin by Rinnegatamante.</p>
+<p>If you want to auto-launch <strong>HexFlow Launcher Unofficial Custom</strong> every time your PS Vita boots up you can use the <a href="https://vitadb.rinnegatamante.it/#/info/261" target="_blank" rel="noopener"><strong>AutoBoot</strong></a> plugin by Rinnegatamante. It's also available on Autoplugin II, however some people recommend to not use autoplugin. Once it's installed and you restart your Vita, you can edit the file that should be there after restart: ux0:data/AutoBoot/boot.cfg</p>
+<p>Inside, put the text "HXLC00001" without quotes</p>
 <p>&nbsp;</p>
 <p><img src="/Media/screen_01.jpg" width="800" title="screen-01"></p>
 <h2>Controls</h2>
