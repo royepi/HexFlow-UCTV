@@ -1227,32 +1227,43 @@ local function DrawCover(x, y, text, icon, sel, apptype)
     zoom = 0
     camX = 0
     Graphics.setImageFilters(icon, FILTER_LINEAR, FILTER_LINEAR)
+    
+    middle_zone = 1 -- How much around 0 is considered as the middle (where the selected cover is displayed)
+    side_factor = x / middle_zone -- This is 0 when x is in the exact center, and 1 or -1 when x is at a side of the middle zone
+    abs_side_factor = math.abs(side_factor)
+
     if showView == 1 then
         -- flat zoom out view
         space = 1.6
         zoom = 0
-        if x > 0.5 then
+        if x > middle_zone then
             extraz = 6
             extrax = 1
 	    -- table.insert(tap_zones, {(x*96)+491, 213, 95, sel}) -- unused
-        elseif x < -0.5 then
+        elseif x < -middle_zone then
             extraz = 6
             extrax = -1
 	    -- table.insert(tap_zones, {(x*96)+369, 213, 95, sel}) -- unused
+        else
+            extraz = 6 * abs_side_factor
+            extrax = 1 * side_factor
         end
     elseif showView == 2 then
         -- zoomin view
         space = 1.6
         zoom = -1
         extray = -0.6
-        if x > 0.5 then
+        if x > middle_zone then
             rot = -1
             extraz = 0
             extrax = 1
-        elseif x < -0.5 then
+        elseif x < -middle_zone then
             rot = 1
             extraz = 0
             extrax = -1
+        else
+            rot = -side_factor
+            extrax =  side_factor
         end
     elseif showView == 3 then
         -- left side view
@@ -1260,38 +1271,53 @@ local function DrawCover(x, y, text, icon, sel, apptype)
         zoom = -0.6
         extray = -0.3
         camX = 1
-        if x > 0.5 then
+        if x > middle_zone then
             rot = -0.5
             extraz = 2 + (x / 2)
             extrax = 0.6
-        elseif x < -0.5 then
+        elseif x <= middle_zone and x > 0 then
+            rot = -0.5 * abs_side_factor
+            extraz = (2 + (x / 2)) * abs_side_factor
+            extrax = 0.6 * abs_side_factor
+        elseif x < -middle_zone then
             rot = 0.5
             extraz = 2
             extrax = -10
+        elseif x >= -middle_zone and x < 0 then
+            rot = 0.5 * abs_side_factor
+            extraz = 2 * abs_side_factor
+            extrax = -10 * abs_side_factor
         end
     elseif showView == 4 then
         -- scroll around
         space = 1
         zoom = 0
-        if x > 0.5 then
+        if x > middle_zone then
             extraz = 2 + (x / 1.5)
             extrax = 1
-        elseif x < -0.5 then
+        elseif x < -middle_zone then
             extraz = 2 - (x / 1.5)
             extrax = -1
+        else
+            extraz = (2 + (math.abs(x) / 1.5)) * abs_side_factor
+            extrax = side_factor
         end
-    elseif showView ~= 5 then	 -- NOTE: ~=
+    else
         -- default view
         space = 1
         zoom = 0
-        if x > 0.5 then
+        if x > middle_zone then
             rot = -1
             extraz = 3
             extrax = 1
-        elseif x < -0.5 then
+        elseif x < -middle_zone then
             rot = 1
             extraz = 3
             extrax = -1
+        else
+            rot = -side_factor
+            extraz = 3 * abs_side_factor
+            extrax = side_factor
         end
     end
     
