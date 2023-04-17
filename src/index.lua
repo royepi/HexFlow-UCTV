@@ -1,4 +1,4 @@
--- HexFlow Launcher Custom version 1.2.1
+﻿-- HexFlow Launcher Custom version 1.2.2
 -- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2 + jimbob4000's Retroflow v5.0.2
 -- https://www.patreon.com/vitahex
 -- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
@@ -11,7 +11,7 @@ local sortTime = 0
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "1.2.1"
+local appversion = "1.2.2"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
@@ -564,7 +564,8 @@ end
 
 function WriteAppList()
     local file_over = System.openFile(cur_dir .. "/applist.dat", FCREATE)
-    io.open(cur_dir .. "/apptitlecache.dat","w"):close()	 -- Clear old applist data
+    --@@io.open(cur_dir .. "/apptitlecache.dat","w"):close()	 --@@ typo
+    io.open(cur_dir .. "/applist.dat","w"):close()	 -- Clear old applist data
     System.closeFile(file_over)
 
     file = io.open(cur_dir .. "/applist.dat", "w")
