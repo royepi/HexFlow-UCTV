@@ -7,15 +7,17 @@
 <p>Display and launch your games and homebrews in style.<br /><strong>HexFlow Launcher</strong> features a 3d user interface to display your games with their box art and supports many customization options like custom covers, backgrounds, and - in v0.6 and above - one custom category.</p>
 <p>Launching a game/app from <strong>HexFlow Launcher</strong> will close the launcher automaticaly without asking.</p>
 <h2>Custom Covers</h2>
-<p>Place your custom covers in "<em>ux0:/data/HexFlow/COVERS/PSVITA/</em>"</p>
+<p>Place your custom covers in "<em>ux0:/data/HexFlow/COVERS/PSVITA/</em>" and similar.</p>
+<p>If RetroFlow is enabled, Retro covers can be found in "<em>ux0:/data/RetroFlow/COVERS/</em>"</p>
 <p>Cover images must be in <strong>png</strong> format and the file name must match the <strong>App ID</strong> or the <strong>App Name</strong> of each app (recomended resolution 256x256px). <a href="https://live.staticflickr.com/7176/6885249717_738e8ee187_n.jpg" target="_blank" rel="noopener">Sample vita cover image</a></p>
 <h3>Download Covers and Backgrounds</h3>
 <p>In v0.3 and above, covers can be downloaded automatically from the settings menu (Start button). You can also download covers and backgrounds manually from the link below. Thanks to <b>astuermer</b> for creating <a href="https://github.com/andiweli/hexflow-covers">the original cover archive</a> used in v0.9.1 and below, and big thanks to <b>jimbob4000</b> for maintaining the current cover archive.</p>
 <p><a href="https://github.com/jimbob4000/hexflow-covers/" target="_blank" rel="noopener">https://github.com/jimbob4000/hexflow-covers/</a></p>
 <h3>Custom Background</h3>
 <p>Place your <strong>Background.png</strong> or <strong>Background.jpg</strong> image in "<em>ux0:/data/HexFlow/</em>" (recomended resolution 1280x720px or less). Some custom backgrounds are available <a href="https://github.com/andiweli/hexflow-covers/tree/main/Backgrounds">HERE</a>. In v0.9 and above, these sample custom backgrounds are included by default.</p>
+<p>If RetroFlow is enabled, special backgrounds for RetroFlow entries can be downloaded individually from the triangle menu and can be found in "<em>ux0:/data/RetroFlow/BACKGROUNDS/</em>"</p>
 <h3>Custom Category</h3>
-<p>In v0.6 and above, take the <strong>applist.dat</strong> file in "<em>ux0:data/HexFlow/</em>" and rename it to <strong>customsort.dat</strong>. This will generate a 5th category - "Custom" - and you can put what games you want or reorder it within Vitashell, or on your PC in a unix-compatible text editor such as gVim Easy. Windows notepad won't work.</p>
+<p>In v0.6 and above, take the <strong>applist.dat</strong> file in "<em>ux0:data/HexFlow/</em>" and rename it to <strong>customsort.dat</strong>. This will generate a 5th category - "Custom" - and you can put what games you want or reorder it within Vitashell, or on your PC in a unix-compatible text editor such as gVim Easy. Windows notepad won't work. This can be used for real apps, for example, to create a "utilities" category, however it doesn't currently support RetroFlow entries and a fix for this is in bugtesting.</p>
 <h3>Custom Music</h3>
 <p>Place your  <strong>Music.ogg</strong> or <strong>Music.mp3</strong> file in "<em>ux0:data/HexFlow/</em>" (music will play automaticaly when the "Sounds" option is enabled)</p>
 <p>&nbsp;</p>
@@ -37,7 +39,7 @@
 <p><strong>In v1.0 and above, DPad Up/Down can either be used to access SwitchView UI menu, or to change category if either of these options are enabled in the Settings menu</strong></p>
 <p>&nbsp;</p>
 <h3>IMPORTANT</h3>
-<p><strong>Subfolders and psp categories plugin are not supported</strong>.</p>
+<p><strong>Subfolders and psp categories plugin are not supported. Support for these is currently in bugtesting.</strong>.</p>
 <h1>Downloads</h1>
 <p>Grab the latest version from the releases page: https://github.com/BlackSheepBoy69/HexFlow-Launcher-Unofficial-Custom/releases
 <p>&nbsp;</p>
@@ -47,6 +49,7 @@
 <p>Code for "Return to Last Played Game": <b>fwannmacher</b> (v1.1 and above)</p>
 <p><strong>jimbob4000</strong> (<a href="https://github.com/jimbob4000/hexflow-covers" target="_blank" rel="noopener">RetroFlow Covers database</a>) (v1.0 and above)</p>
 <p>Inspiration + various help: <a href="https://github.com/jimbob4000/RetroFlow-Launcher/" target="_blank" rel="noopener">Team RetroFlow</a></p>
+<p>Inspiration for adding smooth view in "Zoom-In" View/"Left-Side" View: Axce. He has coded for it to work in all views but I will fine tune it a little more before adding it to all the views.</p>
 <p>You! Users who enjoy HexFlow Launcher, HexLauncher Custom, and Retroflow, who submit feature requests to this/those projects (which I do watch), and occasionally code. Thank you!</p>
 <h1>Credits (General)</h1>
 <p>Programming/UI: <strong>Sakis RG</strong></p>
@@ -57,13 +60,13 @@
 <p>French - @chronoss</p>
 <p>German - @stuermerandreas</p>
 <p>Spanish - @kodyna91</p>
-<p>Italian - @TheheroGAC</p>
+<p>Italian - @TheheroGAC, @DaRk_ViVi</p>
 <p>Russian - @_novff</p>
 <p>Swedish - @Spoxnus86</p>
 <p>Portuguese - @nighto (Retroflow)</p>
 <p>Japanese - @iGlitch (Retroflow)</p>
 <p>Polish - @SK00RUPA (Retroflow)</p>
-<p>Google Translate was used for HexFlow Launcher Unofficial Custom translations that weren't found on HexFlow Launcher and Retroflow. Retroflow's oddly formatted translation files have been standardized.</p>
+<p>Google Translate was used for HexFlow Launcher Unofficial Custom translations that weren't found on HexFlow Launcher and Retroflow.</p>
 <p>&nbsp;</p>
 <h2>Support</h2>
 <p>If you want to support the original creator of HexFlow Launcher (not this revamp mod), you can join <a href="https://www.patreon.com/vitahex">his Patreon</a>.</p>
