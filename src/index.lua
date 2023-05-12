@@ -1,4 +1,4 @@
--- HexFlow Launcher Custom version 2.0
+-- HexFlow Launcher Custom version 2.1
 -- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2 + jimbob4000's Retroflow v5.0.2
 -- https://www.patreon.com/vitahex
 -- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
@@ -11,7 +11,7 @@ local sortTime = 0
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "2.0"
+local appversion = "2.1"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
