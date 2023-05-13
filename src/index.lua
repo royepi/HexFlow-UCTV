@@ -1,4 +1,4 @@
--- HexFlow Launcher Custom version 2.0
+-- HexFlow Launcher Custom version 2.1
 -- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2 + jimbob4000's Retroflow v5.0.2
 -- https://www.patreon.com/vitahex
 -- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
@@ -11,7 +11,7 @@ local sortTime = 0
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "2.0"
+local appversion = "2.1"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
@@ -41,6 +41,8 @@ local btnT = Graphics.loadImage("app0:/DATA/t.png")
 local btnS = Graphics.loadImage("app0:/DATA/s.png")
 local btnO = Graphics.loadImage("app0:/DATA/o.png")
 local btnD = Graphics.loadImage("app0:/DATA/d.png")
+local btnAccept = Graphics.loadImage("app0:/DATA/x.png")
+local btnCancel = Graphics.loadImage("app0:/DATA/o.png")
 local imgArrows = Graphics.loadImage("app0:/DATA/tri_arrows.png")	  --@@ NEW!
 local imgWifi = Graphics.loadImage("app0:/DATA/wifi.png")
 local imgBattery = Graphics.loadImage("app0:/DATA/bat.png")
@@ -50,6 +52,9 @@ Graphics.setImageFilters(imgFloor, FILTER_LINEAR, FILTER_LINEAR)
 
 local RetroflowAssetsAreLoaded = false					  --@@ NEW!
 local SwitchviewAssetsAreLoaded = false
+
+local BTN_ACCEPT = SCE_CTRL_CROSS
+local BTN_CANCEL = SCE_CTRL_CIRCLE
 
 -- Footer button margins
 local btnMargin = 44	 -- Retroflow: 64. HEXFlow: ~46
@@ -547,6 +552,7 @@ local categoryButton = 0			 --@@ Used to be dCategoryButton
 local View5VitaCropTop = 1
 local lockView = 0
 local showRecentlyPlayed = 1
+local swapXO = 0
 --@@local smoothScrolling = 0			 --@@ new but unused
 --@@local arcadeMerge = 0			 --@@ new but unused
 
@@ -575,7 +581,8 @@ function write_config()
 	.. showRecentlyPlayed
 	.. string.format("%02d", startCategory)	 --@@ NEW! Upgraded to double digits
 	.. string.format("%02d", setLanguage)	 --@@ NEW! Upgraded to double digits
-    ), 20)
+	.. swapXO
+    ), 21)
     System.closeFile(file_config)
 end
 
@@ -648,6 +655,7 @@ if cur_quick_dir["config.dat"] then
     showRecentlyPlayed = tonumber(string.sub(str, 16, 16)) or showRecentlyPlayed
     startCategory =	 tonumber(string.sub(str, 17, 18)) or startCategory	 --@@ Upgraded to double digits
     setLanguage =	 tonumber(string.sub(str, 19, 20)) or setLanguage	 --@@ Upgraded to double digits
+	swapXO =		 tonumber(string.sub(str, 21, 21)) or swapXO
 --@@smoothScrolling = 	 tonumber(string.sub(str,   ,   )) or smoothScrolling	 --@@ new but unused
 --@@arcadeMerge =	 tonumber(string.sub(str,   ,   )) or arcadeMerge	 --@@ new but unused
 else
@@ -663,6 +671,18 @@ if showView > 4 then
 end
     
 showCat = startCategory
+
+if swapXO == 0 then
+	BTN_ACCEPT = SCE_CTRL_CROSS
+	BTN_CANCEL = SCE_CTRL_CIRCLE
+	btnAccept = Graphics.loadImage("app0:/DATA/x.png")
+	btnCancel = Graphics.loadImage("app0:/DATA/o.png")
+else
+	BTN_ACCEPT = SCE_CTRL_CIRCLE
+	BTN_CANCEL = SCE_CTRL_CROSS
+	btnAccept = Graphics.loadImage("app0:/DATA/o.png")
+	btnCancel = Graphics.loadImage("app0:/DATA/x.png")
+end
 
 -- Custom Backgrounds
 function ApplyBackground()
@@ -837,6 +857,8 @@ function FreeMemory()
     Graphics.freeImage(btnT)
     Graphics.freeImage(btnS)
     Graphics.freeImage(btnO)
+    Graphics.freeImage(btnAccept)
+    Graphics.freeImage(btnCancel)
     Graphics.freeImage(imgWifi)
     Graphics.freeImage(imgBattery)
     Graphics.freeImage(imgBack)
@@ -2671,7 +2693,7 @@ while true do
 	    Graphics.drawImage(800, 38, imgWifi)-- wifi icon
 	end
 	-- Footer buttons and icons @@ X positions set in ChangeLanguage()
-	Graphics.drawImage(label1ImgX, 510, btnX)
+	Graphics.drawImage(label1ImgX, 510, btnAccept)
 	Font.print(fnt20, label1X, 508, lang_lines[7], white)--Launch
 	Graphics.drawImage(label2ImgX, 510, btnT)
 	Font.print(fnt20, label2X, 508, lang_lines[8], white)--Details
@@ -2690,7 +2712,7 @@ while true do
 	    Font.print(fnt20, label3X, 508, lang_lines[9], white)--Category
 	end
 	if lockView == 0 then
-	    Graphics.drawImage(label4ImgX, 510, btnO)
+	    Graphics.drawImage(label4ImgX, 510, btnCancel)
 	    Font.print(fnt20, label4X, 508, lang_lines[10], white)--View
 	end
 
@@ -2760,7 +2782,7 @@ while true do
         if startCovers == false then
             targetX = base_x
 	    targetY = base_y						 --@@ NEW!
-	    if p == 1 and Controls.check(pad, SCE_CTRL_CIRCLE) then	 --@@ NEW!
+	    if p == 1 and Controls.check(pad, BTN_CANCEL) then	 --@@ NEW!
 		targetY = base_y + 0.05					 --@@ NEW! Makes the app feel more "alive"
 	    end								 --@@ NEW!
             startCovers = true
@@ -2786,9 +2808,9 @@ while true do
         
         -- PREVIEW
         -- Footer buttons and icons. positions set in ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnO)
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
-        Graphics.drawImage(label2AltImgX, 510, btnX)
+        Graphics.drawImage(label2AltImgX, 510, btnAccept)
         Font.print(fnt20, label2AltX, 508, lang_lines[32], white)--Select
         
         Graphics.fillRect(24, 470, 24, 470, darkalpha)
@@ -2898,7 +2920,7 @@ while true do
 	    status = System.getMessageState()
 	    if status ~= RUNNING then
 
-		if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
+		if (Controls.check(pad, BTN_ACCEPT) and not Controls.check(oldpad, BTN_ACCEPT)) then
 		    if menuY == 0 then
 			if gettingCovers == false then
 			    gettingCovers = true
@@ -2997,7 +3019,7 @@ while true do
 	    status = System.getMessageState()
 	    if status ~= RUNNING then
 
-		if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
+		if (Controls.check(pad, BTN_ACCEPT) and not Controls.check(oldpad, BTN_ACCEPT)) then
 		    if menuY == 0 then
 			if gettingCovers == false then
 			    gettingCovers = true
@@ -3062,9 +3084,9 @@ while true do
 	end
         -- SETTINGS
         -- Footer buttons and icons. label X's are set in function ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnO)
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
-        Graphics.drawImage(label2AltImgX, 510, btnX)
+        Graphics.drawImage(label2AltImgX, 510, btnAccept)
         Font.print(fnt20, label2AltX, 508, lang_lines[32], white)--Select
         Graphics.fillRect(60, 900, 24, 488, darkalpha)
         Font.print(fnt22, 84, 34, lang_lines[6], white)--SETTINGS
@@ -3271,7 +3293,14 @@ while true do
         else
             Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[23], white)--OFF
         end
-        
+   
+     	Font.print(fnt22, 484, 79 + 306, lang_lines[120] .. ": ", white)--Swap XO
+		if swapXO == 1 then
+			Font.print(fnt22, 484 + toggle2X + 275, 79 + 306, lang_lines[22], white)--ON
+		else
+			Font.print(fnt22, 484 + toggle2X + 275, 79 + 306, lang_lines[23], white)--OFF
+		end
+
         Font.print(fnt22, 84, 79 + 306, lang_lines[91] .. ": ", white)--Background #9 & View #5
 	if setSwitch == 1 then
 	    Font.print(fnt22, 84 + 260 + toggle1X, 79 + 306, lang_lines[22], white)--ON
@@ -3301,7 +3330,7 @@ while true do
         status = System.getMessageState()
         if status ~= RUNNING then
             
-            if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
+            if (Controls.check(pad, BTN_ACCEPT) and not Controls.check(oldpad, BTN_ACCEPT)) then
                 if menuY == 0 then
                 --@@if startCategory < 7 then
 		    if (setRetroFlow==1 and startCategory<38)
@@ -3481,8 +3510,14 @@ while true do
                             setSwitch = 0
                 	else
                 	    setSwitch = 1
+					end
+			else
+				if swapXO == 0 then
+					swapXO = 1
+				else
+					swapXO = 0
+				end
 			end
-		    end
                 elseif menuY == 10 then
 		    if menuX == 0 then
                 	if View5VitaCropTop == 1 then
@@ -3611,7 +3646,7 @@ while true do
         
         -- More Information / About
         -- Footer buttons and icons. label X's are set in ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnO)
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
         
         Graphics.fillRect(30, 930, 24, 496, darkalpha)-- bg
@@ -3693,7 +3728,7 @@ while true do
 	end
         
         -- Navigation Buttons
-        if (Controls.check(pad, SCE_CTRL_CROSS) and not Controls.check(oldpad, SCE_CTRL_CROSS)) then
+        if (Controls.check(pad, BTN_ACCEPT) and not Controls.check(oldpad, BTN_ACCEPT)) then
 	    if bottomMenu then
 		execute_switch_bottom_menu()
 	    elseif gettingCovers == false and app_short_title~="-" then
@@ -3821,7 +3856,7 @@ while true do
 	elseif ((categoryButton ~= 1 and categoryButton ~= 2) and Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE))
 	or ((categoryButton == 1 or categoryButton == 2) and Controls.check(pad, SCE_CTRL_DOWN) and not Controls.check(oldpad, SCE_CTRL_DOWN)) then
 	    showCat = Category_Plus(showCat+1)
-        elseif (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE))
+        elseif (Controls.check(pad, BTN_CANCEL) and not Controls.check(oldpad, BTN_CANCEL))
 	and (lockView == 0) then
             -- VIEW
 	    if showView > 3 and setSwitch == 0 then
@@ -4052,7 +4087,7 @@ while true do
         end
     -- End Touch
     elseif showMenu > 0 then
-        if (Controls.check(pad, SCE_CTRL_CIRCLE) and not Controls.check(oldpad, SCE_CTRL_CIRCLE))
+        if (Controls.check(pad, BTN_CANCEL) and not Controls.check(oldpad, BTN_CANCEL))
 	 and not hasTyped then			  -- Only read controls while not typing.
             status = System.getMessageState()
             if status ~= RUNNING then
