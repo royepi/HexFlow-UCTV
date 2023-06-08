@@ -1,4 +1,4 @@
-﻿-- HexFlow Launcher Custom version 2.1
+﻿-- HexFlow Launcher Custom version 2.2
 -- based on VitaHEX's HexFlow Launcher v0.5 + SwitchView UI v0.1.2 + jimbob4000's Retroflow v5.0.2
 -- https://www.patreon.com/vitahex
 -- Want to make your own version? Right-click the vpk and select "Open with... Winrar" and edit the index.lua inside.
@@ -11,7 +11,7 @@ local sortTime = 0
 
 dofile("app0:addons/threads.lua")
 local working_dir = "ux0:/app"
-local appversion = "2.1"
+local appversion = "2.2"
 function System.currentDirectory(dir)
     if dir == nil then
         return working_dir --"ux0:/app"
@@ -36,8 +36,8 @@ local click = Sound.open("app0:/DATA/click2.ogg")
 local sndMusic = click--temp
 local imgCoverTmp = Graphics.loadImage("app0:/DATA/noimg.png")
 local backTmp = Graphics.loadImage("app0:/DATA/noimg.png")
-local btnAccept = Graphics.loadImage("app0:/DATA/x.png")	 --@@ Used to be btnX
-local btnCancel = Graphics.loadImage("app0:/DATA/o.png")	 --@@ Used to be btnO
+local btnAccept = Graphics.loadImage("app0:/DATA/x.png")	 -- Used to be btnX
+local btnCancel = Graphics.loadImage("app0:/DATA/o.png")	 -- Used to be btnO
 local btnT = Graphics.loadImage("app0:/DATA/t.png")
 local btnS = Graphics.loadImage("app0:/DATA/s.png")
 local btnD = Graphics.loadImage("app0:/DATA/d.png")
@@ -51,8 +51,8 @@ Graphics.setImageFilters(imgFloor, FILTER_LINEAR, FILTER_LINEAR)
 local RetroflowAssetsAreLoaded = false
 local SwitchviewAssetsAreLoaded = false
 
-local CTRL_ACCEPT = SCE_CTRL_CROSS				 --@@ NEW!
-local CTRL_CANCEL = SCE_CTRL_CIRCLE				 --@@ NEW!
+local CTRL_ACCEPT = SCE_CTRL_CROSS
+local CTRL_CANCEL = SCE_CTRL_CIRCLE
 
 -- Footer button margins
 local btnMargin = 44	 -- Retroflow: 64. HEXFlow: ~46
@@ -76,6 +76,7 @@ local toggle2X = nil
 
 local spin_allowance = 0
 local bottomMenu = false
+local utilityMenu = false	 --@@ NEW!
 local menuSel = 1
 local render_distance = 8
 local ovrrd_str = ""
@@ -125,7 +126,6 @@ end
 if not cur_quick_dir["lastplayedgame.dat"] then
     local file_over = System.openFile(cur_dir .. "/lastplayedgame.dat", FCREATE)
     cur_quick_dir["lastplayedgame.dat"] = true
-  --System.writeFile(file_over, " ", 1)
     System.writeFile(file_over, " \n \n \n \n \n \n \n \n \n \n \n \n \n", 26)	 -- fixes the lag-at-first-launch glitch.
     System.closeFile(file_over)
 end
@@ -436,7 +436,7 @@ Font.setPixelSizes(fnt25, 25)
 
 function sanitize(some_data)
     some_data = tostring(some_data)
-    return some_data:gsub("\n", " "):gsub("\t", " ")
+    return some_data:gsub("\r", ""):gsub("\n", " "):gsub("\t", " ")	 --@@ NEW! Now deletes Windows Notepad return character.
 end
 
 local menuX = 0
@@ -451,8 +451,9 @@ local app_title = info.title
 local app_short_title = info.short_title
 local app_category = info.category
 local app_titleid = info.titleid
-local app_size = 0
-local DISC_ID = false	 -- can be a string or a bool false
+--@@local app_size = 0
+local app_size_text = "0"	 --@@ NEW!
+local DISC_ID = false		 -- can be a string or a bool false
 
 local master_index = 1
 local p = 1
@@ -548,7 +549,7 @@ local categoryButton = 0
 local View5VitaCropTop = 1
 local lockView = 0
 local showRecentlyPlayed = 1
-local swapXO = 0				 --@@ NEW!
+local swapXO = 0
 --local smoothScrolling = 0			 -- unused
 --local arcadeMerge = 0				 -- unused
 
@@ -577,7 +578,7 @@ function write_config()
 	.. showRecentlyPlayed
 	.. string.format("%02d", startCategory)	 -- Upgraded to double digits
 	.. string.format("%02d", setLanguage)	 -- Upgraded to double digits
-	.. swapXO
+	.. 0					 --@@ Used to be swapXO, about to be replaced by a new setting which is 0 default.
     ), 21)
     System.closeFile(file_config)
 end
@@ -605,6 +606,7 @@ function readBin(filename, allow_iso_scan)	 -- returns a string or nil
 
 	if data:sub(-10):upper() == "/EBOOT.PBP" then
 	    path_game = string.sub(data, -19, -11)	 -- Gets the "slus00453" from "ux0:pspemu/psp/game/slus00453/eboot.pbp"
+	    app_size_text = app_size_text .. " (" .. string.format("%02d", getAppSize(data:sub(0, -10))/1024/1024) .. "Mb)"	 --@@ NEW! Example: "01Mb (512Mb)"
 	elseif allow_iso_scan == true
 	 and data:sub(-4):upper() == ".ISO"
 	 and System.doesFileExist(data) then		 -- Example: "ux0:pspemu/ISO/Dantes_Inferno.iso"
@@ -615,6 +617,9 @@ function readBin(filename, allow_iso_scan)	 -- returns a string or nil
 	    if path_game ~= nil then
 		path_game = path_game:gsub("-", "")
 	    end
+	    inp = System.openFile(data, FREAD)		 --@@ NEW! There's probably a better way to do this
+	 	app_size_text = app_size_text .. " (" .. string.format("%02d", System.sizeFile(inp)/1024/1024) .. "Mb)"
+	    System.closeFile(inp)
 	end
     end
     if path_game and not path_game:match("%W") then	 -- Only return valid path_game that DON'T have NON-alphanumeric characters.
@@ -622,43 +627,53 @@ function readBin(filename, allow_iso_scan)	 -- returns a string or nil
     end
 end
 
---@@ NEW! When new setting swapXO is undefined, check system language. If Japanese, enable swapXO.
+-- When swapXO is undefined, check system language. If Japanese, enable swapXO.
 function autoset_XO_swap()
     swapXO = 0
     local getLanguage = System.getLanguage()
 
     if getLanguage == 0 then
-	setLanguage = 9		 --@@ Japanese
+	setLanguage = 9		 -- Japanese
 	swapXO = 1
---@@elseif (getLanguage == 1) or (getLanguage == 18) then	 --@@ 1=AmericanEnglish, 18=British
---@@	setLanguage = 1		 --@@ American English
+  --elseif (getLanguage == 1) or (getLanguage == 18) then	 -- 1=AmericanEnglish, 18=British
+  --	setLanguage = 0		 -- American English
     elseif getLanguage == 2 then
-	setLanguage = 2		 --@@ French
-    elseif (getLanguage == 3) or (getLanguage == 20) then	 --@@ 3=Spanish, 20=SpanishLatin
-	setLanguage = 4		 --@@ Spanish
+	setLanguage = 2		 -- French
+    elseif (getLanguage == 3) or (getLanguage == 20) then	 -- 3=Spanish, 20=SpanishLatin
+	setLanguage = 4		 -- Spanish
     elseif getLanguage == 4 then
-	setLanguage = 1		 --@@ German
+	setLanguage = 1		 -- German
     elseif getLanguage == 5 then
-	setLanguage = 3		 --@@ Italian
-    elseif (getLanguage == 7) or (getLanguage == 17) then	 --@@ 7=PortugeseTrad, 17=PortugeseBrazil
-	setLanguage = 7		 --@@ Portugese
+	setLanguage = 3		 -- Italian
+    elseif (getLanguage == 7) or (getLanguage == 17) then	 -- 7=PortugeseTrad, 17=PortugeseBrazil
+	setLanguage = 7		 -- Portugese
     elseif getLanguage == 8 then
-	setLanguage = 5		 --@@ Russian
+	setLanguage = 5		 -- Russian
     elseif getLanguage == 13 then
-	setLanguage = 6		 --@@ Swedish
+	setLanguage = 6		 -- Swedish
     elseif getLanguage == 16 then
-	setLanguage = 8		 --@@ Polish
+	setLanguage = 8		 -- Polish
     elseif getLanguage == 16 then
-	setLanguage = 8		 --@@ Polish
-    end	 --@@ Don't change what language is set if a system language has no co-responding HexFlow Custom language. These languages are as follows:
-	 --@@ 6=Dutch, 9=Korean, 10=ChineseTrad, 11=ChineseSimple, 12=Finnish, 14=Danish, 15=Norwegian, 19=Turkish
-	 --@@ Languages with no system language values which are should be imported from RetroFlow: Hungarian, Japanese Ryukyuan.
+	setLanguage = 8		 -- Polish
+    end	 -- Don't change what language is set if a system language has no co-responding HexFlow Custom language. These languages are as follows:
+	 -- 6=Dutch, 9=Korean, 10=ChineseTrad, 11=ChineseSimple, 12=Finnish, 14=Danish, 15=Norwegian, 19=Turkish
+	 -- Languages with no system language values which are should be imported from RetroFlow: Hungarian, Japanese Ryukyuan.
     if true==true then
 	return swapXO
     end
 end
 
---@@ READ SETTINGS
+function apply_XO_swap()	 --@@ NEW!
+    if Controls.getEnterButton() == SCE_CTRL_CIRCLE then
+	swapXO = 1
+	CTRL_ACCEPT, CTRL_CANCEL = CTRL_CANCEL, CTRL_ACCEPT
+	btnAccept, btnCancel = btnCancel, btnAccept
+    else
+	swapXO = 0
+    end
+end
+
+-- READ SETTINGS
 if cur_quick_dir["config.dat"] then
     local file_config = System.openFile(cur_dir .. "/config.dat", FREAD)
     local filesize = System.sizeFile(file_config)
@@ -683,13 +698,16 @@ if cur_quick_dir["config.dat"] then
     showRecentlyPlayed = tonumber(string.sub(str, 16, 16)) or showRecentlyPlayed
     startCategory =	 tonumber(string.sub(str, 17, 18)) or startCategory	 -- Upgraded to double digits
     setLanguage =	 tonumber(string.sub(str, 19, 20)) or setLanguage	 -- Upgraded to double digits
-    swapXO =		 tonumber(string.sub(str, 21, 21)) or autoset_XO_swap()	 --@@ NEW! If getXO == nil, it will do a (very slow) function to determine language and whether swapXO should be ON or OFF.
+    swapXO =		 tonumber(string.sub(str, 21, 21)) or autoset_XO_swap()
   --smoothScrolling = 	 tonumber(string.sub(str,   ,   )) or smoothScrolling	 -- unused
   --arcadeMerge =	 tonumber(string.sub(str,   ,   )) or arcadeMerge	 -- unused
 else
-    swapXO = autoset_XO_swap()	 --@@ NEW!
+    swapXO = autoset_XO_swap()	 --@@ autoset_XO_swap() is very slow; only used when config doesn't exist, or if tonumber(string.sub(str, 21, 21)) == nil
     write_config()
 end
+
+apply_XO_swap()	 --@@ NEW!
+showCat = startCategory
 
 if showView > 4 then
     if setSwitch == 1 then
@@ -698,13 +716,6 @@ if showView > 4 then
 	showView = 0
     end
 end
-
-if swapXO == 1 then
-    CTRL_ACCEPT, CTRL_CANCEL = CTRL_CANCEL, CTRL_ACCEPT
-    btnAccept, btnCancel = btnCancel, btnAccept
-end
-    
-showCat = startCategory
 
 
 -- Custom Backgrounds
@@ -876,11 +887,11 @@ function FreeMemory()
         Sound.close(sndMusic)
     end
     Graphics.freeImage(imgCoverTmp)
-    Graphics.freeImage(btnAccept)		 --@@ Used to be btnX
-    Graphics.freeImage(btnCancel)		 --@@ Used to be btnO
+    Graphics.freeImage(btnAccept)		 -- Used to be btnX
+    Graphics.freeImage(btnCancel)		 -- Used to be btnO
     Graphics.freeImage(btnT)
     Graphics.freeImage(btnS)
-    Graphics.freeImage(btnD)			 --@@ NEW! Free D-Pad image. Forgot to add this in v2.0
+    Graphics.freeImage(btnD)
     Graphics.freeImage(imgWifi)
     Graphics.freeImage(imgBattery)
     Graphics.freeImage(imgBack)
@@ -888,9 +899,9 @@ function FreeMemory()
     if SwitchviewAssetsAreLoaded == true then
 	SwitchviewAssetsAreLoaded = false
 	Graphics.freeImage(imgCart)
-	--@@Graphics.freeImage(imgAvatar)	 --@@ (1/3)
-	--@@Graphics.freeImage(imgCont)		 --@@ (2/3) Can't believe these lines of code got left in the v2.0 release.
-	--@@Graphics.freeImage(img4Square)	 --@@ (3/3)
+	--Graphics.freeImage(imgAvatar)
+	--Graphics.freeImage(imgCont)
+	--Graphics.freeImage(img4Square)
 	Graphics.freeImage(imgFloor2)
 	Graphics.freeImage(btnMenu1)
 	Graphics.freeImage(btnMenu2)
@@ -957,7 +968,7 @@ function ReadCustomSort(file_over, target_table)
     end
 end
 
-function WriteRecentlyPlayed(lastPlayedGameID)	 --@@ Needs cleaned up
+function WriteRecentlyPlayed(lastPlayedGameID)	 -- Needs cleaned up
     local lastPlayedGameText = ""
 
     if lastPlayedGameID == "hotfix_mode" then
@@ -1103,7 +1114,7 @@ function p_plus(plus_num)
 		master_index = p - 3
 	    end
 	elseif showView == 6 then
-	--@@if math.floor((p - 1) / 6) > base_y then	 -- this is more optimized but got downgraded because it introduced: "grid camera refocus glitch"
+	  --if math.floor((p - 1) / 6) > base_y then	 -- more optimized but unused; somehow causes "grid camera refocus glitch"
 	    if math.floor((p - 1) / 6) > math.floor((master_index - 1) / 6) then
 		master_index = p - 6
 	    end
@@ -1152,7 +1163,7 @@ function LoadAppTitleTables()
 
     -- RetroFlow integration! If enabled, it overrides all the standard functions with new, slower RetroFlow functions.
     if setRetroFlow==1 then
-	--@@ Uncomment these to make it wholly switch over to the RetroFlow covers folders if RetroFlow is enabled.
+	-- Uncomment these to make it wholly switch over to the RetroFlow covers folders if RetroFlow is enabled.
 	--covers_psv = "ux0:/data/RetroFlow/COVERS/Sony - PlayStation Vita/"
 	--covers_psp = "ux0:/data/RetroFlow/COVERS/Sony - PlayStation Portable/"
 	--covers_psx = "ux0:/data/RetroFlow/COVERS/Sony - PlayStation/"
@@ -1257,7 +1268,7 @@ function LoadAppTitleTables()
 	    elseif getCovers == 5 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Nintendo 64/"
 	    elseif getCovers == 6 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Super Nintendo Entertainment System/"
 	    elseif getCovers == 7 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Nintendo Entertainment System/"
-	  --elseif getCovers ==   then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Nintendo DS/"		 --@@ NEW!
+	  --elseif getCovers ==   then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Nintendo DS/"
 	    elseif getCovers == 8 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Game Boy Advance/"
 	    elseif getCovers == 9 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Game Boy Color/"
 	    elseif getCovers == 10 then	 return "ux0:/data/RetroFlow/COVERS/Nintendo - Game Boy/"
@@ -1356,15 +1367,14 @@ function LoadAppTitleTables()
 
 		-- START INSTANT COVER FINDER
 		cover_path = CoverDirectoryLookup(file.app_type)
-	    --@@if cover_path == covers_psv then
-	    --@@    cover_list = cover_dir_psv
+	      --if cover_path == covers_psv then
+	      --    cover_list = cover_dir_psv
 		if cover_path == covers_psp then
 		    cover_list = cover_dir_psp
 		elseif cover_path == covers_psx then
 		    cover_list = cover_dir_psx
 		else
 		    cover_list = cover_dir_psv
-		    --@@error("impossible apptype (" .. file.app_type .. ") on apptitlecache.dat entry " .. file.name .. ":" .. file.apptitle)
 		end
 		custom_path = file.apptitle .. ".png"		  -- needs sanitization?
 		if cover_list[custom_path] then
@@ -1389,9 +1399,9 @@ function LoadAppTitleTables()
 			table.insert(games_table, file) 
 		    elseif file.app_type == 2 then
 			table.insert(folders_table, file)
-		    --@@if adr_launcher == 0 then
-		    --@@    table.insert(files_table, file)
-		    --@@end
+		      --if adr_launcher == 0 then
+		      --    table.insert(files_table, file)
+		      --end
 			table.insert(psp_table, file) 
 		    elseif file.app_type == 3 then
 			table.insert(folders_table, file)
@@ -1415,7 +1425,13 @@ function LoadAppTitleTables()
     for i=0, total_apps do
 	k = total_apps - i			 -- reversefor k, v in ipairs(real_app_list) do
 	local v = real_app_list[k]
-	if v and (not v.name or not v.directory or not v.name:len()==9) then
+	if v					 --@@ I have no idea why it needs this "if v~=nil" (shortened to "if v") but it crashes without it.
+	 and (
+	  (v.name==nil)				 --@@ Rolling cache relies on a cool trick of just deleting the name data if an app was successfully loaded from cache.
+	  or (v.directory==false)		 --@@ All real apps are folders.
+	  or (v.name:len()~=9)			 --@@ All real apps are 9 letters long folders.
+	  or (System.doesFileExist(working_dir .. "/" .. v.name .. "/sce_sys/param.sfo")==false) --@@ NEW! Slows loading time but hard-stops anything else that might come through. Example file it's looking for:  "ux0:/app/VITASHELL/sce_sys/param.sfo"
+	 ) then
 	    table.remove(real_app_list, k)
 	end
     end
@@ -1474,7 +1490,7 @@ function LoadAppTitleTables()
   --table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
 
     if newAppsMsg ~= "" then	 -- Always rewrites applist/cache when a title is added/removed.
-	table.sort(folders_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)	 --@@ NEW!
+	table.sort(folders_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
       --table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
 	CacheTitleTable()
 	WriteAppList()
@@ -1485,7 +1501,7 @@ function LoadAppTitleTables()
 	files_table = TableConcat(folders_table, files_table)
 	folders_table = {}
     else
-	files_table = folders_table	 --@@ folders_table was used for everything that needed cached. Without it, adding Adrenaline Launcher will be much harder.
+	files_table = folders_table	 -- folders_table is for everything that needs cached. Without it, adding Adrenaline Launcher will be much harder.
     end
     table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
 
@@ -1495,10 +1511,10 @@ function LoadAppTitleTables()
     table.sort(files_table, function(a, b) return (a.apptitle:lower() < b.apptitle:lower()) end)
     ovrrd_str = ""
 
-    ReadCustomSort("customsort.dat", custom_table)
     if showRecentlyPlayed == 1 then
 	ReadCustomSort("lastplayedgame.dat", recently_played_table)
     end
+    ReadCustomSort("customsort.dat", custom_table)
 
     -- LAST PLAYED GAME
     if ((setRetroFlow==1 and startCategory==38) or (setRetroFlow~=1 and startCategory==7))
@@ -1578,7 +1594,7 @@ function GetNameSelected()
 --	if xCatLookup(showCat)[p].launch_type == 0 then
 	    app_short_title = xCatLookup(showCat)[p].apptitle
 --	else
---	    --@@ UNUSED. replaces every " (" with "(", then delete the brackets and everything in them.
+--	    --unused. Replaces every " (" with "(", then delete the brackets and everything in them.
 --	    app_short_title = xCatLookup(showCat)[p].apptitle:gsub(" %(", "("):gsub('%b()', '')
 --	end
     else
@@ -1593,6 +1609,7 @@ function GetInfoSelected()
     icon_path = "app0:/DATA/noimg.png"
     pic_path = "app0:/DATA/noimg.png"
     apptype = 0
+    app_size_text = "0"			 --@@ Moved here now
     app_titleid = "000000000"
     app_version = "00.00"
     DISC_ID = false
@@ -1601,7 +1618,8 @@ function GetInfoSelected()
 	apptype = xCatLookup(showCat)[p].app_type
         if xCatLookup(showCat)[p].launch_type == 0 then
 	    if System.doesFileExist(working_dir .. "/" .. xCatLookup(showCat)[p].name .. "/sce_sys/param.sfo") then
-		appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name	 --example: "ux0:app/SLUS00453"
+		appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name			   --example: "ux0:app/SLUS00453"
+		app_size_text = "Size: " .. string.format("%02d", getAppSize(appdir)/1024/1024) .. "Mb" --@@ NEW!
         	info = System.extractSfo(appdir .. "/sce_sys/param.sfo")
         	icon_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/icon0.png"
         	pic_path = "ur0:/appmeta/" .. xCatLookup(showCat)[p].name .. "/pic0.png"
@@ -1610,13 +1628,21 @@ function GetInfoSelected()
 		app_titleid = tostring(info.titleid)
 		app_version = tostring(info.version)
 		if apptype==2 or apptype==3 then
-		    DISC_ID = readBin(appdir .. "/data/boot.bin", true)
+		    DISC_ID = readBin(appdir .. "/data/boot.bin", true)	 --@@ app_size_text is now modified in readBin() for PSP/PS1 games.
 		end
 	    end
 	else
 	    if xCatLookup(showCat)[p].directory then
-		appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name	 --example: "ux0:pspemu/PSP/GAME/SLUS00453"
+		appdir=working_dir .. "/" .. xCatLookup(showCat)[p].name			 --example: "ux0:pspemu/PSP/GAME/SLUS00453"
+		app_size = getAppSize(appdir)							 --@@ NEW!
+	    else										 --@@ NEW!
+		app_size = xCatLookup(showCat)[p].size						 --@@ NEW!
 	    end
+	    if app_size < 900000 and apptype ~= 3 then					 --@@ NEW!
+		app_size_text = "Size: 0Mb, " .. string.format("%02d", app_size/1024) .. "Kb"	 --@@ NEW!
+	    else										 --@@ NEW!
+		app_size_text = "Size: " .. string.format("%02d", app_size/1024/1024) .. "Mb"	 --@@ NEW!
+	    end											 --@@ NEW!
 	    icon_path = xSIconLookup(apptype)
 	    if apptype == 2 then
 		pic_path = "ux0:data/RetroFlow/BACKGROUNDS/Sony - PlayStation Portable/"
@@ -1627,12 +1653,11 @@ function GetInfoSelected()
 	    else
 		pic_path = xRomDirLookup(apptype):gsub("/ROMS/", "/BACKGROUNDS/")
 	    end
-	    pic_path = pic_path .. (xCatLookup(showCat)[p].name:match("(.+)%..+$") or xCatLookup(showCat)[p].name) .. ".png"
-	    --@@ "(xCatLookup(showCat)[p].name:m... or xCatLookup(showCat)[p].name)" cuts off everything after the last "." like this:   "Donkey-Kong.n64" --> "Donkey-Kong"
+	    pic_path = pic_path .. (xCatLookup(showCat)[p].name:match("(.+)%..+$") or xCatLookup(showCat)[p].name) .. ".png"	 --@@ cuts everything after the last "." then add ".png". Example:   "Donkey-Kong.n64" --> "Donkey-Kong"
 	    app_title = xCatLookup(showCat)[p].apptitle
-	    app_short_title = xCatLookup(showCat)[p].apptitle:gsub(" %(", "("):gsub('%b()', '')	    --@@ replaces every " (" with "(", then delete the brackets and everything in them.
-	    if app_title:match("%((.+)%)") then		 --@@ input: "Wario Land (USA) (NTSC).gba" ---> output: "(USA) (NTSC)" @@ input: "Wario Land.gba" ---> output: nothing (FAILS THE "IF" STATEMENT)
-		app_version = app_title:match("%((.+)%)"):gsub("%) %(", ', ')	 --@@ the gsub takes out midsection parenthesis like this: input: "(USA) (NTSC)" ---> output: (USA, NTSC)
+	    app_short_title = xCatLookup(showCat)[p].apptitle:gsub(" %(", "("):gsub('%b()', '')	    -- replaces every " (" with "(", then delete the brackets and everything in them.
+	    if app_title:match("%((.+)%)") then		 -- input: "Wario Land (USA) (NTSC).gba" ---> output: "(USA) (NTSC)" @@ input: "Wario Land.gba" ---> output: nothing (FAILS THE "IF" STATEMENT)
+		app_version = app_title:match("%((.+)%)"):gsub("%) %(", ', ')	 -- the gsub takes out midsection parenthesis like this: input: "(USA) (NTSC)" ---> output: (USA, NTSC)
 	    end
 	end
     end
@@ -1647,6 +1672,13 @@ function close_triangle_preview()
     if setBackground > 0.5 then
 	Render.useTexture(modBackground, imgCustomBack)
     end
+end
+
+function close_utility_menu()	 --@@ NEW!
+    utilityMenu = false
+    menuX = 0
+    menuY = menuItems
+--@@Graphics.freeImage(imgUtilityBorder)
 end
 
 function check_for_out_of_bounds()
@@ -1732,46 +1764,46 @@ function DownloadCover(entry)
 
     downloadable_file =
      (
-	(apptype==2 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSP/")			 --@@ PSP
-     or (apptype==3 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PS1/")			 --@@ PS1
-     or (setRetroFlow ~= 1 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/")			 --@@ Vita & Homebrews
-     or (apptype==5 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/N64/Covers/")		 --@@ N64
-     or (apptype==6 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SNES/Covers/")		 --@@ SNES
-     or (apptype==7 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NES/Covers/")		 --@@ NES
-  -- or (apptype==  and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NDS/Covers/")		 --@@ NDS @@ unused
-     or (apptype==8 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GBA/Covers/")		 --@@ GBA
-     or (apptype==9 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GBC/Covers/")		 --@@ GBC
-     or (apptype==10 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GB/Covers/")		 --@@ GB
-     or (apptype==11 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/DC/Covers/")		 --@@ DREAMCAST
-     or (apptype==12 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SEGA_CD/Covers/")	 --@@ SEGA_CD
-     or (apptype==13 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/32X/Covers/")		 --@@ S32X
-     or (apptype==14 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MD/Covers/")		 --@@ MD
-     or (apptype==15 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SMS/Covers/")		 --@@ SMS
-     or (apptype==16 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GG/Covers/")		 --@@ GG
-     or (apptype==17 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/TG16/Covers/")		 --@@ TG16
-     or (apptype==18 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/TG_CD/Covers/")		 --@@ TGCD
-     or (apptype==19 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PCE/Covers/")		 --@@ PCE
-     or (apptype==20 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PCE_CD/Covers/")	 --@@ PCECD
-     or (apptype==21 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/AMIGA/Covers/")		 --@@ AMIGA
-     or (apptype==22 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/C64/Covers/")		 --@@ C64
-     or (apptype==23 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/WSWAN_COL/Covers/")	 --@@ WSCAN_COL
-     or (apptype==24 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/WSWAN/Covers/")		 --@@ WSWAN
-     or (apptype==25 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PICO-8/Covers/")	 --@@ PICO-8 @@ invalid
-     or (apptype==26 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MSX2/Covers/")		 --@@ MSX2
-     or (apptype==27 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MSX/Covers/")		 --@@ MSX1
-     or (apptype==28 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ZXS/Covers/")		 --@@ ZXS	 
-     or (apptype==29 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_7800/Covers/")	 --@@ ATARI_7800
-     or (apptype==30 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_5200/Covers/")	 --@@ ATARI_5200
-     or (apptype==31 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_2600/Covers/")	 --@@ ATARI_2600
-     or (apptype==32 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_LYNX/Covers/")	 --@@ ATARI_LYNX
-     or (apptype==33 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/COLECOVISION/Covers/")	 --@@ COLECOVISION
-     or (apptype==34 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/VECTREX/Covers/")	 --@@ VECTREX
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 --@@ FBA @@unused. Shares mame archive
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 --@@ MAME_2003_PLUS @@ unused
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 --@@ MAME_2000 @@ unused
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO/Covers/")	 --@@ NEOGEO @@ unused
-     or (apptype==35 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO_PC/Covers/")	 --@@ NGPC
-     or (			 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/")			 --@@ Vita & Homebrews
+	(apptype==2 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSP/")			 -- PSP
+     or (apptype==3 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PS1/")			 -- PS1
+     or (setRetroFlow ~= 1 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/")			 -- Vita & Homebrews
+     or (apptype==5 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/N64/Covers/")		 -- N64
+     or (apptype==6 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SNES/Covers/")		 -- SNES
+     or (apptype==7 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NES/Covers/")		 -- NES
+  -- or (apptype==  and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NDS/Covers/")		 -- NDS @@ unused
+     or (apptype==8 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GBA/Covers/")		 -- GBA
+     or (apptype==9 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GBC/Covers/")		 -- GBC
+     or (apptype==10 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GB/Covers/")		 -- GB
+     or (apptype==11 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/DC/Covers/")		 -- DREAMCAST
+     or (apptype==12 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SEGA_CD/Covers/")	 -- SEGA_CD
+     or (apptype==13 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/32X/Covers/")		 -- S32X
+     or (apptype==14 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MD/Covers/")		 -- MD
+     or (apptype==15 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/SMS/Covers/")		 -- SMS
+     or (apptype==16 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/GG/Covers/")		 -- GG
+     or (apptype==17 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/TG16/Covers/")		 -- TG16
+     or (apptype==18 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/TG_CD/Covers/")		 -- TGCD
+     or (apptype==19 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PCE/Covers/")		 -- PCE
+     or (apptype==20 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PCE_CD/Covers/")	 -- PCECD
+     or (apptype==21 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/AMIGA/Covers/")		 -- AMIGA
+     or (apptype==22 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/C64/Covers/")		 -- C64
+     or (apptype==23 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/WSWAN_COL/Covers/")	 -- WSCAN_COL
+     or (apptype==24 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/WSWAN/Covers/")		 -- WSWAN
+     or (apptype==25 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PICO-8/Covers/")	 -- PICO-8 @@ invalid
+     or (apptype==26 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MSX2/Covers/")		 -- MSX2
+     or (apptype==27 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MSX/Covers/")		 -- MSX1
+     or (apptype==28 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ZXS/Covers/")		 -- ZXS	 
+     or (apptype==29 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_7800/Covers/")	 -- ATARI_7800
+     or (apptype==30 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_5200/Covers/")	 -- ATARI_5200
+     or (apptype==31 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_2600/Covers/")	 -- ATARI_2600
+     or (apptype==32 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/ATARI_LYNX/Covers/")	 -- ATARI_LYNX
+     or (apptype==33 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/COLECOVISION/Covers/")	 -- COLECOVISION
+     or (apptype==34 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/VECTREX/Covers/")	 -- VECTREX
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 -- FBA @@unused. Shares mame archive
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 -- MAME_2003_PLUS @@ unused
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Covers/")		 -- MAME_2000 @@ unused
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO/Covers/")	 -- NEOGEO @@ unused
+     or (apptype==35 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO_PC/Covers/")	 -- NGPC
+     or (			 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/")			 -- Vita & Homebrews
      )
      ..
      (
@@ -1822,58 +1854,58 @@ function DownloadSnap(entry)
 
     downloadable_file =
      (
-	(apptype==2 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PSP/Named_Snaps/")								 --@@ PSP
-     or (apptype==3 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PS1/Named_Snaps/")								 --@@ PS1
-     or (setRetroFlow ~= 1 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/Names_Snaps/")									 --@@ Vita & Homebrews @@ invalid
-     or (apptype==5 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_64/ec7430189022b591a8fb0fa16101201f861363f8/Named_Snaps/")				 --@@ N64
-     or (apptype==6 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Super_Nintendo_Entertainment_System/5c469e48755fec26b4b9d651b6962a2cdea3133d/Named_Snaps/")	 --@@ SNES
-     or (apptype==7 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/f4415b21a256bcbe7b30a9d71a571d6ba4815c71/Named_Snaps/")	 --@@ NES
-  -- or (apptype==  and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_DS/bdbcbae29f2b2bbfc9ffb73fce5a86cea1a58521/Named_Snaps/")				 --@@ NDS @@ unused
-     or (apptype==8 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Advance/fd58a8fae1cec5857393c0405c3d0514c7fdf6cf/Named_Snaps/")			 --@@ GBA
-     or (apptype==9 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/a0cc546d2b4e2eebefdcf91b90ae3601c377c3ce/Named_Snaps/")			 --@@ GBC
-     or (apptype==10 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy/d5ad94ba8c5159381d7f618ec987e609d23ae203/Named_Snaps/")				 --@@ GB
-     or (apptype==11 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/DC/Named_Snaps/")								 --@@ DREAMCAST
-     or (apptype==12 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Mega-CD_-_Sega_CD/a8737a2a394645f27415f7346ac2ceb0cfcd0942/Named_Snaps/")			 --@@ SEGA_CD
-     or (apptype==13 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_32X/4deb45e651e29506a7bfc440408b3343f0e1a3ae/Named_Snaps/")					 --@@ S32X
-     or (apptype==14 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Mega_Drive_-_Genesis/6ac232741f979a6f0aa54d077ff392fe170f4725/Named_Snaps/")			 --@@ MD
-     or (apptype==15 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Master_System_-_Mark_III/02f8c7f989db6124475b7e0978c27af8534655eb/Named_Snaps/")			 --@@ SMS
-     or (apptype==16 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Game_Gear/b99b424d2adcf5ccd45c372db2c15f01653f2b92/Named_Snaps/")				 --@@ GG
-     or (apptype==17 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_-_TurboGrafx_16/d0d6e27f84d757416799e432154e0adcadb154c9/Named_Snaps/")			 --@@ TG16
-     or (apptype==18 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_CD_-_TurboGrafx-CD/cd554a5cdca862f090e6c3f9510a3b1b6c2d5b38/Named_Snaps/")		 --@@ TGCD
-     or (apptype==19 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_-_TurboGrafx_16/d0d6e27f84d757416799e432154e0adcadb154c9/Named_Snaps/")			 --@@ PCE
-     or (apptype==20 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_CD_-_TurboGrafx-CD/cd554a5cdca862f090e6c3f9510a3b1b6c2d5b38/Named_Snaps/")		 --@@ PCECD
-     or (apptype==21 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Commodore_-_Amiga/b6446e83b3dc93446371a5dbfb0f24574eb56461/Named_Snaps/")				 --@@ AMIGA
-     or (apptype==22 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Commodore_-_64/df90042ef9823d1b0b9d3ec303051f555dca2246/Named_Snaps/")					 --@@ C64
-     or (apptype==23 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Bandai_-_WonderSwan_Color/5b57a78fafa4acb8590444c15c116998fcea9dce/Named_Snaps/")			 --@@ WSCAN_COL
-     or (apptype==24 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Bandai_-_WonderSwan/3913706e173ec5f8c0cdeebd225b16f4dc3dd6c6/Named_Snaps/")				 --@@ WSWAN
-     or (apptype==25 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PICO8/Named_Snaps/")								 --@@ PICO-8 @@ invalid
-     or (apptype==26 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Microsoft_-_MSX2/12d7e10728cc4c3314b8b14b5a9b1892a886d2ab/Named_Snaps/")				 --@@ MSX2
-     or (apptype==27 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Microsoft_-_MSX/ed54675a51597fd5bf66a45318a273f330b7662f/Named_Snaps/")					 --@@ MSX1
-     or (apptype==28 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sinclair_-_ZX_Spectrum/d23c953dc9853983fb2fce2b8e96a1ccc08b70e8/Named_Snaps/")				 --@@ ZXS
-     or (apptype==29 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_7800/eff4d49a71a62764dd66d414b1bf7a843f85f7ae/Named_Snaps/")					 --@@ ATARI_7800
-     or (apptype==30 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_5200/793489381646954046dd1767a1af0fa4f6b86c24/Named_Snaps/")					 --@@ ATARI_5200
-     or (apptype==31 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_2600/ea2ba38f9bace8e85539d12e2f65e31c797c6585/Named_Snaps/")					 --@@ ATARI_2600
-     or (apptype==32 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_Lynx/91278444136e9c19f89331421ffe84cce6f82fb9/Named_Snaps/")					 --@@ ATARI_LYNX
-     or (apptype==33 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Coleco_-_ColecoVision/332c63436431ea5fceedf50b94447bb6e7a8e1f5/Named_Snaps/")				 --@@ COLECOVISION
-     or (apptype==34 and	 "https://raw.githubusercontent.com/libretro-thumbnails/GCE_-_Vectrex/ed03e5d1214399d2f4429109874b2ad3d8a18709/Named_Snaps/")					 --@@ VECTREX
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 --@@ FBA @@unused. Shares mame archive
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 --@@ MAME_2003_PLUS @@ unused
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 --@@ MAME_2000 @@ unused
-  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO/Named_Snaps/")								 --@@ NEOGEO@@ unused
-     or (apptype==35 and	 "https://raw.githubusercontent.com/libretro-thumbnails/SNK_-_Neo_Geo_Pocket_Color/f940bd5da36105397897c093dda77ef06d51cbcf/Named_Snaps/")			 --@@ NGPC
-     or (			 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/Names_Snaps/")									 --@@ Vita & Homebrews @@ invalid
+	(apptype==2 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PSP/Named_Snaps/")								 -- PSP
+     or (apptype==3 and		 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PS1/Named_Snaps/")								 -- PS1
+     or (setRetroFlow ~= 1 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/Names_Snaps/")									 -- Vita & Homebrews @@ invalid
+     or (apptype==5 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_64/ec7430189022b591a8fb0fa16101201f861363f8/Named_Snaps/")				 -- N64
+     or (apptype==6 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Super_Nintendo_Entertainment_System/5c469e48755fec26b4b9d651b6962a2cdea3133d/Named_Snaps/")	 -- SNES
+     or (apptype==7 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/f4415b21a256bcbe7b30a9d71a571d6ba4815c71/Named_Snaps/")	 -- NES
+  -- or (apptype==  and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_DS/bdbcbae29f2b2bbfc9ffb73fce5a86cea1a58521/Named_Snaps/")				 -- NDS @@ unused
+     or (apptype==8 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Advance/fd58a8fae1cec5857393c0405c3d0514c7fdf6cf/Named_Snaps/")			 -- GBA
+     or (apptype==9 and		 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/a0cc546d2b4e2eebefdcf91b90ae3601c377c3ce/Named_Snaps/")			 -- GBC
+     or (apptype==10 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy/d5ad94ba8c5159381d7f618ec987e609d23ae203/Named_Snaps/")				 -- GB
+     or (apptype==11 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/DC/Named_Snaps/")								 -- DREAMCAST
+     or (apptype==12 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Mega-CD_-_Sega_CD/a8737a2a394645f27415f7346ac2ceb0cfcd0942/Named_Snaps/")			 -- SEGA_CD
+     or (apptype==13 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_32X/4deb45e651e29506a7bfc440408b3343f0e1a3ae/Named_Snaps/")					 -- S32X
+     or (apptype==14 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Mega_Drive_-_Genesis/6ac232741f979a6f0aa54d077ff392fe170f4725/Named_Snaps/")			 -- MD
+     or (apptype==15 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Master_System_-_Mark_III/02f8c7f989db6124475b7e0978c27af8534655eb/Named_Snaps/")			 -- SMS
+     or (apptype==16 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Game_Gear/b99b424d2adcf5ccd45c372db2c15f01653f2b92/Named_Snaps/")				 -- GG
+     or (apptype==17 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_-_TurboGrafx_16/d0d6e27f84d757416799e432154e0adcadb154c9/Named_Snaps/")			 -- TG16
+     or (apptype==18 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_CD_-_TurboGrafx-CD/cd554a5cdca862f090e6c3f9510a3b1b6c2d5b38/Named_Snaps/")		 -- TGCD
+     or (apptype==19 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_-_TurboGrafx_16/d0d6e27f84d757416799e432154e0adcadb154c9/Named_Snaps/")			 -- PCE
+     or (apptype==20 and	 "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_CD_-_TurboGrafx-CD/cd554a5cdca862f090e6c3f9510a3b1b6c2d5b38/Named_Snaps/")		 -- PCECD
+     or (apptype==21 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Commodore_-_Amiga/b6446e83b3dc93446371a5dbfb0f24574eb56461/Named_Snaps/")				 -- AMIGA
+     or (apptype==22 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Commodore_-_64/df90042ef9823d1b0b9d3ec303051f555dca2246/Named_Snaps/")					 -- C64
+     or (apptype==23 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Bandai_-_WonderSwan_Color/5b57a78fafa4acb8590444c15c116998fcea9dce/Named_Snaps/")			 -- WSCAN_COL
+     or (apptype==24 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Bandai_-_WonderSwan/3913706e173ec5f8c0cdeebd225b16f4dc3dd6c6/Named_Snaps/")				 -- WSWAN
+     or (apptype==25 and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/PICO8/Named_Snaps/")								 -- PICO-8 @@ invalid
+     or (apptype==26 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Microsoft_-_MSX2/12d7e10728cc4c3314b8b14b5a9b1892a886d2ab/Named_Snaps/")				 -- MSX2
+     or (apptype==27 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Microsoft_-_MSX/ed54675a51597fd5bf66a45318a273f330b7662f/Named_Snaps/")					 -- MSX1
+     or (apptype==28 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Sinclair_-_ZX_Spectrum/d23c953dc9853983fb2fce2b8e96a1ccc08b70e8/Named_Snaps/")				 -- ZXS
+     or (apptype==29 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_7800/eff4d49a71a62764dd66d414b1bf7a843f85f7ae/Named_Snaps/")					 -- ATARI_7800
+     or (apptype==30 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_5200/793489381646954046dd1767a1af0fa4f6b86c24/Named_Snaps/")					 -- ATARI_5200
+     or (apptype==31 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_2600/ea2ba38f9bace8e85539d12e2f65e31c797c6585/Named_Snaps/")					 -- ATARI_2600
+     or (apptype==32 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Atari_-_Lynx/91278444136e9c19f89331421ffe84cce6f82fb9/Named_Snaps/")					 -- ATARI_LYNX
+     or (apptype==33 and	 "https://raw.githubusercontent.com/libretro-thumbnails/Coleco_-_ColecoVision/332c63436431ea5fceedf50b94447bb6e7a8e1f5/Named_Snaps/")				 -- COLECOVISION
+     or (apptype==34 and	 "https://raw.githubusercontent.com/libretro-thumbnails/GCE_-_Vectrex/ed03e5d1214399d2f4429109874b2ad3d8a18709/Named_Snaps/")					 -- VECTREX
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 -- FBA @@unused. Shares mame archive
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 -- MAME_2003_PLUS @@ unused
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/MAME/Named_Snaps/")								 -- MAME_2000 @@ unused
+  -- or (apptype==   and	 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/Retro/NEOGEO/Named_Snaps/")								 -- NEOGEO@@ unused
+     or (apptype==35 and	 "https://raw.githubusercontent.com/libretro-thumbnails/SNK_-_Neo_Geo_Pocket_Color/f940bd5da36105397897c093dda77ef06d51cbcf/Named_Snaps/")			 -- NGPC
+     or (			 "https://raw.githubusercontent.com/jimbob4000/hexflow-covers/main/Covers/PSVita/Names_Snaps/")									 -- Vita & Homebrews @@ invalid
      )
      ..
      (
-        (launch_mode==0 and	 (DISC_ID or entry.name))		 --@@ For real apps. Relatively simple. Example: "VITASHELL"
-     or (entry.name:match("(.+)%..+$")~=nil and entry.name:match("%((.+)%)")==nil and entry.name:match("(.+)%..+$") .. " (USA)")	 --@@ Add " (USA)" to RetroFlows with no region specified. @@ Ex: "Donkey Kong.n64" -------> "Donkey Kong (USA)"
-     or (entry.name:match("(.+)%..+$") or entry.name)			 --@@ For RetroFlow entries. If item has a period at the end, this removes it... otherwise it'll use the whole file name. @@ Ex: "Donkey Kong (USA).n64" --> "Donkey Kong (USA)"
-     ):gsub("%%", '%%25'):gsub("%s+", '%%20') .. ".png"			 --@@ Converts spacebars to "%20" and percentage signs to "%25" since you can't those in a website address, then adds ".png" @@ Ex: "Donkey Kong (USA)" ---> "Donkey%20Kong%20(USA).png"
+        (launch_mode==0 and	 (DISC_ID or entry.name))		 -- For real apps. Relatively simple. Example: "VITASHELL"
+     or (entry.name:match("(.+)%..+$")~=nil and entry.name:match("%((.+)%)")==nil and entry.name:match("(.+)%..+$") .. " (USA)")	 -- Add " (USA)" to RetroFlows with no region specified. Ex: "Donkey Kong.n64" -------> "Donkey Kong (USA)"
+     or (entry.name:match("(.+)%..+$") or entry.name)			 -- For RetroFlow entries. If item has a period at the end, this removes it... otherwise it'll use the whole file name. Ex: "Donkey Kong (USA).n64" --> "Donkey Kong (USA)"
+     ):gsub("%%", '%%25'):gsub("%s+", '%%20') .. ".png"			 -- Converts spacebars to "%20" and percentage signs to "%25" since you can't those in a website address, then adds ".png" Ex: "Donkey Kong (USA)" ---> "Donkey%20Kong%20(USA).png"
 
      --System.setMessage(downloadable_file, false, BUTTON_OK)		 -- debug
 
     custom_path = (entry.name:match("(.+)%..+$") or entry.name) .. ".png"
-    System.deleteFile("ux0:/data/HexFlow/" .. custom_path)		 --@@ if cover already exists, delete it before trying to download.
+    System.deleteFile("ux0:/data/HexFlow/" .. custom_path)		 -- if cover already exists, delete it before trying to download.
 
     if apptype == 2 then
 	output_folder = "ux0:data/RetroFlow/BACKGROUNDS/Sony - PlayStation Portable/"
@@ -1884,7 +1916,7 @@ function DownloadSnap(entry)
     else
 	output_folder = xRomDirLookup(apptype):gsub("/ROMS/", "/BACKGROUNDS/")
     end
-    System.createDirectory(output_folder)				 --@@ Prevents Nintendo DS cover download crash in experimental builds.
+    System.createDirectory(output_folder)				 -- Prevents Nintendo DS cover download crash in experimental builds.
 
     Network.downloadFile(downloadable_file, "ux0:/data/HexFlow/" .. custom_path)
 
@@ -1897,7 +1929,7 @@ function DownloadSnap(entry)
 	else
 	    output_file_location = output_folder .. custom_path:gsub('%%25', "%%"):gsub('%%20', " ")
 	    System.rename("ux0:/data/HexFlow/" .. custom_path, output_file_location)
-	    System.deleteFile("ux0:/data/HexFlow/" .. custom_path) --@@ just delete file if rename operation somehow failed.
+	    System.deleteFile("ux0:/data/HexFlow/" .. custom_path) -- just delete file if rename operation somehow failed.
 	    pic_path = output_file_location
             -- set pic0 as background
             Graphics.freeImage(backTmp)
@@ -1924,7 +1956,8 @@ function DownloadCategoryCovers()
 	    System.setMessage("Downloading covers...", true)
 	    System.setMessageProgMsg("Downloading covers...")
 	    for i=1, #xCatLookup(getCovers) do
-		if string.match(xCatLookup(getCovers)[i].icon_path, "/icon") --add a new check here
+	    --@@if string.match(xCatLookup(getCovers)[i].icon_path, "/icon")
+		if string.match(xCatLookup(getCovers)[i].icon_path, "/COVERS/") == nil	 --@@ NEW!
 		and DownloadCover(xCatLookup(getCovers)[i]) then
 		    cvrfound = cvrfound + 1
 		end
@@ -2003,16 +2036,16 @@ local function DrawCover(x, y, text, icon, sel, apptype, reflections)
             extraz = x * 0.833		 --simplified abs_side_factor + x
             extrax = 0.6
         elseif x > 0 then
-            rot = x * -0.333		 --simplified -0.5 * abs_side_factor
-            extraz = x * 0.833		 --simplified (abs_side_factor + x) / 2
-            extrax = x * 0.4		 --simplified 0.6 * abs_side_factor
+            rot = x * -0.333		 -- simplified -0.5 * abs_side_factor
+            extraz = x * 0.833		 -- simplified (abs_side_factor + x) / 2, which used to be 2 + (x / 2)
+            extrax = x * 0.4		 -- simplified 0.6 * abs_side_factor
         elseif x < -0.5 then		 -- (1/4)
             rot = 0.5			 -- (2/4) Remove these lines to stop items on the left from teleporting offscreen.
             extraz = 2			 -- (3/4)
             extrax = -10		 -- (4/4)
 	else				 -- x is -0.5 or below
-            rot = x * -0.333		 --simplified 0 - abs_side_factor
-	    extrax = x * 0.667		 --simplified 0.5 * abs_side_factor
+            rot = x * -0.333		 -- simplified 0 - abs_side_factor
+	    extrax = x * 0.667		 -- simplified 0.5 * abs_side_factor
         end
     elseif showView == 4 then
         -- scroll around
@@ -2043,7 +2076,7 @@ local function DrawCover(x, y, text, icon, sel, apptype, reflections)
     Render.setCamera(camX, 0, 0, 0.0, 0.0, 0.0)
     
     if hideBoxes <= 0 then
-	if showView==5 and inPreview==false then					   -- SwitchView @@ 192px image size, 200px space. @@ NEW! Now defers to 3D view if inpreview is on, so the code could be simplified a lot.
+	if showView==5 and inPreview==false then
 	    -- SwitchView! 192px image size, 200px space.
 	    x = x * 200 + 85
 	    y = 152
@@ -2055,7 +2088,7 @@ local function DrawCover(x, y, text, icon, sel, apptype, reflections)
 	    icon_width = Graphics.getImageWidth(icon)
 	    if apptype==1 and View5VitaCropTop==1 and icon_height~=128 then
 	      --vita_header_size = math.ceil(icon_height*31/320)
-		vita_header_size = math.ceil(icon_height*0.096875)	 -- calculate vita cover's "blue top" proportion (29/320 will work but 31/320 looks better) and use this calculation to dynamicly crop it.
+		vita_header_size = math.ceil(icon_height*0.096875)	 -- how big the blue top of the vita cover is (29/320 will work but 31/320 looks best) to dynamicly crop it.
 		Graphics.drawImageExtended(x+96, y+96, icon, 0, vita_header_size, icon_width, icon_height - vita_header_size, 0, 192 / icon_width, 192 / (icon_height-vita_header_size))
 	    else
 		Graphics.drawScaleImage(x, 152, icon, 192 / icon_width, 192 / icon_height)
@@ -2074,7 +2107,8 @@ local function DrawCover(x, y, text, icon, sel, apptype, reflections)
 	    icon_height = Graphics.getImageHeight(icon)
 	    icon_width = Graphics.getImageWidth(icon)
 	    if (apptype==1) and (View5VitaCropTop == 1) and (icon_height ~= 128) then
-		vita_header_size = math.ceil(Graphics.getImageHeight(icon)*31/320)	  --@@ <--- this is how big the blue top of the vita cover is - 29/320 will work but 31/320 looks better. @@ dear future self... good luck figuring out the below line.
+	      --vita_header_size = math.ceil(Graphics.getImageHeight(icon)*31/320)
+		vita_header_size = math.ceil(icon_height*0.096875)	 -- how big the blue top of the vita cover is (29/320 will work but 31/320 looks best) to dynamicly crop it.
 		Graphics.drawImageExtended(x+66, y+66, icon, 0, vita_header_size, icon_width, icon_height-vita_header_size, 0, 132 / icon_width, 132 / (icon_height - vita_header_size))
 	    else
 		Graphics.drawScaleImage(x, y, icon, 132 / icon_width, 132 / icon_height)
@@ -2122,7 +2156,8 @@ local function DrawCover(x, y, text, icon, sel, apptype, reflections)
                 Render.drawModel(modCoverHbrNoref, x + extrax, y + extray, -5 - extraz - zoom, 0, math.deg(rot), 0)
             end
         elseif apptype==5 or apptype==6 then
-	    if showView == 1 then	 -- n64_fix
+	    if inPreview == false	 --@@ NEW! n64_fix. This specific line is a bugfix for "n64 too far to the left in triangle menu"
+	    and showView == 1 then	 -- n64_fix
 		x = x - 0.45		 -- n64_fix
 	    end				 -- n64_fix
             if reflections == 1 then
@@ -2236,7 +2271,8 @@ function DownloadSingleSnap()
 	if not Network.isWifiEnabled() then
 	    System.setMessage("Internet Connection Required", false, BUTTON_OK)
 	elseif not (setBackground > 0.5) then
-	    System.setMessage(lang_lines[19] .. ": " .. lang_lines[19] .. "Required", false, BUTTON_OK) --Custom Background ON Required
+	--@@System.setMessage(lang_lines[19] .. ": " .. lang_lines[19] .. "Required", false, BUTTON_OK) --unused. "Custom Background ON Required"
+	    System.setMessage(lang_lines[18] .. ": " .. lang_lines[23], false, BUTTON_OK) --Custom Background OFF
 	elseif DownloadSnap(xCatLookup(showCat)[p]) then
 	    System.setMessage(lang_lines[56]:gsub("*", DISC_ID or xCatLookup(showCat)[p].name), false, BUTTON_OK) --Cover XXXXXXXXX found!
 	else
@@ -2326,20 +2362,35 @@ function Category_Plus(tmpCat)
     end
 end
 
+local utilityItems = 7
 function execute_switch_bottom_menu()
-    if menuSel==1 then
-	System.executeUri("wbapp0:")	   --1 News (Internet Browser)
-    elseif menuSel==2 then
-	System.executeUri("psns:")	   --2 Store
-    elseif menuSel==3 then
-	System.executeUri("photo:")	   --3 Album
-    elseif menuSel==4 then			
-	System.executeUri("scecomboplay:") --4 Controls (PS3 Cross-Controller). Note: to launch moonlight it's FreeMemory() + System.launchApp(XYZZ00002) + System.exit()
-    elseif menuSel==5 then
-	System.executeUri("settings_dlg:") --5 System Settings
-    elseif menuSel==6 then
-	FreeMemory()			   --6 Exit
-	System.exit()
+    if menuSel == 0 then
+	FreeIcons()				    --@@ NEW! 0 Decrypt Icons. Credit to cy33hc for his program "copyicons"
+	FreeMemory()
+	Network.term()
+	System.launchEboot("app0:/copyicons.bin")
+    elseif menuSel==1 then
+	System.executeUri("wbapp0:")		    --1 News (Internet Browser)
+    --@@System.executeUri("https://www.google.com") --1 News (Internet Browser:https://www.google.com)
+    elseif menuSel == 2 then
+	System.executeUri("psns:")		    --2 Store
+    elseif menuSel == 3 then
+	System.executeUri("photo:")		    --3 Album
+    elseif menuSel == 4 then			
+	System.executeUri("scecomboplay:")	    --4 Controls (PS3 Cross-Controller). Note: to launch moonlight it's FreeMemory() + System.launchApp(XYZZ00002) + System.exit()
+    elseif menuSel == 5 then
+	System.executeUri("settings_dlg:")	    --5 System Settings
+    elseif menuSel == 6 then
+	if showMenu == 2 then
+	    FreeMemory()			    --@@ NEW! 6 VitaShell (from start menu)
+	    System.launchApp("VITASHELL")
+	    System.exit()
+	else
+	    FreeMemory()			    --6 Exit
+	    System.exit()
+	end
+    elseif menuSel == 7 then
+	System.executeUri("pstc:")		    --@@ NEW! 7 Trophies
     end
 end
 
@@ -2428,18 +2479,18 @@ while true do
 	    Graphics.drawScaleImage(0, 298, imgFloor2, 960, 1)
 	end
 
-        prevX = 0		 --@@ Moved here now
-        prevZ = 0		 --@@ Moved here now
-        prevRot = 0		 --@@ Moved here now
-        inPreview = false	 --@@ Moved here now
+        prevX = 0
+        prevZ = 0
+        prevRot = 0
+        inPreview = false
 
         base_x = 0
 	base_y = 0
 	grid_x = 0
 	grid_y = 0
-	n64_x_bonus = 0		 -- n64_fix
+	n64_x_bonus = 0			 -- n64_fix
 	skipRow = false
-        
+
         -- Draw Covers
 	-- If the cover 7 tiles away has been loaded, increase render distance.
 	if xCatLookup(showCat)[p+7] and xCatLookup(showCat)[p+7].ricon then
@@ -2454,19 +2505,19 @@ while true do
         for l, file in pairs(xCatLookup(showCat)) do
 	    if (showView == 1)					 -- n64_fix
 	    and (file.app_type == 5 or file.app_type == 6) then	 -- n64_fix
-		n64_x_bonus = n64_x_bonus + 0.8			 -- n64_fix
+		n64_x_bonus = n64_x_bonus + n64_fatness		 -- n64_fix +0.8 real x bonus after an n64
 	    end							 -- n64_fix
 	    if (showView == 1)					 -- n64_fix
 	    and (l == master_index)				 -- n64_fix
 	    and (file.app_type == 5 or file.app_type == 6) then	 -- n64_fix
 		base_x = base_x + space				 -- n64_fix
 		n64_x_bonus = n64_x_bonus - 0.35		 -- n64_fix
-            elseif l >= master_index then			 -- Note: >= @@ Used to be just "if" not "elseif"... 
+            elseif l >= master_index then			 -- Note: >= @@ Used to be just "if" not "elseif"
                 base_x = base_x + space
 	    elseif (showView == 1)				 -- n64 fix
 	    and (l <= master_index)				 -- n64 fix
 	    and (file.app_type == 5 or file.app_type == 6) then	 -- n64_fix
-		base_x = base_x - n64_fatness			 -- n64_fix
+		base_x = base_x - n64_fatness			 -- n64_fix +0.8 base x bonus after an n64
             end
 	    if grid_x < 6 then
 		grid_x = grid_x + 1
@@ -2478,7 +2529,10 @@ while true do
 		    base_y = grid_y
 		end
 	    end
-	    if skipRow == false and l > p-render_distance and l < p+render_distance+2 then
+	    if skipRow == false and l > p-render_distance and l < p+render_distance+2 then						 --@@ (4/7)
+		--@@if l==p and file.fave_heart == true			 --@@ new but unused
+		--@@    Graphics.drawImage(685, 36, imgFav_small_on)	 --@@ new but unused
+		--@@end							 --@@ new but unused
                 if FileLoad[file] == nil then --add a new check here
                     FileLoad[file] = true
                     Threads.addTask(file, {
@@ -2524,7 +2578,7 @@ while true do
 	    Graphics.drawImage(800, 38, imgWifi)-- wifi icon
 	end
 	-- Footer buttons and icons. X positions set in ChangeLanguage()
-	Graphics.drawImage(label1ImgX, 510, btnAccept)	 --@@ Used to be btnX
+	Graphics.drawImage(label1ImgX, 510, btnAccept)	 -- Used to be btnX
 	Font.print(fnt20, label1X, 508, lang_lines[7], white)--Launch
 	Graphics.drawImage(label2ImgX, 510, btnT)
 	Font.print(fnt20, label2X, 508, lang_lines[8], white)--Details
@@ -2541,7 +2595,7 @@ while true do
 	    Font.print(fnt20, label3X, 508, lang_lines[9], white)--Category
 	end
 	if lockView == 0 then
-	    Graphics.drawImage(label4ImgX, 510, btnCancel)	 --@@ Used to be btnO
+	    Graphics.drawImage(label4ImgX, 510, btnCancel)	 -- Used to be btnO
 	    Font.print(fnt20, label4X, 508, lang_lines[10], white)--View
 	end
 
@@ -2571,7 +2625,7 @@ while true do
         end
         
         
-	-- Special vertical border calculations for Grid View
+	-- Special Y border calculations for Grid View
 	--base_y = math.floor((master_index - 1) / 6)	 -- base_y attempt 1
 	--base_y = (master_index - 1) // 6		 -- base_y attempt 2
 	if curTotal > 12 then
@@ -2605,8 +2659,8 @@ while true do
         if startCovers == false then
             targetX = base_x
 	    targetY = base_y
-	    if p == 1 and Controls.check(pad, CTRL_CANCEL) then	 --@@ Used to be SCE_CTRL_CIRCLE
-		targetY = base_y + 0.05				 -- Makes the app feel more "alive"
+	    if p == 1 and Controls.check(pad, CTRL_CANCEL) then	 -- Used to be SCE_CTRL_CIRCLE
+		targetY = base_y + 0.05				 -- Tactical Jiggle
 	    end
             startCovers = true
             GetNameSelected()
@@ -2622,18 +2676,13 @@ while true do
 	    --Draw half transparent floor for reflection effect
 	    Render.drawModel(modFloor, 0, -0.6+floorY, 0, 0, 0, 0)
 	end
-        
-        --@@prevX = 0		 --@@ MOVED
-        --@@prevZ = 0		 --@@ MOVED
-        --@@prevRot = 0		 --@@ MOVED
-        --@@inPreview = false	 --@@ MOVED
     elseif showMenu == 1 then
         
         -- PREVIEW
         -- Footer buttons and icons. positions set in ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 --@@ Used to be btnO
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 -- Used to be btnO
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
-        Graphics.drawImage(label2AltImgX, 510, btnAccept)	 --@@ Used to be btnX
+        Graphics.drawImage(label2AltImgX, 510, btnAccept)	 -- Used to be btnX
         Font.print(fnt20, label2AltX, 508, lang_lines[32], white)--Select
         
         Graphics.fillRect(24, 470, 24, 470, darkalpha)
@@ -2653,8 +2702,9 @@ while true do
             else
                 Render.useTexture(modBackground, imgCustomBack)
             end
-			
-	    app_size = getAppSize(appdir)/1024/1024
+
+	    --@@app_size = getAppSize(appdir)/1024/1024	 --@@ Moved to GetInfoSelected()
+
 	    menuY=0
 	    tmpappcat=0
             inPreview = true
@@ -2674,40 +2724,30 @@ while true do
         Graphics.drawImage(50, 50, iconTmp)-- icon
 	--Graphics.drawScaleImage(50, 50, iconTmp, 128 / Graphics.getImageWidth(iconTmp), 128 / Graphics.getImageHeight(iconTmp)) --icon, stretched to frame (unused)
 
-	local file = xCatLookup(showCat)[p]	 --@@ Moved here now. Allows cleaner code below
+	local file = xCatLookup(showCat)[p]	 -- Moved here now. Allows cleaner code below
 
         -- txtname = string.sub(app_title, 1, 32) .. "\n" .. string.sub(app_title, 33)
 	txtname = string.sub(file.apptitle, 1, 32) .. "\n" .. string.sub(file.apptitle, 33)
 		
-        local tmpapptype=""	 --@@ game type
-	local tmpcatText=""	 --@@ currently selected override type
+        local tmpapptype=""	 -- text for game type
+	local tmpcatText=""	 -- text for currently selected override type
         -- Draw box
-        --@@if apptype==1 then
-	--@@    tmpapptype = "PS Vita Game"
-        --@@elseif apptype==2 then
-	--@@    tmpapptype = "PSP Game"
-        --@@elseif apptype==3 then
-	--@@    tmpapptype = "PS1 Game"
-        --@@else
-	--@@    tmpapptype = "Homebrew"
-        --@@end
 	if apptype == 0 or apptype == 4 then
 	    tmpapptype = lang_lines[2]	 --Homebrew
 	elseif file.launch_type == 3 then
 	    tmpapptype = "PS1 Retroarch Game"
 	else
-	    tmpapptype = xTextLookup(appt_hotfix(file.app_type)):gsub('\r', "") .. " Game"	 --@@ this gsub cuts off the special Windows-notepad "new line" character which displays in Vita as an XL space.
+	    tmpapptype = xTextLookup(appt_hotfix(file.app_type)):gsub('\r', "") .. " Game"	 -- this gsub cuts off the special Windows-notepad "new line" character which displays in Vita as an XL space.
 	end
 
 	--Draw box
-	--@@local file = xCatLookup(showCat)[p]	 --@@ MOVED
 	DrawCover(prevX, -1.0, file.name, file.ricon or imgCoverTmp, p, file.app_type, 0)
     
         Font.print(fnt22, 50, 190, txtname, white)-- app name
-	if DISC_ID then
-	    Font.print(fnt22, 50, 240, tmpapptype .. "\nApp ID: " .. app_titleid .. " (" .. DISC_ID .. ")\nVersion: " .. app_version .. "\nSize: " .. string.format("%02d", app_size) .. "Mb", white)-- Draw info (PS1)
+	if DISC_ID and DISC_ID ~= app_titleid then	 --@@ NEW! Forgot to add "and DISC_ID ~= app_titleid" in the v2.1 release
+	    Font.print(fnt22, 50, 240, tmpapptype .. "\nApp ID: " .. app_titleid .. " (" .. DISC_ID .. ")\nVersion: " .. app_version .. "\n" .. app_size_text, white)-- Draw info (PS1)
 	else
-	    Font.print(fnt22, 50, 240, tmpapptype .. "\nApp ID: " .. app_titleid .. "\nVersion: " .. app_version .. "\nSize: " .. string.format("%02d", app_size) .. "Mb", white)-- Draw info (not PS1)
+	    Font.print(fnt22, 50, 240, tmpapptype .. "\nApp ID: " .. app_titleid .. "\nVersion: " .. app_version .. "\n" .. app_size_text, white)-- Draw info (not PS1)
 	end
 		
 	if tmpappcat==1 then
@@ -2729,10 +2769,16 @@ while true do
 	    Font.print(fnt22, 50, 352+40, "Override Category: < " .. tmpcatText .. " >", white)
 	    Font.print(fnt22, 50, 352+80, "Rename", white)
 
+	    --@@if xCatLookup(showCat)[p].fave_heart == true then	 --@@ new but unused
+	    --@@    Graphics.drawImage(420, 50, imgFav_large_on)	 --@@ new but unused
+	    --@@else							 --@@ new but unused
+	    --@@    Graphics.drawImage(420, 50, imgFav_large_off)	 --@@ new but unused
+	    --@@end							 --@@ new but unused
+
 	    status = System.getMessageState()
 	    if status ~= RUNNING then
 
-		if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 --@@ Used to be SCE_CTRL_CROSS
+		if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 -- Used to be SCE_CTRL_CROSS
 		    if menuY == 0 then
 			if gettingCovers == false then
 			    gettingCovers = true
@@ -2740,6 +2786,7 @@ while true do
 			end
 		    elseif menuY == 1 then
 			if spin_allowance < 0.1 then
+			    --@@ NEEDS UPDATED BADLY
 			    if showCat == 0 or showCat == 5 or showCat == 6 then
 				spin_allowance = 3
 			    else
@@ -2816,13 +2863,16 @@ while true do
 	    Graphics.fillRect(24, 470, 350 + (menuY * 40), 390 + (menuY * 40), themeCol)-- selection
 	    Font.print(fnt22, 50, 355, "Download Cover", white)
 	    Font.print(fnt22, 50, 355+40, "Download Snap", white)
-	--@@tmpcatText = "Favorites"
-	--@@Font.print(fnt22, 50, 355+80, "DON'T CLICK THIS. Add to: < " .. tmpcatText .. " >", white)
+	    --@@if xCatLookup(showCat)[p].fave_heart == true then
+	    --@@    Graphics.drawImage(420, 50, imgFav_large_on)
+	    --@@else
+	    --@@    Graphics.drawImage(420, 50, imgFav_large_off)
+	    --@@end
 
 	    status = System.getMessageState()
 	    if status ~= RUNNING then
 
-		if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 --@@ Used to be SCE_CTRL_CROSS
+		if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 -- Used to be SCE_CTRL_CROSS
 		    if menuY == 0 then
 			if gettingCovers == false then
 			    gettingCovers = true
@@ -2832,8 +2882,6 @@ while true do
 			if gettingCovers == false then
 			    DownloadSingleSnap()
 			end
-		    elseif menuY == 2 then	 -- Renamer option
-			-- do nothing
                     end
 		elseif (Controls.check(pad, SCE_CTRL_UP)) and not (Controls.check(oldpad, SCE_CTRL_UP)) then
 		    if menuY > 0 then
@@ -2883,9 +2931,9 @@ while true do
 	end
         -- SETTINGS
         -- Footer buttons and icons. label X's are set in function ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 --@@ Used to be btnO
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 -- Used to be btnO
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
-        Graphics.drawImage(label2AltImgX, 510, btnAccept)	 --@@ Used to be btnX
+        Graphics.drawImage(label2AltImgX, 510, btnAccept)	 -- Used to be btnX
         Font.print(fnt20, label2AltX, 508, lang_lines[32], white)--Select
         Graphics.fillRect(60, 900, 24, 488, darkalpha)
         Font.print(fnt22, 84, 34, lang_lines[6], white)--SETTINGS
@@ -2893,9 +2941,11 @@ while true do
 	    Graphics.fillRect(60, 900, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
 	elseif menuY == 11 then
 	    Graphics.fillRect(60 + (280 * menuX), 60 + 280 + (280 * menuX), 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
-	elseif menuX == 0 then
+	elseif menuY > 11 then
+	    --@@ MOVED DOWN
+	elseif menuX == 0 then	 --@@ The ON/OFF settings, left side
 	    Graphics.fillRect(60, 460, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
-	else
+	else			 --@@ The ON/OFF settings, right side
 	    Graphics.fillRect(460, 900, 77 + (menuY * 34), 112 + (menuY * 34), themeCol)-- selection
 	end
         Graphics.drawLine(60, 900, 70, 70, white)
@@ -2935,8 +2985,8 @@ while true do
 
 	if scanComplete == false then
 	    Font.print(fnt22, 84, 79 + 68, lang_lines[19] .. ":", white)--Download Covers
-	--@@if getCovers == 0 then
-	--@@	Font.print(fnt22, 84 + 260, 79 + 68, "<  " .. lang_lines[5] .. "non-Homebrews  >", white) --< All non-Homebrews >
+	  --if getCovers == 0 then
+	  --	Font.print(fnt22, 84 + 260, 79 + 68, "<  " .. lang_lines[5] .. "non-Homebrews  >", white) --< All non-Homebrews >
 	    if getCovers == 2 then
 		Font.print(fnt22, 84 + 260, 79 + 68, "<  " .. lang_lines[50] .. "  >", white) --< Homebrew - Special 'Vita' Archive Download >
 	    else
@@ -2968,14 +3018,14 @@ while true do
 	elseif getBGround == 8 then
 	    BGroundText = lang_lines[71] --Retro
 	elseif getBGround == 9 then
-	    BGroundText = ""	 --@@lang_lines[72] --SwitchView Basic Black
+	    BGroundText = lang_lines[72] --@@ NEW! SwitchView Basic Black
 	else
 	    BGroundText = lang_lines[23] --OFF
 	end
 	if (background_brackets == true) and (BGroundText ~= nil) then
 	    BGroundText = "<  " .. BGroundText .. "  >"
 	    --if setBackground ~= getBGround then	 -- Puts X icon next to unconfirmed background selection. Uncomment these 3 lines to try it.
-	    --    Graphics.drawImage(Font.getTextWidth(fnt20, BGroundText) + btnMargin + 84 + 260, 5 + 79 + 102, btnAccept)	 --@@ Used to be btnX
+	    --    Graphics.drawImage(Font.getTextWidth(fnt20, BGroundText) + btnMargin + 84 + 260, 5 + 79 + 102, btnAccept)	 -- Used to be btnX
 	    --end
 	end
         Font.print(fnt22, 84 + 260, 79 + 102, BGroundText, white)
@@ -3067,16 +3117,13 @@ while true do
         else
             Font.print(fnt22, 84 + 260 + toggle1X, 79 + 272, lang_lines[23], white)--OFF
         end
-	Graphics.drawImage(484, 79 + 272 + 4, btnAccept)			 --@@ btnX
-        Font.print(fnt22, 484 + 22, 79 + 272 + 1, "/", white)
-	Graphics.drawImage(484 + 36, 79 + 272 + 4, btnCancel)			 --@@ btnO
-     	Font.print(fnt22, 484 + 68, 79 + 272, lang_lines[93] .. ": ", white)	 --@@ NEW! Swap
-	if swapXO == 1 then
-	    Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[22], white)--ON
-	else
-	    Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[23], white)--OFF
-	end
-
+        Font.print(fnt22, 484, 79 + 272, lang_lines[94] .. ": ", white)--Lock Current View (#*)
+        if lockView == 1 then
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[22], white)--ON
+        else
+            Font.print(fnt22, 484 + toggle2X + 275, 79 + 272, lang_lines[23], white)--OFF
+        end
+        
         Font.print(fnt22, 84, 79 + 306, lang_lines[91] .. ": ", white)--Background #9 & View #5
 	if setSwitch == 1 then
 	    Font.print(fnt22, 84 + 260 + toggle1X, 79 + 306, lang_lines[22], white)--ON
@@ -3095,26 +3142,33 @@ while true do
 		Font.print(fnt22, 84 + 260 + toggle1X, 79 + 340, lang_lines[23], lightgrey)--OFF
 	    end
 	end
-        Font.print(fnt22, 484, 79 + 306, lang_lines[94] .. ": ", white)--Lock Current View (#*)
-        if lockView == 1 then
-            Font.print(fnt22, 484 + toggle2X + 275, 79 + 306, lang_lines[22], white)--ON
-        else
-            Font.print(fnt22, 484 + toggle2X + 275, 79 + 306, lang_lines[23], white)--OFF
-        end
 
-        PrintCentered(fnt22, 60+140, 79 + 374, lang_lines[95], white, 22)--Decrypt Icons
-        PrintCentered(fnt22, 60+140+280, 79 + 374, lang_lines[84], white, 22)--Exit
-	PrintCentered(fnt22, 60+140+560, 79 + 374, lang_lines[13], white, 22)--More Information (About)
+	if menuY > 11 then	 --@@ System Apps / System Menu / Utilities
+	    Graphics.fillRect(60, 60 + 280, 77 + (3 * 34), 112 + (10 * 34), darkalpha)-- selection
+	    Graphics.fillRect(60, 60 + 280, 77 + (2 * 34), 112 + (10 * 34), darkalpha)-- selection
+	    Graphics.drawImage(60, 122, imgUtilityBorder)
+	    Graphics.fillRect(60, 60 + 280, 77 + ((menuY - 9) * 34), 112 + ((menuY - 9) * 34), themeCol)-- selection
+	    Font.print(fnt22, 84, 79 + 102, lang_lines[95], white)		 --@@ Decrypt Icons
+	    Font.print(fnt22, 84, 79 + 136, lang_lines[79], white)		 --@@ News
+	    Font.print(fnt22, 84, 79 + 170, lang_lines[80], white)		 --@@ Store
+	    Font.print(fnt22, 84, 79 + 204, lang_lines[81], white)		 --@@ Album
+	    Font.print(fnt22, 84, 79 + 238, lang_lines[82], white)		 --@@ Controls
+	    Font.print(fnt22, 84, 79 + 272, lang_lines[83], white)		 --@@ System Settings
+	    Font.print(fnt22, 84, 79 + 306, "VitaShell", white)			 --@@ VitaShell
+	    Font.print(fnt22, 84, 79 + 340, lang_lines[85], white)		 --@@ Trophies
+	end
 
-        --@@PrintCentered(fnt22, 270, 79 + 374, lang_lines[95], white, 22)--Decrypt Icons
-        --@@PrintCentered(fnt22, 690, 79 + 374, lang_lines[13], white, 22)--More Information
+	--@@ NEW! now sanitized because of the "invalid character spacing glitch"
+	PrintCentered(fnt22, 60+140, 79 + 374, sanitize(lang_lines[101]), white, 22)--@@Utilities @@ Used to be lang_lines[95] Decrypt Icons
+        PrintCentered(fnt22, 60+140+280, 79 + 374, sanitize(lang_lines[84]), white, 22)--Exit
+	PrintCentered(fnt22, 60+140+560, 79 + 374, sanitize(lang_lines[13]), white, 22)--More Information (About)
         
         status = System.getMessageState()
         if status ~= RUNNING then
             
-            if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 --@@ Used to be SCE_CTRL_CROSS
+            if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 -- Used to be SCE_CTRL_CROSS
                 if menuY == 0 then
-                --@@if startCategory < 7 then
+                  --if startCategory < 7 then
 		    if (setRetroFlow==1 and startCategory<38)
 		    or (setRetroFlow~=1 and startCategory<7) then
                         startCategory = startCategory + 1
@@ -3265,7 +3319,6 @@ while true do
 				local file_over = System.openFile(cur_dir .. "/lastplayedgame.dat", FCREATE)
 				cur_quick_dir["lastplayedgame.dat"] = true
 				io.open(cur_dir .. "/lastplayedgame.dat","w"):close()	 -- Clear old lastplayedgame data
-			    --@@System.writeFile(file_over, " ", 1)
 				System.writeFile(file_over, " \n \n \n \n \n \n \n \n \n \n \n \n \n", 26)	 -- fixes the lag-at-first-launch glitch.
 				System.closeFile(file_over)
 			    end
@@ -3275,15 +3328,11 @@ while true do
 			recently_played_table = {}
 			ReadCustomSort("lastplayedgame.dat", recently_played_table)
 		    else
-			if swapXO == 0 then
-			    swapXO = 1
+			if lockView == 1 then
+			    lockView = 0
 			else
-			    swapXO = 0
+			    lockView = 1
 			end
-			System.wait(250000)	 --@@ pause for 0.25sec to stop people from spamming this setting.
-			CTRL_ACCEPT, CTRL_CANCEL = CTRL_CANCEL, CTRL_ACCEPT
-			btnAccept, btnCancel = btnCancel, btnAccept
-			oldpad = pad		 -- prevents exitting menu accidentally when toggling this setting.
 		    end
                 elseif menuY == 9 then
 		    if menuX == 0 then
@@ -3293,12 +3342,6 @@ while true do
                             setSwitch = 0
                 	else
                 	    setSwitch = 1
-			end
-		    else
-			if lockView == 1 then
-			    lockView = 0
-			else
-			    lockView = 1
 			end
 		    end
                 elseif menuY == 10 then
@@ -3311,11 +3354,14 @@ while true do
 		    end
                 elseif menuY == 11 then
 		    if menuX == 0 then
-			-- Decrypt Icons
-			FreeIcons()
-			FreeMemory()
-			Network.term()
-			System.launchEboot("app0:/copyicons.bin")
+			--@@-- Decrypt Icons
+			--@@FreeIcons()
+			--@@FreeMemory()
+			--@@Network.term()
+			--@@System.launchEboot("app0:/copyicons.bin")
+			utilityMenu = true			 --@@ NEW!
+			menuY = menuItems + 1			 --@@ NEW!
+			imgUtilityBorder = Graphics.loadImage("app0:/DATA/utilityoverlay.png")	 --@@ NEW!
 		    elseif menuX == 1 then
 			-- Exit
 			System.exit()
@@ -3325,12 +3371,17 @@ while true do
 			menuY = 0
 			menuX = 0
 		    end
+                elseif utilityMenu == true then			 --@@ NEW! could also be "(menuY > 11) and (menuY < 21) then"
+		    menuSel = menuY - menuItems - 1		 --@@ NEW! Lazy code, needs improved later maybe
+		    execute_switch_bottom_menu()		 --@@ NEW!
                 end
                 
                 
 		write_config()	 --Save settings
             elseif (Controls.check(pad, SCE_CTRL_UP)) and not (Controls.check(oldpad, SCE_CTRL_UP)) then
-		if menuY == 5 or (menuY == 11 and menuX ~= 2) then -- When moving to start menu rows with LESS columns, round "menuX" DOWN.
+		if menuY == 12 then				 --@@ NEW!
+		    close_utility_menu()			 --@@ NEW!
+		elseif menuY == 5 or (menuY == 11 and menuX ~= 2) then -- When moving to start menu rows with LESS columns, round "menuX" DOWN.
 		    menuX = 0
                     menuY = menuY - 1
                 elseif menuY > 0 then
@@ -3340,19 +3391,27 @@ while true do
 		    menuY = menuItems
                 end
             elseif (Controls.check(pad, SCE_CTRL_DOWN)) and not (Controls.check(oldpad, SCE_CTRL_DOWN)) then
-		if menuY == 10 and menuX == 2 then	 -- When moving to start menu rows with MORE columns, round "menuX" DOWN.
-		    menuX = 1
+		if utilityMenu == true then			 --@@ NEW!
+		    if menuY < menuItems + utilityItems + 1 then --@@ NEW!
+			menuY = menuY + 1			 --@@ NEW!
+		    else					 --@@ NEW!
+			close_utility_menu()			 --@@ NEW!
+		    end						 --@@ NEW!
+		elseif menuY == 10 and menuX == 2 then	 -- When moving to start menu rows with MORE columns, round "menuX" DOWN.
 		    menuY = menuY + 1
+		    menuX = 1
 		elseif menuY < menuItems then
                     menuY = menuY + 1
 		else
-		    menuX=0				 -- When going from bottom to top of settings, set menuX to 0.
 		    menuY=0
+		    menuX=0				 -- When going from bottom to top of settings, set menuX to 0.
                 end
             elseif (Controls.check(pad, SCE_CTRL_LEFT)) and not (Controls.check(oldpad, SCE_CTRL_LEFT)) then
-		if menuY==2 then --covers download selection -- [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
+		if utilityMenu == true then			 --@@ NEW!
+		    close_utility_menu()			 --@@ NEW!
+		elseif menuY==2 then		 --covers download selection -- [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
 		    getCovers = Category_Minus(getCovers-1)
-		elseif menuY==3 then --Background selection
+		elseif menuY==3 then		 --Background selection
 		-- [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Crystal, [5]=Wood, [6]=Dark, [7]=Playstation Pattern, [8]=Retro.
 		    if getBGround > 0 then
 			getBGround = getBGround - 1
@@ -3376,9 +3435,11 @@ while true do
 		    end
 		end
             elseif (Controls.check(pad, SCE_CTRL_RIGHT)) and not (Controls.check(oldpad, SCE_CTRL_RIGHT)) then
-		if menuY==2 then --covers download selection -- [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
+		if utilityMenu == true then			 --@@ NEW!
+		    close_utility_menu()			 --@@ NEW!
+		elseif menuY==2 then				 --covers download selection -- [1]=PS VITA, [2]=HOMEBREWS, [3]=PSP, [4]=PSX, [5]=CUSTOM, [default]=ALL
 		    getCovers = Category_Plus(getCovers+1)
-		elseif menuY==3 then --Background selection
+		elseif menuY==3 then				 --Background selection
 		-- [1]=Custom, [2]=Citylights, [3]=Aurora, [4]=Crystal, [5]=Wood, [6]=Dark, [7]=Playstation Pattern, [8]=Retro.
 		  --if getBGround == 8 and setSwitch == 1 then
 		  --	getBGround = 9
@@ -3407,7 +3468,7 @@ while true do
         
         -- More Information / About
         -- Footer buttons and icons. label X's are set in ChangeLanguage()
-        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 --@@ Used to be btnO
+        Graphics.drawImage(label1AltImgX, 510, btnCancel)	 -- Used to be btnO
         Font.print(fnt20, label1AltX, 508, lang_lines[11], white)--Close
         
         Graphics.fillRect(30, 930, 24, 496, darkalpha)-- bg
@@ -3415,15 +3476,14 @@ while true do
         Font.print(fnt20, 54, 42, "HexFlow Custom - version " .. appversion .. " by BlackSheepBoy69\nRevamp mod for VitaHEX's HexFlow Launcher 0.5\nSupport the original creator on patreon.com/vitahex", white)-- Draw info
         Font.print(fnt15, 690, 42, "Sort time: ".. sortTime .. " ms.\nRead time: ".. applistReadTime .. " ms.\nFunction Load time: ".. functionTime .. " ms.\nOne Loop time: ".. oneLoopTime .. " ms.", white)
         Graphics.drawLine(30, 930, 124, 124, white)
-        Graphics.drawLine(30, 930, 364, 364, white)
-        Font.print(fnt20, 54, 132, "Custom Covers\nPlace your custom covers in 'ux0:/data/HexFlow/COVERS/PSVITA' or '/PSP' or '/PS1'\nCover images must be in png format and file name must match the App ID or the App Name"
-            .. "\n\nCustom Backgrounds & Music\nIn 'ux0:/data/HexFlow/', place your image - 'background.png' or 'background.jpg'\n(1280x720 max) and song - 'music.ogg' or 'music.mp3' (mp3 not recommended)"
+        Graphics.drawLine(30, 930, 384, 384, white)
+        Font.print(fnt20, 54, 132, "Custom Backgrounds & Music\nIn 'ux0:/data/HexFlow/', place your image - 'background.png' or 'background.jpg'\n(1280x720 max) and song - 'music.ogg'. Unlocks setting 'Music & Sounds: Loop/Play 1x'"
+            .. "\n\nCustom Covers & RetroFlow (requires 'RetroFlow' installed)\nPlace your custom covers in 'ux0:/data/HexFlow/COVERS/PSVITA' or '/PSP' or '/PS1'\nCover images must be in png format and file name must match the App ID or App Name.\nRespectively, 'RetroFlow: ON' lets it read from 'ux0:data/RetroFlow/COVERS' and '/ROMS'"
             .. "\n\nCustom Category\nTake the file 'ux0:/data/HexFlow/applist.dat' and rename it to customsort.dat then\nrearrange the titles how you like. It will spawn in a new category ('Custom')"
-            .. "\n\nOriginal app by VitaHEX. OG code by Sakis RG. Lua Player Plus by Rinnegatamante."
-            .. "\nSpecial thanks to everyone who worked on HexFlow Launcher 0.5 which this is based"
-            .. "\non, jimbob4000 & everyone who worked on RetroFlow Launcher 3.4 from whom a lot of"
-            .. "\ninspiration and a little code was taken, Axce, Fwannmacher, DaRk_ViVi, yzzyx-network,"
-            .. "\nGoogle Translate, and one or more coders who wish to remain anonymous", white)-- Draw info
+            .. "\n\nCredit to VitaHEX, Sakis RG, and everyone who worked on HexFlow Launcher 0.5 which"
+            .. "\nthis is based on, jimbob4000 and everyone who worked on RetroFlow Launcher 5.0.2, for"
+            .. "\ngeneral support/inspiration, Rinnegatamante for Lua Player Plus, Axce, Fwannmacher"
+            .. "\nDaRk_ViVi, yzzyx-network, Google Translate, and one or more coders anonymous.", white)-- Draw info
     
     end
     
@@ -3489,22 +3549,22 @@ while true do
 	end
         
         -- Navigation Buttons
-        if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 --@@ Used to be SCE_CTRL_CROSS
+        if (Controls.check(pad, CTRL_ACCEPT) and not Controls.check(oldpad, CTRL_ACCEPT)) then	 -- Used to be SCE_CTRL_CROSS
 	    if bottomMenu then
 		execute_switch_bottom_menu()
 	    elseif gettingCovers == false and app_short_title~="-" then
                 FreeMemory()
 		local file = xCatLookup(showCat)[p]
-		local Working_Launch_ID = file.name -- Example: VITASHELL. This hotfix seems to 99% stop the "please close HexLauncher Custom" errors.
+		local Working_Launch_ID = file.name	 -- Example: VITASHELL. This hotfix seems to 99% stop the "please close HexLauncher Custom" errors.
 
-                WriteRecentlyPlayed(Working_Launch_ID)		 --@@ NEW! Just crunched the code that was here into this function.
+                WriteRecentlyPlayed(Working_Launch_ID)
 
-		launch_mode = file.launch_type			 --@@ 0 real apps, 1 UNUSED (PS Mobile?), 2 PSP/PS1, 3 PS1 Retroarch, 4 UNUSED, 5 N64, 6 SNES, 7 NES...
+		launch_mode = file.launch_type		 -- 0 real apps, 1 UNUSED (PS Mobile?), 2 PSP/PS1, 3 PS1 Retroarch, 4 UNUSED, 5 N64, 6 SNES, 7 NES...
 		if launch_mode == 0 then
 		    System.launchApp(Working_Launch_ID)
 		    System.exit()
 		else
-		    romfile = xRomDirLookup(launch_mode) .. "/" .. file.name		 --@@ example: "ux0:/data/RetroFlow/ROMS/Nintendo - Game Boy/batman.gb"
+		    romfile = xRomDirLookup(launch_mode) .. "/" .. file.name		 -- ex: "ux0:/data/RetroFlow/ROMS/Nintendo - Game Boy/batman.gb"
 
 		    if apptype and xRomDirLookup(launch_mode) then
 			if launch_mode == 3 then	 --@@ PS1
@@ -3515,8 +3575,8 @@ while true do
 			    launch_retroarch(romfile, "app0:/snes9x2005_libretro.self")
 			elseif launch_mode == 7 then	 --@@ NES
 			    launch_retroarch(romfile, "app0:/quicknes_libretro.self")
-		    --@@elseif launch_mode ==   then	 --@@ NDS
-		    --@@    launch_NooDS(romfile)
+		      --elseif launch_mode ==   then	 --@@ NDS
+		      --    launch_NooDS(romfile)
 			elseif launch_mode == 8 then	 --@@ GBA
 			    launch_retroarch(romfile, "app0:/gpsp_libretro.self")
 			elseif launch_mode == 9 then	 --@@ GBC
@@ -3571,14 +3631,14 @@ while true do
 			    launch_retroarch(romfile, "app0:/bluemsx_libretro.self")
 			elseif launch_mode == 34 then	 --@@ VECTREX
 			    launch_retroarch(romfile, "app0:/vecx_libretro.self")
-		    --@@elseif launch_mode ==    then	 --@@ FBA
-		    --@@    launch_retroarch(romfile, "app0:/fbalpha2012_libretro.self")
-		    --@@elseif launch_mode ==    then	 --@@ MAME_2003_PLUS
-		    --@@    launch_retroarch(romfile, "app0:/mame2003_plus_libretro.self")
-		    --@@elseif launch_mode ==    then	 --@@ MAME_2000
-		    --@@    launch_retroarch(romfile, "app0:/mame2000_libretro.self")
-		    --@@elseif launch_mode ==    then	 --@@ NEOGEO
-		    --@@    launch_retroarch(romfile, "app0:/fbalpha2012_neogeo_libretro.self")
+		      --elseif launch_mode ==    then	 --@@ FBA
+		      --    launch_retroarch(romfile, "app0:/fbalpha2012_libretro.self")
+		      --elseif launch_mode ==    then	 --@@ MAME_2003_PLUS
+		      --    launch_retroarch(romfile, "app0:/mame2003_plus_libretro.self")
+		      --elseif launch_mode ==    then	 --@@ MAME_2000
+		      --    launch_retroarch(romfile, "app0:/mame2000_libretro.self")
+		      --elseif launch_mode ==    then	 --@@ NEOGEO
+		      --    launch_retroarch(romfile, "app0:/fbalpha2012_neogeo_libretro.self")
 			elseif launch_mode == 35 then	 --@@ NGPC
 			    launch_retroarch(romfile, "app0:/mednafen_ngp_libretro.self")
 			end
@@ -3592,6 +3652,8 @@ while true do
             end
         elseif (Controls.check(pad, SCE_CTRL_TRIANGLE) and not Controls.check(oldpad, SCE_CTRL_TRIANGLE)) then
             if showMenu == 0 and app_short_title~="-" then
+		--@@imgFav_large_on = Graphics.loadImage("app0:/DATA/fav-large-on.png")		 --@@ new but unused
+		--@@imgFav_large_off = Graphics.loadImage("app0:/DATA/fav-large-off.png")	 --@@ new but unused
 		prvRotY = 0
 		GetInfoSelected()	 -- Full info scan is only here now.
                 showMenu = 1
@@ -3617,7 +3679,7 @@ while true do
 	elseif ((categoryButton ~= 1 and categoryButton ~= 2) and Controls.check(pad, SCE_CTRL_SQUARE) and not Controls.check(oldpad, SCE_CTRL_SQUARE))
 	or ((categoryButton == 1 or categoryButton == 2) and Controls.check(pad, SCE_CTRL_DOWN) and not Controls.check(oldpad, SCE_CTRL_DOWN)) then
 	    showCat = Category_Plus(showCat+1)
-        elseif (Controls.check(pad, CTRL_CANCEL) and not Controls.check(oldpad, CTRL_CANCEL))	 --@@ Used to be SCE_CTRL_CIRCLE
+        elseif (Controls.check(pad, CTRL_CANCEL) and not Controls.check(oldpad, CTRL_CANCEL))	 -- Used to be SCE_CTRL_CIRCLE
 	and (lockView == 0) then
             -- VIEW
 	    if showView > 3 and setSwitch == 0 then
@@ -3806,7 +3868,7 @@ while true do
 	    elseif (showView == 6) and (y1 < ystart - 60) then
                 ystart = y1
                 p = p + 6
-		if not (math.floor((master_index - 1) / 6) > math.floor((curTotal - 1) / 6) - 2) then	 --@@ prevents camera from going out of bounds.
+		if not (math.floor((master_index - 1) / 6) > math.floor((curTotal - 1) / 6) - 2) then	 -- prevents camera from going out of bounds.
 		    master_index = master_index + 6
 		end
                 if p <= curTotal then
@@ -3848,8 +3910,11 @@ while true do
         end
     -- End Touch
     elseif showMenu > 0 then
-        if (Controls.check(pad, CTRL_CANCEL) and not Controls.check(oldpad, CTRL_CANCEL))	 --@@ Used to be SCE_CTRL_CIRCLE
-	 and not hasTyped then			  -- Only read controls while not typing.
+        if (Controls.check(pad, CTRL_CANCEL) and not Controls.check(oldpad, CTRL_CANCEL))	 -- Used to be SCE_CTRL_CIRCLE
+	 and not hasTyped then		 -- Only read controls while not typing.
+	    if utilityMenu == true then	 --@@ NEW!
+		close_utility_menu()	 --@@ NEW!
+	    end				 --@@ NEW!
             status = System.getMessageState()
             if status ~= RUNNING then
 		if spin_allowance > 0 then
@@ -3876,9 +3941,9 @@ while true do
 		    if SwitchviewAssetsAreLoaded == true then
 			SwitchviewAssetsAreLoaded = false
 			Graphics.freeImage(imgCart)
-			Graphics.freeImage(imgAvatar)
-			Graphics.freeImage(imgCont)
-			Graphics.freeImage(img4Square)
+			--@@Graphics.freeImage(imgAvatar)
+			--@@Graphics.freeImage(imgCont)
+			--@@Graphics.freeImage(img4Square)
 			Graphics.freeImage(imgFloor2)
 			Graphics.freeImage(btnMenu1)
 			Graphics.freeImage(btnMenu2)
