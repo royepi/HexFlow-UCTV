@@ -8,14 +8,14 @@ Every aspect found on the original launcher applies, please support the main rel
 
 ## Features/Changes
 * Removed WiFi, Clock and Battery indicators.
-* Removed display of Switch Menu features (still accesible by pressing down, text will display them).
+* Removed display of Switch Menu features ([still accesible by pressing down, text will display them](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Switch%20view%20with%20%20options%20highlighted.png?raw=true)).
 * Changed font to make it more on brand.
 * Switched default wallpaper to Playstation Pattern.
 * Changed name of backgrounds accordingly on text files.
 * Edited screens and bubble just to differentiate it.
 
 ## Still working on
-<p>Editing font, can't display Japanese characters (but you can rename games in launcher).<p>
+<p>Editing font, can't display Japanese characters ([but you can rename games in launcher](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Renamed%20Japanese%20game.png?raw=true)).<p>
 <p>Still learning how to implement features from other launchers.<p>
 
 ## Tips & Thoughts
