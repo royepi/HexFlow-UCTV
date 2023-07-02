@@ -16,6 +16,7 @@ Every aspect found on the original launcher applies, please support the main rel
 
 # Still working on
 <p>Editing font, can't display Japanese characters (but you can rename games in launcher).<p>
+<p>Still learning how to implement features from other launchers.<p>
 
 # Tips & Thoughts
 * I recommend changing Category Button to UP/DOWN and Theme to Black.
@@ -25,4 +26,4 @@ Every aspect found on the original launcher applies, please support the main rel
 <p>Hope you enjoy it.<p>
 
 # Thanks
-To [BlackSheepBoy69](https://github.com/BlackSheepBoy69) and [VitaHex](https://github.com/VitaHEX-Games), please support them.
+To [BlackSheepBoy69](https://github.com/BlackSheepBoy69), [VitaHex](https://github.com/VitaHEX-Games), and [jimbob4000](https://github.com/jimbob4000) for their projects and inspiration, please support them.
