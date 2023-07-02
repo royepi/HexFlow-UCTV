@@ -4,7 +4,7 @@
 
 # HexFlow UCTV
 is a custom edit/hack/fork for PSTV/VITA TV of HexFLow Unofficial Custom.
-Every aspect found on the original launcher applies, please support the main
+Every aspect found on the original launcher applies, please support the main release.
 
 # Features/Changes:
 
