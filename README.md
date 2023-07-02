@@ -13,7 +13,7 @@ Every aspect found on the original launcher applies, please support the main rel
 * Changed font to make it more on brand.
 * Switched default wallpaper to Playstation Pattern.
 * Changed name of backgrounds accordingly on text files.
-* Edited screens and [bubble](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Bubble%20on%20main%20menu.png?raw=true) just to differentiate it.
+* Edited [screens](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Launcher%20splash.png?raw=true) and [bubble](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Bubble%20on%20main%20menu.png?raw=true) just to differentiate it.
 
 ### Still working on
 * Editing font, can't display Japanese characters ([but you can rename games in launcher](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Renamed%20Japanese%20game.png?raw=true)).
