@@ -14,11 +14,11 @@ Every aspect found on the original launcher applies, please support the main rel
 * Changed name of backgrounds accordingly on text files.
 * Edited screens and bubble just to differentiate it.
 
-# Still working on
+## Still working on
 <p>Editing font, can't display Japanese characters (but you can rename games in launcher).<p>
 <p>Still learning how to implement features from other launchers.<p>
 
-# Tips & Thoughts
+## Tips & Thoughts
 * I recommend changing Category Button to UP/DOWN and Theme to Black.
 * ID for AutoBoot is "HFTV00012".
 * I have just checked it running PSV, PSP, PS1 and HB, haven't tried with emulators.
