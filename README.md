@@ -15,7 +15,7 @@ Every aspect found on the original launcher applies, please support the main rel
 <p>*Changed name of backgrounds accordingly on text files.<p>
 <p>*Edited screens and bubble just to differentiate it.<p>
 
-# Still working: 
+# Still working on: 
 <p>*Editing font, can't display Japanese characters (But you can rename games in launcher).<p>
 
 #Tips & Thoughts
