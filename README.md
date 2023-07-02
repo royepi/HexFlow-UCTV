@@ -8,12 +8,12 @@ Every aspect found on the original launcher applies, please support the main
 
 # Features/Changes:
 
-<p>Removed WiFi, Clock and Battery indicators.<p>
-*Removed display of Switch Menu features (still accesible by pressing down, text will display them)
-*Changed font to make it more on brand.
-*Switched default wallpaper to Playstation Pattern.
-*Changed name of backgrounds accordingly on text files.
-*Edited screens and bubble just to differentiate it.
+<p>*Removed WiFi, Clock and Battery indicators.<p>
+<p>*Removed display of Switch Menu features (still accesible by pressing down, text will display them).<p>
+<p>*Changed font to make it more on brand.<p>
+<p>*Switched default wallpaper to Playstation Pattern.<p>
+<p>*Changed name of backgrounds accordingly on text files.<p>
+<p>*Edited screens and bubble just to differentiate it.<p>
 
 # Still working: 
 -Editing font, can't display Japanese characters (But you can rename games in launcher)
