@@ -25,6 +25,7 @@ Every aspect found on the original launcher applies, please support the main rel
 * Config you PSTV _Resolution_ to **1080i** and _RGB Range_ to **Automatic**, by doing these steps it won't be necessary to stretch the _Display Area_ on yout TV or PSTV, and all PS games with fit the acreen accordingly.
 * Also, I recommend changing the Launcher's Category Button to UP/DOWN and Theme to Black for a more streamlined experience.
 * ID for AutoBoot is "HFTV00012".
+* It can be installed along any other launchers without problems.
 * I have just checked it running PSV, PSP, PS1 and HB, haven't tried with emulators.
   
 <p>Hope you enjoy it.<p>
