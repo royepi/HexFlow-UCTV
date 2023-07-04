@@ -21,8 +21,8 @@ Every aspect found on the original launcher applies, please support the main rel
 * Still learning how to implement features from other launchers.
 
 ### Tips & Thoughts
-* Please install [Sharpscale](https://forum.devchroma.nl/index.php/topic,112.msg204.html#msg204) to get the best possible picture. I I recommend setting the scaling to Fitted an Point for a general improvement.
-* Config you PSTV video output to 1080i and RGB Range to Automatic, by doing these steps it won't be necessary to stretch the viewing area on yout TV or PSTV.
+* Please install [Sharpscale](https://www.gamebrew.org/wiki/Sharpscale_Vita) to get the best possible picture. I recommend setting the scaling to Fitted an Point for a general improvement.
+* Config you PSTV video output to 1080i and RGB Range to Automatic, by doing these steps it won't be necessary to stretch the viewing area on yout TV or PSTV, and all PS games with fit the acreen accordingly.
 * Also, I recommend changing the Launcher's Category Button to UP/DOWN and Theme to Black for a more streamlined experience.
 * ID for AutoBoot is "HFTV00012".
 * I have just checked it running PSV, PSP, PS1 and HB, haven't tried with emulators.
