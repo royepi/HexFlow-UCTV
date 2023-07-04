@@ -20,7 +20,8 @@ Every aspect found on the original launcher applies, please support the main rel
 * Still learning how to implement features from other launchers.
 
 ### Tips & Thoughts
-* I recommend changing Category Button to UP/DOWN and Theme to Black.
+* Please install [Sharpscale](https://forum.devchroma.nl/index.php/topic,112.msg204.html#msg204) to get the best possible picture. I I recommend setting the scaling to Fitted an Point for a general improvement.
+* Also, I recommend changing the Launcher's Category Button to UP/DOWN and Theme to Black.
 * ID for AutoBoot is "HFTV00012".
 * I have just checked it running PSV, PSP, PS1 and HB, haven't tried with emulators.
   
