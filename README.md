@@ -17,11 +17,13 @@ Every aspect found on the original launcher applies, please support the main rel
 
 ### Still working on
 * Editing font, can't display Japanese characters ([but you can rename games in launcher](https://github.com/royepi/HexFlow-UCTV/blob/main/Screens/Renamed%20Japanese%20game.png?raw=true)).
+* Streamlining the UI to a better default.
 * Still learning how to implement features from other launchers.
 
 ### Tips & Thoughts
 * Please install [Sharpscale](https://forum.devchroma.nl/index.php/topic,112.msg204.html#msg204) to get the best possible picture. I I recommend setting the scaling to Fitted an Point for a general improvement.
-* Also, I recommend changing the Launcher's Category Button to UP/DOWN and Theme to Black.
+* Config you PSTV video output to 1080i and RGB Range to Automatic, by doing these steps it won't be necessary to stretch the viewing area on yout TV or PSTV.
+* Also, I recommend changing the Launcher's Category Button to UP/DOWN and Theme to Black for a more streamlined experience.
 * ID for AutoBoot is "HFTV00012".
 * I have just checked it running PSV, PSP, PS1 and HB, haven't tried with emulators.
   
